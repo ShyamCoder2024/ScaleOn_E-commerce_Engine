@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import https from 'https';
 import dns from 'dns';
 import dotenv from 'dotenv';
 
@@ -8,118 +9,151 @@ dotenv.config();
 dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 
 /**
- * Resolve MongoDB SRV record using Google DNS API as fallback
+ * Make HTTPS request (works on all Node versions)
  */
-async function resolveSRV(hostname) {
-    try {
-        // First try native DNS
-        return new Promise((resolve, reject) => {
-            dns.resolveSrv(`_mongodb._tcp.${hostname}`, (err, addresses) => {
-                if (err) reject(err);
-                else resolve(addresses);
-            });
-        });
-    } catch (error) {
-        console.log('Native DNS failed, trying Google DNS API...');
-        // Fallback to Google DNS-over-HTTPS
-        const response = await fetch(`https://dns.google/resolve?name=_mongodb._tcp.${hostname}&type=SRV`);
-        const data = await response.json();
-        if (data.Answer) {
-            return data.Answer.map(a => {
-                const parts = a.data.split(' ');
-                return {
-                    priority: parseInt(parts[0]),
-                    weight: parseInt(parts[1]),
-                    port: parseInt(parts[2]),
-                    name: parts[3].replace(/\.$/, '')
-                };
-            });
-        }
-        throw new Error('Could not resolve SRV record');
-    }
+function httpsGet(url) {
+    return new Promise((resolve, reject) => {
+        https.get(url, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => resolve(JSON.parse(data)));
+        }).on('error', reject);
+    });
 }
 
 /**
- * Build standard connection string from SRV record
+ * Resolve MongoDB SRV using Google DNS-over-HTTPS API
  */
-function buildStandardUri(srvRecords, originalUri) {
-    const uri = new URL(originalUri.replace('mongodb+srv://', 'mongodb://'));
-    const hosts = srvRecords.map(r => `${r.name}:${r.port}`).join(',');
+async function resolveSRVviaGoogle(hostname) {
+    console.log(`🔍 Resolving SRV via Google DNS: _mongodb._tcp.${hostname}`);
+    const data = await httpsGet(`https://dns.google/resolve?name=_mongodb._tcp.${hostname}&type=SRV`);
 
-    // Extract database name from path or default
-    const dbName = uri.pathname.slice(1) || 'scaleon_commerce';
+    if (data.Answer && data.Answer.length > 0) {
+        return data.Answer.map(a => {
+            const parts = a.data.split(' ');
+            return {
+                priority: parseInt(parts[0]),
+                weight: parseInt(parts[1]),
+                port: parseInt(parts[2]),
+                name: parts[3].replace(/\.$/, '')
+            };
+        });
+    }
+    throw new Error('No SRV records found');
+}
 
-    return `mongodb://${uri.username}:${uri.password}@${hosts}/${dbName}?ssl=true&replicaSet=atlas-${Date.now()}-shard-0&authSource=admin`;
+/**
+ * Resolve TXT record for authSource via Google DNS
+ */
+async function resolveTXTviaGoogle(hostname) {
+    try {
+        const data = await httpsGet(`https://dns.google/resolve?name=${hostname}&type=TXT`);
+        if (data.Answer && data.Answer.length > 0) {
+            const txt = data.Answer[0].data.replace(/"/g, '');
+            const params = new URLSearchParams(txt);
+            return params.get('authSource') || 'admin';
+        }
+    } catch (e) {
+        console.log('TXT resolution failed, using default authSource=admin');
+    }
+    return 'admin';
 }
 
 const connectDB = async () => {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/scaleon_commerce';
 
-    try {
-        // If it's an SRV connection and we're having issues, try to resolve manually
-        if (mongoUri.startsWith('mongodb+srv://')) {
-            console.log('🔄 Attempting MongoDB connection...');
-        }
+    console.log('🔄 Attempting MongoDB connection...');
 
-        const conn = await mongoose.connect(mongoUri, {
-            serverSelectionTimeoutMS: 15000,
-            socketTimeoutMS: 45000,
-            family: 4, // Force IPv4
-        });
+    // If using SRV, try manual resolution FIRST since Render has DNS issues
+    if (mongoUri.startsWith('mongodb+srv://')) {
+        try {
+            // Parse the SRV URI
+            const srvUrl = new URL(mongoUri.replace('mongodb+srv://', 'https://'));
+            const hostname = srvUrl.hostname;
+            const username = srvUrl.username;
+            const password = srvUrl.password;
+            const dbName = srvUrl.pathname.slice(1).split('?')[0] || 'scaleon_commerce';
 
-        console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+            console.log(`📡 Resolving SRV for: ${hostname}`);
 
-        // Handle connection events
-        mongoose.connection.on('error', (err) => {
-            console.error(`❌ MongoDB connection error: ${err}`);
-        });
+            // Resolve SRV records via Google DNS
+            const srvRecords = await resolveSRVviaGoogle(hostname);
+            console.log(`✅ Found ${srvRecords.length} MongoDB hosts`);
 
-        mongoose.connection.on('disconnected', () => {
-            console.warn('⚠️ MongoDB disconnected. Attempting to reconnect...');
-        });
+            // Build hosts string
+            const hosts = srvRecords.map(r => `${r.name}:${r.port}`).join(',');
 
-        mongoose.connection.on('reconnected', () => {
-            console.log('✅ MongoDB reconnected');
-        });
+            // Get authSource from TXT record
+            const authSource = await resolveTXTviaGoogle(hostname);
 
-        // Graceful shutdown
-        process.on('SIGINT', async () => {
-            await mongoose.connection.close();
-            console.log('MongoDB connection closed through app termination');
-            process.exit(0);
-        });
+            // Build standard connection string
+            const standardUri = `mongodb://${username}:${password}@${hosts}/${dbName}?ssl=true&authSource=${authSource}&retryWrites=true&w=majority`;
 
-    } catch (error) {
-        console.error(`❌ MongoDB Connection Error: ${error.message}`);
+            console.log('🔗 Connecting with resolved hosts...');
 
-        // If SRV lookup failed, try manual resolution
-        if (error.message.includes('ENOTFOUND') && mongoUri.startsWith('mongodb+srv://')) {
-            console.log('🔄 SRV lookup failed. Trying manual resolution...');
+            const conn = await mongoose.connect(standardUri, {
+                serverSelectionTimeoutMS: 30000,
+                socketTimeoutMS: 45000,
+                family: 4,
+            });
 
+            console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+            setupConnectionHandlers();
+            return;
+
+        } catch (srvError) {
+            console.error('❌ SRV resolution failed:', srvError.message);
+
+            // Try direct connection as last resort
+            console.log('🔄 Trying direct connection...');
             try {
-                const url = new URL(mongoUri.replace('mongodb+srv://', 'https://'));
-                const srvRecords = await resolveSRV(url.hostname);
-
-                if (srvRecords && srvRecords.length > 0) {
-                    console.log('✅ Manually resolved SRV records:', srvRecords.length, 'hosts');
-                    const standardUri = buildStandardUri(srvRecords, mongoUri);
-
-                    const conn = await mongoose.connect(standardUri, {
-                        serverSelectionTimeoutMS: 15000,
-                        socketTimeoutMS: 45000,
-                        family: 4,
-                    });
-
-                    console.log(`✅ MongoDB Connected (via manual SRV): ${conn.connection.host}`);
-                    return;
-                }
-            } catch (fallbackError) {
-                console.error('❌ Manual SRV resolution also failed:', fallbackError.message);
+                const conn = await mongoose.connect(mongoUri, {
+                    serverSelectionTimeoutMS: 30000,
+                    socketTimeoutMS: 45000,
+                    family: 4,
+                });
+                console.log(`✅ MongoDB Connected (direct): ${conn.connection.host}`);
+                setupConnectionHandlers();
+                return;
+            } catch (directError) {
+                console.error('❌ Direct connection also failed:', directError.message);
+                process.exit(1);
             }
         }
-
-        process.exit(1);
+    } else {
+        // Standard connection (non-SRV)
+        try {
+            const conn = await mongoose.connect(mongoUri, {
+                serverSelectionTimeoutMS: 30000,
+                socketTimeoutMS: 45000,
+            });
+            console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+            setupConnectionHandlers();
+        } catch (error) {
+            console.error(`❌ MongoDB Connection Error: ${error.message}`);
+            process.exit(1);
+        }
     }
 };
+
+function setupConnectionHandlers() {
+    mongoose.connection.on('error', (err) => {
+        console.error(`❌ MongoDB connection error: ${err}`);
+    });
+
+    mongoose.connection.on('disconnected', () => {
+        console.warn('⚠️ MongoDB disconnected');
+    });
+
+    mongoose.connection.on('reconnected', () => {
+        console.log('✅ MongoDB reconnected');
+    });
+
+    process.on('SIGINT', async () => {
+        await mongoose.connection.close();
+        console.log('MongoDB connection closed');
+        process.exit(0);
+    });
+}
 
 export default connectDB;
