@@ -1,0 +1,121 @@
+{
+    "store": {
+        "name": "My Store",
+        "description": "Welcome to our store",
+        "logo": null,
+        "favicon": null,
+        "email": "contact@mystore.com",
+        "phone": "",
+        "address": ""
+    },
+    "branding": {
+        "colors": {
+            "primary": "#3B82F6",
+            "secondary": "#1E40AF",
+            "accent": "#F59E0B",
+            "background": "#FFFFFF",
+            "text": "#1F2937"
+        },
+        "fonts": {
+            "heading": "Inter",
+            "body": "Inter"
+        }
+    },
+    "features": {
+        "variants": false,
+        "inventory": true,
+        "discounts": true,
+        "reviews": false,
+        "wishlist": false,
+        "guestCheckout": false,
+        "emailNotifications": true,
+        "adminNotifications": true,
+        "searchEnabled": true,
+        "categoriesEnabled": true
+    },
+    "business": {
+        "currency": "INR",
+        "currencySymbol": "₹",
+        "currencyPosition": "before",
+        "thousandsSeparator": ",",
+        "decimalSeparator": ".",
+        "decimalPlaces": 2,
+        "dateFormat": "DD/MM/YYYY",
+        "timezone": "Asia/Kolkata",
+        "minOrderValue": 0,
+        "maxQuantityPerItem": 99
+    },
+    "shipping": {
+        "method": "flat",
+        "flatRate": 5000,
+        "freeThreshold": 50000,
+        "tiers": [],
+        "outOfStockBehavior": "show_unavailable"
+    },
+    "tax": {
+        "enabled": false,
+        "method": "flat_rate",
+        "rate": 0,
+        "includedInPrice": false
+    },
+    "checkout": {
+        "requirePhone": true,
+        "requireAddress": true,
+        "showOrderReview": true,
+        "cartExpiryHours": 24
+    },
+    "payment": {
+        "providers": {
+            "razorpay": {
+                "enabled": false,
+                "testMode": true
+            },
+            "stripe": {
+                "enabled": false,
+                "testMode": true
+            },
+            "cod": {
+                "enabled": true,
+                "maxOrderValue": 1000000,
+                "extraCharge": 0
+            }
+        },
+        "defaultProvider": "cod"
+    },
+    "email": {
+        "templates": {
+            "orderConfirmation": {
+                "subject": "Order Confirmed - {{orderId}}",
+                "enabled": true
+            },
+            "orderShipped": {
+                "subject": "Your Order Has Been Shipped - {{orderId}}",
+                "enabled": true
+            },
+            "orderDelivered": {
+                "subject": "Your Order Has Been Delivered - {{orderId}}",
+                "enabled": true
+            },
+            "passwordReset": {
+                "subject": "Reset Your Password",
+                "enabled": true
+            },
+            "emailVerification": {
+                "subject": "Verify Your Email",
+                "enabled": true
+            }
+        }
+    },
+    "policies": {
+        "shipping": "",
+        "returns": "",
+        "privacy": "",
+        "terms": ""
+    },
+    "social": {
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "youtube": ""
+    }
+}

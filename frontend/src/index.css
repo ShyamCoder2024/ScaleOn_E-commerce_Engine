@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+/* Custom utilities */
+@layer utilities {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 text-white px-4 py-2 rounded-lg font-medium 
+           hover:bg-blue-700 transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-gray-700 px-4 py-2 rounded-lg font-medium border border-gray-300
+           hover:bg-gray-50 transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  }
+
+  /* ... other utils ... */
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Print Styles for PDF Export */
+@media print {
+  /* Hide all generic UI elements */
+  nav, aside, header:not(.print-header), footer, button, .no-print {
+    display: none !important;
+  }
+
+  /* Ensure background colors are printed */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Reset layout for print */
+  body, #root, main {
+    display: block !important;
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Adjust Grid for Paper (A4) */
+  .grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 16px !important;
+  }
+  
+  .grid > * {
+    flex: 1 1 45% !important; /* 2 cols */
+    margin-bottom: 16px !important;
+  }
+
+  /* Specific Override for Chart Container */
+  .lg\:col-span-3, .lg\:col-span-2 {
+      width: 100% !important;
+      flex: 1 1 100% !important;
+  }
+
+  /* Text color fixes */
+  .text-white {
+    color: #000 !important; /* Print white text as black on white paper if bg is removed, but we forced color-adjust so keep as is? */
+  }
+  
+  /* If inside a dark block that stays dark, keep white text. 
+     If background removal happens, force black text. 
+     Since we used print-color-adjust: exact, backgrounds should stay.
+  */
+}
