@@ -32,11 +32,11 @@ router.post('/register', authLimiter, registerValidator, asyncHandler(async (req
         await cartService.transferToUser(result.user._id, req.cookies.sessionId);
     }
 
-    // Set cookies
+    // Set cookies - sameSite: 'none' required for cross-origin (Vercel to Render)
     res.cookie('token', result.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -71,11 +71,11 @@ router.post('/login', authLimiter, loginValidator, asyncHandler(async (req, res)
         await cartService.mergeGuestCart(result.user._id, req.cookies.sessionId);
     }
 
-    // Set cookies
+    // Set cookies - sameSite: 'none' required for cross-origin (Vercel to Render)
     res.cookie('token', result.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -127,11 +127,11 @@ router.post('/refresh', asyncHandler(async (req, res) => {
 
     const result = await authService.refreshToken(refreshToken);
 
-    // Update cookie
+    // Update cookie - sameSite: 'none' required for cross-origin (Vercel to Render)
     res.cookie('token', result.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
