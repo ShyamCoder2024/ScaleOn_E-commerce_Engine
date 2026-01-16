@@ -316,6 +316,30 @@ router.get('/:paymentId/status', protect, asyncHandler(async (req, res) => {
 }));
 
 /**
+ * @route   GET /api/payments/razorpay-status
+ * @desc    Check if Razorpay is properly configured (for debugging)
+ * @access  Public
+ */
+router.get('/razorpay-status', asyncHandler(async (req, res) => {
+    const isConfigured = razorpayService.isConfigured();
+    const hasKeyId = !!process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_ID !== 'your_razorpay_key_id';
+    const hasKeySecret = !!process.env.RAZORPAY_KEY_SECRET;
+
+    res.json({
+        success: true,
+        data: {
+            razorpayConfigured: isConfigured,
+            hasKeyId,
+            hasKeySecret,
+            keyIdPrefix: process.env.RAZORPAY_KEY_ID ? process.env.RAZORPAY_KEY_ID.substring(0, 8) + '...' : null,
+            message: isConfigured
+                ? 'Razorpay is properly configured'
+                : 'Razorpay is NOT configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables.'
+        }
+    });
+}));
+
+/**
  * @route   GET /api/payments/methods
  * @desc    Get available payment methods
  * @access  Public
