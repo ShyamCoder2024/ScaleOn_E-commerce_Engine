@@ -7,7 +7,8 @@
 // Order Status Constants
 // ===========================================
 export const ORDER_STATUS = {
-    PENDING: 'pending',
+    PAYMENT_PENDING: 'payment_pending', // Awaiting online payment
+    PENDING: 'pending',                  // Payment confirmed, awaiting processing
     PROCESSING: 'processing',
     SHIPPED: 'shipped',
     DELIVERED: 'delivered',
@@ -19,6 +20,7 @@ export const ORDER_STATUS = {
 
 // Valid status transitions (state machine)
 export const ORDER_STATUS_TRANSITIONS = {
+    [ORDER_STATUS.PAYMENT_PENDING]: [ORDER_STATUS.PENDING, ORDER_STATUS.PROCESSING, ORDER_STATUS.CANCELLED], // Payment received → pending/processing, failed → cancelled
     [ORDER_STATUS.PENDING]: [ORDER_STATUS.PROCESSING, ORDER_STATUS.CANCELLED],
     [ORDER_STATUS.PROCESSING]: [ORDER_STATUS.SHIPPED, ORDER_STATUS.ON_HOLD, ORDER_STATUS.CANCELLED],
     [ORDER_STATUS.SHIPPED]: [ORDER_STATUS.DELIVERED],

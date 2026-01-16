@@ -61,6 +61,12 @@ class OrderWorkflowService {
             // Generate order ID
             const orderId = await Order.generateOrderId();
 
+            // Determine initial status based on payment method
+            // COD orders start as PENDING (no upfront payment needed)
+            // Online payment orders start as PAYMENT_PENDING until payment is confirmed
+            const isCOD = orderData.paymentMethod === 'cod';
+            const initialStatus = isCOD ? ORDER_STATUS.PENDING : ORDER_STATUS.PAYMENT_PENDING;
+
             // Create order - payment will be linked after Payment record is created
             const order = new Order({
                 orderId,
@@ -69,7 +75,7 @@ class OrderWorkflowService {
                 shippingAddress: orderData.shippingAddress,
                 billingAddress: orderData.billingAddress || orderData.shippingAddress,
                 pricing,
-                status: ORDER_STATUS.PENDING,
+                status: initialStatus,
                 shippingMethod: orderData.shippingMethod || 'standard',
                 discountCode: cart.discountCode,
                 discountAmount: cart.discountAmount || 0
