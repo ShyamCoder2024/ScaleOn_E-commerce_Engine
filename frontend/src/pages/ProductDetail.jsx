@@ -92,7 +92,11 @@ const ProductDetail = () => {
     };
 
     const isInStock = () => {
+        // If inventory feature is disabled globally, always in stock
         if (!isFeatureEnabled('inventory')) return true;
+        // If product doesn't track inventory, always in stock
+        if (product?.trackInventory === false) return true;
+        // Check current stock based on variant or main inventory
         return getCurrentStock() > 0;
     };
 
@@ -271,30 +275,71 @@ const ProductDetail = () => {
                             </p>
                         )}
 
-                        {/* Variants */}
-                        {product.hasVariants && product.variantOptions?.length > 0 && (
+                        {/* Variants - Show if product has variants */}
+                        {product.hasVariants && product.variants?.length > 0 && (
                             <div className="space-y-4">
-                                {product.variantOptions.map(option => (
-                                    <div key={option.name}>
+                                {/* If variantOptions are defined, use them */}
+                                {product.variantOptions?.length > 0 ? (
+                                    product.variantOptions.map(option => (
+                                        <div key={option.name}>
+                                            <label className="block text-sm font-medium text-gray-900 mb-2">
+                                                {option.name}
+                                            </label>
+                                            <div className="flex flex-wrap gap-2">
+                                                {option.values.map(value => {
+                                                    const isSelected = selectedVariant?.options?.get?.(option.name) === value ||
+                                                        selectedVariant?.options?.[option.name] === value;
+                                                    const matchingVariant = product.variants?.find(v => {
+                                                        const optValue = v.options?.get?.(option.name) || v.options?.[option.name];
+                                                        return optValue === value;
+                                                    });
+                                                    // Check availability - if trackInventory is false, always available
+                                                    const isAvailable = product.trackInventory === false ||
+                                                        (matchingVariant?.isAvailable !== false && matchingVariant?.inventory > 0);
+
+                                                    return (
+                                                        <button
+                                                            key={value}
+                                                            onClick={() => {
+                                                                if (matchingVariant) {
+                                                                    setSelectedVariant(matchingVariant);
+                                                                }
+                                                            }}
+                                                            disabled={!isAvailable}
+                                                            className={`px-4 py-2 rounded-lg border-2 font-medium transition-colors ${isSelected
+                                                                ? 'border-primary-600 bg-primary-50 text-primary-700'
+                                                                : isAvailable
+                                                                    ? 'border-gray-200 hover:border-gray-300'
+                                                                    : 'border-gray-100 text-gray-400 cursor-not-allowed line-through'
+                                                                }`}
+                                                        >
+                                                            {value}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    /* Fallback: display variants directly if no variantOptions defined */
+                                    <div>
                                         <label className="block text-sm font-medium text-gray-900 mb-2">
-                                            {option.name}
+                                            Select Option
                                         </label>
                                         <div className="flex flex-wrap gap-2">
-                                            {option.values.map(value => {
-                                                const isSelected = selectedVariant?.options?.[option.name] === value;
-                                                const matchingVariant = product.variants?.find(v =>
-                                                    v.options?.[option.name] === value
-                                                );
-                                                const isAvailable = matchingVariant?.inventory > 0;
+                                            {product.variants.map((variant, idx) => {
+                                                const isSelected = selectedVariant?._id === variant._id || selectedVariant?.sku === variant.sku;
+                                                const isAvailable = product.trackInventory === false ||
+                                                    (variant.isAvailable !== false && variant.inventory > 0);
+                                                // Get display name from options or sku
+                                                const variantName = variant.options
+                                                    ? (Array.from(variant.options?.values?.() || Object.values(variant.options)).join(' / '))
+                                                    : variant.sku || `Option ${idx + 1}`;
 
                                                 return (
                                                     <button
-                                                        key={value}
-                                                        onClick={() => {
-                                                            if (matchingVariant) {
-                                                                setSelectedVariant(matchingVariant);
-                                                            }
-                                                        }}
+                                                        key={variant._id || variant.sku || idx}
+                                                        onClick={() => setSelectedVariant(variant)}
                                                         disabled={!isAvailable}
                                                         className={`px-4 py-2 rounded-lg border-2 font-medium transition-colors ${isSelected
                                                             ? 'border-primary-600 bg-primary-50 text-primary-700'
@@ -303,13 +348,13 @@ const ProductDetail = () => {
                                                                 : 'border-gray-100 text-gray-400 cursor-not-allowed line-through'
                                                             }`}
                                                     >
-                                                        {value}
+                                                        {variantName}
                                                     </button>
                                                 );
                                             })}
                                         </div>
                                     </div>
-                                ))}
+                                )}
                             </div>
                         )}
 
@@ -351,29 +396,49 @@ const ProductDetail = () => {
                             </div>
                         </div>
 
-                        {/* Add to Cart / Buy Now */}
-                        <div className="flex gap-3">
+                        {/* Add to Cart / Buy Now / Wishlist */}
+                        <div className="flex gap-3 flex-wrap">
                             {isInStock() ? (
                                 <>
                                     <button
                                         onClick={handleAddToCart}
                                         disabled={addingToCart}
-                                        className="flex-1 btn-secondary py-4 text-lg flex items-center justify-center gap-2"
+                                        className="flex-1 min-w-[120px] btn-secondary py-3 sm:py-4 text-base sm:text-lg flex items-center justify-center gap-2"
                                     >
                                         <ShoppingCart size={20} />
-                                        {addingToCart ? 'Adding...' : 'Add to Cart'}
+                                        <span className="hidden xs:inline">{addingToCart ? 'Adding...' : 'Add to Cart'}</span>
+                                        <span className="xs:hidden">{addingToCart ? '...' : 'Cart'}</span>
                                     </button>
                                     <button
                                         onClick={handleBuyNow}
                                         disabled={addingToCart}
-                                        className="flex-1 btn-primary py-4 text-lg"
+                                        className="flex-1 min-w-[120px] btn-primary py-3 sm:py-4 text-base sm:text-lg"
                                     >
                                         Buy Now
                                     </button>
                                 </>
                             ) : (
-                                <button disabled className="flex-1 btn-secondary py-4 text-lg opacity-50 cursor-not-allowed">
+                                <button disabled className="flex-1 btn-secondary py-3 sm:py-4 text-base sm:text-lg opacity-50 cursor-not-allowed">
                                     Out of Stock
+                                </button>
+                            )}
+                            {/* Wishlist Button - Always visible for mobile accessibility */}
+                            {isFeatureEnabled('wishlist') && (
+                                <button
+                                    onClick={() => toggleWishlist(product)}
+                                    className={`w-14 h-14 sm:w-auto sm:h-auto sm:px-4 sm:py-3 rounded-xl flex items-center justify-center gap-2 transition-all border-2 ${isInWishlist(product._id)
+                                            ? 'bg-red-50 border-red-500 text-red-500'
+                                            : 'bg-gray-50 border-gray-200 text-gray-600 hover:border-red-300 hover:text-red-500'
+                                        }`}
+                                    title={isInWishlist(product._id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                                >
+                                    <Heart
+                                        size={22}
+                                        className={isInWishlist(product._id) ? 'fill-red-500' : ''}
+                                    />
+                                    <span className="hidden sm:inline font-medium">
+                                        {isInWishlist(product._id) ? 'Saved' : 'Wishlist'}
+                                    </span>
                                 </button>
                             )}
                         </div>

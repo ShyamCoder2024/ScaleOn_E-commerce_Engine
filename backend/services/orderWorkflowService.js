@@ -140,6 +140,22 @@ class OrderWorkflowService {
             throw new Error('Order not found');
         }
 
+        // Create Payment record for COD with pending status (will be completed on delivery)
+        const payment = new Payment({
+            order: order._id,
+            user: order.user,
+            provider: 'cod',
+            method: 'cod',
+            amount: order.pricing.total,
+            currency: 'INR',
+            status: PAYMENT_STATUS.PENDING // Will be marked as completed when delivered
+        });
+        await payment.save();
+
+        // Link payment to order
+        order.payment = payment._id;
+        await order.save();
+
         // Update order status to processing
         await order.updateStatus(ORDER_STATUS.PROCESSING, null, 'COD order confirmed');
 
@@ -155,7 +171,7 @@ class OrderWorkflowService {
         await notificationService.sendOrderConfirmation(order._id);
         await notificationService.sendAdminNewOrderNotification(order._id);
 
-        return order;
+        return Order.findById(orderId).populate('payment');
     }
 
     /**

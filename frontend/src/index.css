@@ -11,6 +11,8 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -19,6 +21,67 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #f9fafb;
   color: #1f2937;
+  /* Performance: Enable GPU acceleration */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  /* Prevent overscroll bounce on iOS */
+  overscroll-behavior-y: contain;
+}
+
+/* Performance optimizations */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  /* GPU acceleration for images */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Improved touch targets for mobile */
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth transitions for interactive elements */
+button,
+a,
+.transition-all {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Fix for iOS input zoom */
+@media (max-width: 640px) {
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Extra small breakpoint helper */
+@media (max-width: 375px) {
+  .xs\:hidden {
+    display: none !important;
+  }
+
+  .xs\:block {
+    display: block !important;
+  }
+
+  .xs\:inline {
+    display: inline !important;
+  }
 }
 
 /* Custom utilities */
@@ -28,16 +91,11 @@ body {
   }
 
   .btn-primary {
-    @apply bg-blue-600 text-white px-4 py-2 rounded-lg font-medium 
-           hover:bg-blue-700 transition-colors duration-200
-           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-           disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply bg-white text-gray-700 px-4 py-2 rounded-lg font-medium border border-gray-300
-           hover:bg-gray-50 transition-colors duration-200
-           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+    @apply bg-white text-gray-700 px-4 py-2 rounded-lg font-medium border border-gray-300 hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
   }
 
   /* ... other utils ... */
@@ -67,8 +125,14 @@ body {
 
 /* Print Styles for PDF Export */
 @media print {
+
   /* Hide all generic UI elements */
-  nav, aside, header:not(.print-header), footer, button, .no-print {
+  nav,
+  aside,
+  header:not(.print-header),
+  footer,
+  button,
+  .no-print {
     display: none !important;
   }
 
@@ -79,7 +143,9 @@ body {
   }
 
   /* Reset layout for print */
-  body, #root, main {
+  body,
+  #root,
+  main {
     display: block !important;
     position: relative !important;
     margin: 0 !important;
@@ -96,23 +162,26 @@ body {
     flex-wrap: wrap !important;
     gap: 16px !important;
   }
-  
-  .grid > * {
-    flex: 1 1 45% !important; /* 2 cols */
+
+  .grid>* {
+    flex: 1 1 45% !important;
+    /* 2 cols */
     margin-bottom: 16px !important;
   }
 
   /* Specific Override for Chart Container */
-  .lg\:col-span-3, .lg\:col-span-2 {
-      width: 100% !important;
-      flex: 1 1 100% !important;
+  .lg\:col-span-3,
+  .lg\:col-span-2 {
+    width: 100% !important;
+    flex: 1 1 100% !important;
   }
 
   /* Text color fixes */
   .text-white {
-    color: #000 !important; /* Print white text as black on white paper if bg is removed, but we forced color-adjust so keep as is? */
+    color: #000 !important;
+    /* Print white text as black on white paper if bg is removed, but we forced color-adjust so keep as is? */
   }
-  
+
   /* If inside a dark block that stays dark, keep white text. 
      If background removal happens, force black text. 
      Since we used print-color-adjust: exact, backgrounds should stay.

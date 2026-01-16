@@ -109,7 +109,22 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
         `https://placehold.co/400x400/e2e8f0/475569?text=${encodeURIComponent(product.name?.slice(0, 10) || 'Product')}`;
 
     const secondaryImage = product.images?.find(img => img.url !== primaryImage)?.url || primaryImage;
-    const inStock = !isFeatureEnabled('inventory') || product.inventory > 0;
+
+    // Fix: Proper stock check - respect trackInventory setting and variant inventory
+    const checkInStock = () => {
+        // If inventory feature is disabled globally, always show in stock
+        if (!isFeatureEnabled('inventory')) return true;
+        // If product doesn't track inventory, always show in stock
+        if (product.trackInventory === false) return true;
+        // If product has variants, check if any variant has stock
+        if (product.hasVariants && product.variants?.length > 0) {
+            return product.variants.some(v => v.isAvailable && v.inventory > 0);
+        }
+        // Check main inventory
+        return product.inventory > 0;
+    };
+
+    const inStock = checkInStock();
     const inWishlist = isInWishlist(product._id);
     const wishlistEnabled = isFeatureEnabled('wishlist');
 
@@ -260,10 +275,11 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
                 {wishlistEnabled && (
                     <button
                         onClick={handleWishlistToggle}
-                        className={`absolute top-3 right-3 z-30 p-2 rounded-full shadow-sm transition-all duration-300 ${inWishlist
+                        className={`absolute top-3 right-3 z-30 p-2.5 rounded-full shadow-sm transition-all duration-300 ${inWishlist
                             ? 'bg-white text-red-500 opacity-100'
-                            : 'bg-white/80 backdrop-blur-sm text-gray-600 opacity-0 translate-x-2'
-                            } group-hover:opacity-100 group-hover:translate-x-0 hover:bg-white hover:text-red-500`}
+                            : 'bg-white/90 backdrop-blur-sm text-gray-600 md:opacity-0 md:translate-x-2'
+                            } md:group-hover:opacity-100 md:group-hover:translate-x-0 hover:bg-white hover:text-red-500 active:scale-95`}
+                        aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
                     >
                         <Heart
                             size={18}

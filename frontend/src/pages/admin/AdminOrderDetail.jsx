@@ -362,18 +362,38 @@ const AdminOrderDetail = () => {
                             <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
                                 <span className="text-sm font-medium text-slate-600">Status</span>
                                 <span className={`flex items-center gap-1.5 text-sm font-bold ${order.payment?.status === 'completed' ? 'text-emerald-600' :
-                                        order.payment?.status === 'failed' ? 'text-rose-600' : 'text-amber-600'
+                                        order.payment?.status === 'failed' ? 'text-rose-600' :
+                                            order.payment?.status === 'pending' ? 'text-amber-600' : 'text-slate-600'
                                     }`}>
-                                    {order.payment?.status === 'completed' ? <CheckCircle size={14} /> : <AlertTriangle size={14} />}
-                                    {order.payment?.status?.toUpperCase()}
+                                    {order.payment?.status === 'completed' ? <CheckCircle size={14} /> :
+                                        order.payment?.status === 'pending' ? <Clock size={14} /> :
+                                            order.payment?.status === 'failed' ? <AlertTriangle size={14} /> : null}
+                                    {order.payment?.status?.toUpperCase() || 'N/A'}
                                 </span>
                             </div>
 
                             <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
                                     <span className="text-slate-500">Method</span>
-                                    <span className="font-medium capitalize">{order.payment?.method || 'Unknown'}</span>
+                                    <span className="font-medium capitalize">
+                                        {order.payment?.method === 'cod' ? 'Cash on Delivery' :
+                                            order.payment?.method || 'Unknown'}
+                                    </span>
                                 </div>
+                                {order.payment?.method === 'cod' && order.payment?.status === 'pending' && (
+                                    <div className="pt-2 border-t border-slate-100 mt-2">
+                                        <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded">
+                                            💵 Payment to be collected on delivery
+                                        </p>
+                                    </div>
+                                )}
+                                {order.payment?.method === 'cod' && order.payment?.status === 'completed' && (
+                                    <div className="pt-2 border-t border-slate-100 mt-2">
+                                        <p className="text-xs text-emerald-600 bg-emerald-50 p-2 rounded">
+                                            ✓ Payment collected on delivery
+                                        </p>
+                                    </div>
+                                )}
                                 {order.payment?.transactionId && (
                                     <div className="pt-2 border-t border-slate-100 mt-2">
                                         <p className="text-xs text-slate-400 mb-1">Transaction ID</p>

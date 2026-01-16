@@ -11,10 +11,24 @@ export default defineConfig({
                 target: 'http://localhost:5001',
                 changeOrigin: true
             }
-        }
+        },
+        // Fix 404 on page refresh - redirect all requests to index.html for SPA routing
+        historyApiFallback: true
     },
     build: {
         outDir: 'dist',
-        sourcemap: false
+        sourcemap: false,
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    vendor: ['react', 'react-dom', 'react-router-dom'],
+                    ui: ['lucide-react']
+                }
+            }
+        }
+    },
+    // Optimize for development
+    optimizeDeps: {
+        include: ['react', 'react-dom', 'react-router-dom', 'axios']
     }
 })
