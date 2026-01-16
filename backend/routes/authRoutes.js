@@ -19,10 +19,10 @@ const router = express.Router();
  * @access  Public
  */
 router.post('/register', authLimiter, registerValidator, asyncHandler(async (req, res) => {
-    const { email, password, firstName, lastName } = req.body;
+    const { email, password, firstName, lastName, phone } = req.body;
 
     const result = await authService.register(
-        { email, password, firstName, lastName },
+        { email, password, firstName, lastName, phone },
         req.ip,
         req.get('user-agent')
     );

@@ -14,6 +14,7 @@ const Register = () => {
         firstName: '',
         lastName: '',
         email: '',
+        phone: '',
         password: '',
         confirmPassword: '',
     });
@@ -65,6 +66,7 @@ const Register = () => {
             password: formData.password,
             firstName: formData.firstName,
             lastName: formData.lastName,
+            phone: formData.phone,
         });
 
         if (result.success) {
@@ -150,6 +152,24 @@ const Register = () => {
                             {errors.email && (
                                 <p className="mt-2 text-sm text-red-600">{errors.email}</p>
                             )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                                Mobile Number
+                            </label>
+                            <div className="mt-1">
+                                <input
+                                    id="phone"
+                                    name="phone"
+                                    type="tel"
+                                    autoComplete="tel"
+                                    value={formData.phone}
+                                    onChange={handleChange}
+                                    className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent sm:text-sm transition-all"
+                                    placeholder="+91 9876543210"
+                                />
+                            </div>
                         </div>
 
                         <div>

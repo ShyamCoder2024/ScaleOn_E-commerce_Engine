@@ -50,7 +50,7 @@ class AuthService {
      * Register a new user
      */
     async register(userData, ipAddress = null, userAgent = null) {
-        const { email, password, firstName, lastName } = userData;
+        const { email, password, firstName, lastName, phone } = userData;
 
         // Check if user already exists
         const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -68,7 +68,8 @@ class AuthService {
             password,
             profile: {
                 firstName,
-                lastName
+                lastName,
+                phone: phone || undefined
             },
             verificationToken: hashedToken,
             verificationTokenExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours

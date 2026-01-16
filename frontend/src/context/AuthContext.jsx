@@ -35,6 +35,23 @@ export const AuthProvider = ({ children }) => {
             // Only logout if it's an authentication error (401/403)
             // Do NOT logout on network errors or 500s
             if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+                // Try to refresh the token before logging out
+                const refreshToken = localStorage.getItem('refreshToken');
+                if (refreshToken) {
+                    try {
+                        const refreshResponse = await authAPI.refresh(refreshToken);
+                        if (refreshResponse.data?.data?.accessToken) {
+                            localStorage.setItem('token', refreshResponse.data.data.accessToken);
+                            // Retry fetching user with new token
+                            const retryResponse = await authAPI.getMe();
+                            setUser(retryResponse.data.data.user);
+                            return;
+                        }
+                    } catch (refreshErr) {
+                        console.error('Token refresh failed:', refreshErr);
+                    }
+                }
+                // If refresh failed or no refresh token, logout
                 localStorage.removeItem('token');
                 localStorage.removeItem('refreshToken');
                 setUser(null);
