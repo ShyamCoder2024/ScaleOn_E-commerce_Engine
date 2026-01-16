@@ -309,7 +309,7 @@ const Products = () => {
 
                         {/* Loading State */}
                         {loading ? (
-                            <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1'}`}>
+                            <div className={`grid gap-3 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1'}`}>
                                 {[...Array(8)].map((_, idx) => (
                                     <div key={idx} className="card p-4">
                                         <div className="skeleton aspect-square mb-4" />
@@ -320,7 +320,7 @@ const Products = () => {
                             </div>
                         ) : products.length > 0 ? (
                             <>
-                                <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1'}`}>
+                                <div className={`grid gap-3 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1'}`}>
                                     {products.map(product => (
                                         <ProductCard
                                             key={product._id}
