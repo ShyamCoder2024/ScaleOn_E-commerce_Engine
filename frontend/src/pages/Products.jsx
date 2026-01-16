@@ -161,8 +161,9 @@ const Products = () => {
         <div className="min-h-screen bg-gray-50">
             {/* Header Removed - merged into Global Header */}
 
-            <div className="container-custom py-8">
-                <div className="flex flex-col lg:flex-row gap-8 lg:items-start">
+            <div className="container-custom py-4 sm:py-8">
+                {/* Layout Container: Block on Mobile, Flex on Desktop */}
+                <div className="block lg:flex lg:gap-8 lg:items-start">
                     {/* Filters Sidebar */}
                     <aside className={`
             fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:shadow-none lg:w-72 lg:shrink-0 lg:z-10
@@ -290,7 +291,7 @@ const Products = () => {
                     )}
 
                     {/* Products Grid */}
-                    <div className="flex-1 w-full">
+                    <div className="flex-1 w-full min-w-0">
                         {/* Results Count */}
                         <div className="mb-4 flex items-center justify-between">
                             <p className="text-gray-600">
@@ -309,7 +310,7 @@ const Products = () => {
 
                         {/* Loading State */}
                         {loading ? (
-                            <div className={`grid gap-3 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1'}`}>
+                            <div className={`grid gap-2 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1'}`}>
                                 {[...Array(8)].map((_, idx) => (
                                     <div key={idx} className="card p-4">
                                         <div className="skeleton aspect-square mb-4" />
@@ -320,7 +321,7 @@ const Products = () => {
                             </div>
                         ) : products.length > 0 ? (
                             <>
-                                <div className={`grid gap-3 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1'}`}>
+                                <div className={`grid gap-2 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1'}`}>
                                     {products.map(product => (
                                         <ProductCard
                                             key={product._id}
