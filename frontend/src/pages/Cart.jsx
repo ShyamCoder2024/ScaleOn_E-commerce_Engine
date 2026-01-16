@@ -122,19 +122,19 @@ const Cart = () => {
                                         </div>
 
                                         {/* Price and Quantity Controls */}
-                                        <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-gray-50 sm:border-none sm:pt-0 sm:mt-auto">
+                                        <div className="flex items-end justify-between gap-4 mt-4 pt-3 border-t border-gray-50 sm:border-none sm:pt-0 sm:mt-auto">
                                             {/* Price Block */}
-                                            <div>
+                                            <div className="pb-1">
                                                 <p className="text-xs text-gray-400 font-medium mb-0.5">Price</p>
                                                 <div className="flex items-baseline gap-1">
-                                                    <span className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">
+                                                    <span className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight leading-none">
                                                         {formatPrice(item.priceAtAdd || item.product?.price || 0)}
                                                     </span>
                                                 </div>
                                             </div>
 
                                             {/* Quantity Controls */}
-                                            <div className="flex items-center bg-white rounded-lg border border-gray-200 p-0.5 shadow-sm">
+                                            <div className="flex items-center bg-white rounded-lg border border-gray-200 p-0.5 shadow-sm shrink-0">
                                                 <button
                                                     onClick={() => updateQuantity(item._id, item.quantity - 1)}
                                                     className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-md transition-all active:scale-95 disabled:opacity-30"
