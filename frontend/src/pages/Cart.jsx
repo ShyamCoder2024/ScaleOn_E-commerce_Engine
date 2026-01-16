@@ -122,36 +122,43 @@ const Cart = () => {
                                         </div>
 
                                         {/* Price and Quantity Controls */}
-                                        <div className="flex items-center justify-between gap-4 mt-3">
+                                        <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-gray-50 sm:border-none sm:pt-0 sm:mt-auto">
                                             {/* Price Block */}
-                                            <div className="flex items-baseline gap-1.5">
-                                                <span className="text-base sm:text-lg font-bold text-gray-900">
-                                                    {formatPrice(item.priceAtAdd || item.product?.price || 0)}
-                                                </span>
-                                                {item.quantity > 1 && (
-                                                    <span className="text-xs text-gray-400 font-medium">
-                                                        x{item.quantity}
+                                            <div>
+                                                <p className="text-xs text-gray-400 font-medium mb-0.5">Price</p>
+                                                <div className="flex items-baseline gap-1">
+                                                    <span className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">
+                                                        {formatPrice(item.priceAtAdd || item.product?.price || 0)}
                                                     </span>
-                                                )}
+                                                </div>
                                             </div>
 
-                                            {/* Quantity Controls - More Compact */}
-                                            <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 p-0.5 shadow-sm">
+                                            {/* Quantity Controls */}
+                                            <div className="flex items-center bg-white rounded-lg border border-gray-200 p-0.5 shadow-sm">
                                                 <button
                                                     onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                                                    className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-sm rounded-md transition-all active:scale-95 disabled:opacity-50"
+                                                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-md transition-all active:scale-95 disabled:opacity-30"
                                                     disabled={item.quantity <= 1}
                                                 >
-                                                    <Minus size={14} />
+                                                    <Minus size={16} />
                                                 </button>
-                                                <span className="w-8 text-center font-semibold text-gray-900 text-sm tabular-nums">
-                                                    {item.quantity}
-                                                </span>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    value={item.quantity}
+                                                    onChange={(e) => {
+                                                        const val = parseInt(e.target.value);
+                                                        if (!isNaN(val) && val > 0) {
+                                                            updateQuantity(item._id, val);
+                                                        }
+                                                    }}
+                                                    className="w-10 text-center font-bold text-gray-900 text-base border-none focus:ring-0 p-0 appearance-none bg-transparent"
+                                                />
                                                 <button
                                                     onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                                                    className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-sm rounded-md transition-all active:scale-95"
+                                                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-md transition-all active:scale-95"
                                                 >
-                                                    <Plus size={14} />
+                                                    <Plus size={16} />
                                                 </button>
                                             </div>
                                         </div>
