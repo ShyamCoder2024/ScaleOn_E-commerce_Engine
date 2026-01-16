@@ -31,9 +31,14 @@ export const AuthProvider = ({ children }) => {
             const response = await authAPI.getMe();
             setUser(response.data.data.user);
         } catch (err) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-            setUser(null);
+            console.error('Fetch user failed:', err);
+            // Only logout if it's an authentication error (401/403)
+            // Do NOT logout on network errors or 500s
+            if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('refreshToken');
+                setUser(null);
+            }
         } finally {
             setLoading(false);
         }
@@ -43,9 +48,12 @@ export const AuthProvider = ({ children }) => {
         try {
             setError(null);
             const response = await authAPI.login({ email, password });
-            const { user, accessToken } = response.data.data;
+            const { user, accessToken, refreshToken } = response.data.data;
 
             localStorage.setItem('token', accessToken);
+            if (refreshToken) {
+                localStorage.setItem('refreshToken', refreshToken);
+            }
             setUser(user);
 
             return { success: true, user };
@@ -60,9 +68,12 @@ export const AuthProvider = ({ children }) => {
         try {
             setError(null);
             const response = await authAPI.register(data);
-            const { user, accessToken, requiresVerification } = response.data.data;
+            const { user, accessToken, refreshToken, requiresVerification } = response.data.data;
 
             localStorage.setItem('token', accessToken);
+            if (refreshToken) {
+                localStorage.setItem('refreshToken', refreshToken);
+            }
             setUser(user);
 
             return { success: true, user, requiresVerification };

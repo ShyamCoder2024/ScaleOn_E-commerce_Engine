@@ -46,6 +46,7 @@ router.post('/register', authLimiter, registerValidator, asyncHandler(async (req
         data: {
             user: result.user,
             accessToken: result.accessToken,
+            refreshToken: result.refreshToken,
             requiresVerification: result.requiresVerification
         }
     });
@@ -84,7 +85,8 @@ router.post('/login', authLimiter, loginValidator, asyncHandler(async (req, res)
         message: 'Login successful',
         data: {
             user: result.user,
-            accessToken: result.accessToken
+            accessToken: result.accessToken,
+            refreshToken: result.refreshToken
         }
     });
 }));
