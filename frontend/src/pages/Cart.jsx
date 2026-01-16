@@ -73,12 +73,12 @@ const Cart = () => {
                     {/* Cart Items List */}
                     <div className="lg:col-span-8 space-y-4">
                         {cart.items.map(item => (
-                            <div key={item._id} className="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100 relative overflow-hidden">
-                                <div className="flex gap-3 sm:gap-4 h-full">
-                                    {/* Product Image */}
+                            <div key={item._id} className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                                <div className="flex gap-3">
+                                    {/* Product Image - Compact */}
                                     <Link
                                         to={`/products/${item.product?.slug || item.productId}`}
-                                        className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-gray-100 border border-gray-100 overflow-hidden"
+                                        className="shrink-0 w-20 h-20 rounded-md bg-gray-100 border border-gray-100 overflow-hidden"
                                     >
                                         <img
                                             src={item.image || item.product?.primaryImage || 'https://placehold.co/200x200/e2e8f0/475569?text=No+Image'}
@@ -87,81 +87,60 @@ const Cart = () => {
                                         />
                                     </Link>
 
-                                    {/* Product Details Column */}
-                                    <div className="flex-1 min-w-0 flex flex-col justify-between">
-
-                                        {/* Top Row: Title + Delete */}
+                                    {/* Content Column */}
+                                    <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                                         <div className="flex justify-between items-start gap-2">
-                                            <div className="min-w-0">
+                                            <div className="min-w-0 pr-6">
                                                 <Link
                                                     to={`/products/${item.product?.slug || item.productId}`}
-                                                    className="text-sm sm:text-base font-semibold text-gray-900 hover:text-primary-600 leading-snug line-clamp-2"
+                                                    className="text-sm font-semibold text-gray-900 line-clamp-2 leading-snug"
                                                 >
                                                     {item.productName || item.product?.name}
                                                 </Link>
 
-                                                {/* Variant / Category Badge */}
+                                                {/* Variant Badge - Tiny */}
                                                 {(item.variant || item.product?.category) && (
-                                                    <div className="flex flex-wrap gap-1 mt-1">
-                                                        {item.variant ? (
-                                                            Object.entries(item.variant.options || {}).map(([key, value]) => (
-                                                                <span key={key} className="text-[10px] text-gray-500 bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded capitalize">
-                                                                    {value}
-                                                                </span>
-                                                            ))
-                                                        ) : (
-                                                            <span className="text-[10px] text-gray-500 bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded capitalize">
-                                                                Item
-                                                            </span>
-                                                        )}
+                                                    <div className="mt-1">
+                                                        <span className="text-[10px] text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-200 inline-block truncate max-w-full">
+                                                            {item.variant ? Object.values(item.variant.options || {}).join(' / ') : 'Item'}
+                                                        </span>
                                                     </div>
                                                 )}
                                             </div>
 
+                                            {/* Delete Button - Absolute Top Right */}
                                             <button
                                                 onClick={() => removeItem(item._id)}
-                                                className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors shrink-0 -mt-1 -mr-1"
-                                                aria-label="Remove item"
+                                                className="absolute top-0 right-0 text-gray-400 hover:text-red-500 p-1"
+                                                aria-label="Remove"
                                             >
-                                                <Trash2 size={18} />
+                                                <Trash2 size={16} />
                                             </button>
                                         </div>
 
-                                        {/* Bottom Row: Price + Quantity */}
-                                        <div className="flex items-end justify-between gap-2 mt-3 text-right">
-                                            {/* Price */}
-                                            <div className="text-left">
-                                                <span className="text-lg sm:text-xl font-bold text-gray-900 leading-none block">
-                                                    {formatPrice(item.priceAtAdd || item.product?.price || 0)}
-                                                </span>
-                                            </div>
+                                        {/* Bottom Row: Price + Compact Counter */}
+                                        <div className="flex items-end justify-between mt-2">
+                                            <span className="text-base font-bold text-gray-900">
+                                                {formatPrice(item.priceAtAdd || item.product?.price || 0)}
+                                            </span>
 
-                                            {/* Quantity Counter */}
-                                            <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 p-0.5 shadow-sm shrink-0">
+                                            {/* Micro-Counter */}
+                                            <div className="flex items-center bg-gray-50 rounded border border-gray-200 h-7">
                                                 <button
                                                     onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                                                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-sm rounded-md transition-all active:scale-95 disabled:opacity-30"
+                                                    className="w-7 h-full flex items-center justify-center text-gray-500 hover:text-gray-900 active:scale-95 disabled:opacity-30"
                                                     disabled={item.quantity <= 1}
                                                 >
-                                                    <Minus size={14} />
+                                                    <Minus size={12} />
                                                 </button>
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    value={item.quantity}
-                                                    onChange={(e) => {
-                                                        const val = parseInt(e.target.value);
-                                                        if (!isNaN(val) && val > 0) {
-                                                            updateQuantity(item._id, val);
-                                                        }
-                                                    }}
-                                                    className="w-10 text-center font-bold text-gray-900 text-sm border-none focus:ring-0 p-0 bg-transparent tabular-nums"
-                                                />
+                                                <div className="w-8 text-center text-xs font-bold text-gray-900 tabular-nums border-x border-gray-200/50 h-full flex items-center justify-center bg-white">
+                                                    {item.quantity}
+                                                </div>
                                                 <button
                                                     onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                                                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-sm rounded-md transition-all active:scale-95"
+                                                    className="w-7 h-full flex items-center justify-center text-gray-500 hover:text-gray-900 active:scale-95"
                                                 >
-                                                    <Plus size={14} />
+                                                    <Plus size={12} />
                                                 </button>
                                             </div>
                                         </div>
