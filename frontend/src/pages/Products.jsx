@@ -162,7 +162,7 @@ const Products = () => {
             {/* Header Removed - merged into Global Header */}
 
             <div className="container-custom py-8">
-                <div className="flex flex-col lg:flex-row gap-8 items-start">
+                <div className="flex flex-col lg:flex-row gap-8 lg:items-start">
                     {/* Filters Sidebar */}
                     <aside className={`
             fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:shadow-none lg:w-72 lg:shrink-0 lg:z-10
@@ -290,7 +290,7 @@ const Products = () => {
                     )}
 
                     {/* Products Grid */}
-                    <div className="flex-1">
+                    <div className="flex-1 w-full">
                         {/* Results Count */}
                         <div className="mb-4 flex items-center justify-between">
                             <p className="text-gray-600">
