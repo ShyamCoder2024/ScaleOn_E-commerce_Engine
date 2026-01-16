@@ -3,8 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
     ArrowLeft, Mail, Phone, MapPin,
     ShoppingBag, Package, CreditCard, User,
-    Shield, BanCircle
-, ChevronLeft, ChevronRight, Search, Filter, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Truck, Clock, ExternalLink, Eye, Ban, ChevronDown } from "lucide-react";
+    Shield, ChevronLeft, ChevronRight, Search, Filter, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Truck, Clock, ExternalLink, Eye, Ban, ChevronDown
+} from "lucide-react";
 import { adminAPI, orderAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -253,9 +253,9 @@ const CustomerDetail = () => {
                                                     <span className="text-xs text-slate-500">{formatDate(order.createdAt)}</span>
                                                 </div>
                                                 <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg ${order.status === 'delivered' ? 'bg-emerald-100 text-emerald-800' :
-                                                        order.status === 'cancelled' ? 'bg-rose-100 text-rose-800' :
-                                                            order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                                                                'bg-amber-100 text-amber-800'
+                                                    order.status === 'cancelled' ? 'bg-rose-100 text-rose-800' :
+                                                        order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                                                            'bg-amber-100 text-amber-800'
                                                     }`}>
                                                     {order.status}
                                                 </span>
@@ -307,9 +307,9 @@ const CustomerDetail = () => {
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <span className={`inline-flex px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg ${order.status === 'delivered' ? 'bg-emerald-100 text-emerald-800' :
-                                                                order.status === 'cancelled' ? 'bg-rose-100 text-rose-800' :
-                                                                    order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                                                                        'bg-amber-100 text-amber-800'
+                                                            order.status === 'cancelled' ? 'bg-rose-100 text-rose-800' :
+                                                                order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                                                                    'bg-amber-100 text-amber-800'
                                                             }`}>
                                                             {order.status}
                                                         </span>

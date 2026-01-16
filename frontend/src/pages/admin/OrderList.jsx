@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
-    Filter,
-    TruckCircle, XCircle, Package,
-    AlertCircle, RefreshCw, ShoppingCart
-    , ChevronLeft, ChevronRight, Search, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Truck, Clock, ExternalLink, Eye, Ban, ChevronDown
+    Filter, Package,
+    AlertCircle, RefreshCw, ShoppingCart,
+    ChevronLeft, ChevronRight, Search, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Truck, Clock, ExternalLink, Eye, Ban, ChevronDown
 } from "lucide-react";
 import { orderAPI } from '../../services/api';
 import toast from 'react-hot-toast';

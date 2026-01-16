@@ -1,4 +1,4 @@
-import { Truck, ShieldHeadphones, RefreshCw, ChevronLeft, ChevronRight, Search, Filter, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Clock, ExternalLink, Eye, Ban, ChevronDown } from "lucide-react";
+import { Truck, RefreshCw, ChevronLeft, ChevronRight, Search, Filter, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Clock, ExternalLink, Eye, Ban, ChevronDown } from "lucide-react";
 
 const ServiceStrip = () => {
     const services = [

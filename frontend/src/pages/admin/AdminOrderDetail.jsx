@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-    ArrowLeft, Package, TruckCircle,
+    ArrowLeft, Package,
     MapPin, CreditCard, X, FileText,
     Copy, Mail, Phone,
-    AlertTriangle, ShieldChevronDown
-, ChevronLeft, ChevronRight, Search, Filter, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Truck, Clock, ExternalLink, Eye, Ban, ChevronDown } from "lucide-react";
+    AlertTriangle,
+    ChevronLeft, ChevronRight, Search, Filter, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Truck, Clock, ExternalLink, Eye, Ban, ChevronDown
+} from "lucide-react";
 import { orderAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -362,8 +363,8 @@ const AdminOrderDetail = () => {
                             <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
                                 <span className="text-sm font-medium text-slate-600">Status</span>
                                 <span className={`flex items-center gap-1.5 text-sm font-bold ${order.payment?.status === 'completed' ? 'text-emerald-600' :
-                                        order.payment?.status === 'failed' ? 'text-rose-600' :
-                                            order.payment?.status === 'pending' ? 'text-amber-600' : 'text-slate-600'
+                                    order.payment?.status === 'failed' ? 'text-rose-600' :
+                                        order.payment?.status === 'pending' ? 'text-amber-600' : 'text-slate-600'
                                     }`}>
                                     {order.payment?.status === 'completed' ? <CheckCircle size={14} /> :
                                         order.payment?.status === 'pending' ? <Clock size={14} /> :
