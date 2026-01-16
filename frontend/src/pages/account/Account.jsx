@@ -548,13 +548,18 @@ const Account = () => {
                                         )}
                                     </div>
                                 ) : (
-                                    <div className="text-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                                            <Package size={24} className="text-gray-400" />
+                                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl">
+                                        <div className="w-24 h-24 bg-primary-50 rounded-full flex items-center justify-center mb-6 animate-in zoom-in duration-300">
+                                            <Package size={40} className="text-primary-400" strokeWidth={1.5} />
                                         </div>
-                                        <h3 className="text-lg font-bold text-gray-900 mb-1">No orders yet</h3>
-                                        <p className="text-gray-500 mb-6">When you place orders, they will appear here</p>
-                                        <Link to="/products" className="inline-flex px-6 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors shadow-lg shadow-primary-200">
+                                        <h3 className="text-xl font-bold text-gray-900 mb-2">No orders yet</h3>
+                                        <p className="text-gray-500 mb-8 text-center max-w-xs mx-auto">
+                                            Looks like you haven't made your choice yet. Explore our collection today!
+                                        </p>
+                                        <Link
+                                            to="/products"
+                                            className="px-8 py-3.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-all shadow-xl shadow-gray-200 hover:-translate-y-0.5 active:translate-y-0"
+                                        >
                                             Start Shopping
                                         </Link>
                                     </div>
@@ -570,36 +575,42 @@ const Account = () => {
                                         <h2 className="text-xl font-bold text-gray-900">Saved Addresses</h2>
                                         <p className="text-gray-500 text-sm mt-1">Manage your shipping destinations</p>
                                     </div>
-                                    <button
-                                        onClick={openAddAddressModal}
-                                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl font-medium hover:bg-black transition-all shadow-lg shadow-gray-200"
-                                    >
-                                        <Plus size={18} />
-                                        Add New
-                                    </button>
+                                    {user?.profile?.addresses?.length > 0 && (
+                                        <button
+                                            onClick={openAddAddressModal}
+                                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-all shadow-lg shadow-gray-200"
+                                        >
+                                            <Plus size={18} strokeWidth={2.5} />
+                                            <span className="hidden sm:inline">Add New</span>
+                                            <span className="sm:hidden">Add</span>
+                                        </button>
+                                    )}
                                 </div>
 
                                 {user?.profile?.addresses?.length > 0 ? (
                                     <div className="grid sm:grid-cols-2 gap-4">
                                         {user.profile.addresses.map(address => (
-                                            <div key={address._id} className="group border border-gray-200 hover:border-primary-500 rounded-2xl p-5 relative transition-all bg-gray-50 hover:bg-white hover:shadow-md">
+                                            <div key={address._id} className="group border border-gray-200 hover:border-black rounded-2xl p-5 relative transition-all bg-white hover:shadow-xl hover:-translate-y-1">
                                                 {address.isDefault && (
-                                                    <span className="absolute top-4 right-4 px-2.5 py-1 bg-primary-100 text-primary-700 text-xs font-bold uppercase tracking-wide rounded-full">
+                                                    <span className="absolute top-4 right-4 px-2.5 py-1 bg-black text-white text-[10px] font-bold uppercase tracking-wider rounded-full">
                                                         Default
                                                     </span>
                                                 )}
                                                 <div className="pr-12">
-                                                    <p className="font-bold text-gray-900 text-lg mb-1">
-                                                        {address.firstName} {address.lastName}
-                                                    </p>
-                                                    <p className="text-gray-600 text-sm leading-relaxed">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <MapPin size={16} className="text-gray-400" />
+                                                        <p className="font-bold text-gray-900 text-lg">
+                                                            {address.firstName} {address.lastName}
+                                                        </p>
+                                                    </div>
+                                                    <p className="text-gray-500 text-sm leading-relaxed pl-6">
                                                         {address.street}<br />
                                                         {address.city}, {address.state} {address.postalCode}<br />
                                                         {address.country}
                                                     </p>
                                                     {address.phone && (
-                                                        <p className="text-sm text-gray-500 mt-3 flex items-center gap-2">
-                                                            <div className="w-1 h-1 rounded-full bg-gray-400" />
+                                                        <p className="text-sm text-gray-500 mt-3 flex items-center gap-2 pl-6">
+                                                            <div className="w-1 h-1 rounded-full bg-gray-300" />
                                                             {address.phone}
                                                         </p>
                                                     )}
@@ -607,16 +618,16 @@ const Account = () => {
                                                 <div className="flex gap-3 mt-5 pt-4 border-t border-gray-100">
                                                     <button
                                                         onClick={() => openEditAddressModal(address)}
-                                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-300 transition-all"
+                                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-50 text-gray-900 rounded-xl font-bold hover:bg-gray-100 transition-all text-sm"
                                                     >
-                                                        <Edit2 size={16} />
+                                                        <Edit2 size={14} strokeWidth={2.5} />
                                                         Edit
                                                     </button>
                                                     <button
                                                         onClick={() => handleDeleteAddress(address._id)}
-                                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-red-600 rounded-xl font-medium hover:bg-red-50 hover:border-red-100 transition-all"
+                                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-red-600 rounded-xl font-bold hover:bg-red-50 hover:border-red-100 transition-all text-sm"
                                                     >
-                                                        <Trash2 size={16} />
+                                                        <Trash2 size={14} strokeWidth={2.5} />
                                                         Delete
                                                     </button>
                                                 </div>
@@ -624,17 +635,20 @@ const Account = () => {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                                            <MapPin size={24} className="text-gray-400" />
+                                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl">
+                                        <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 animate-in zoom-in duration-300">
+                                            <MapPin size={40} className="text-gray-400" strokeWidth={1.5} />
                                         </div>
-                                        <h3 className="text-lg font-bold text-gray-900 mb-1">No addresses saved</h3>
-                                        <p className="text-gray-500 mb-6">Add an address for a faster checkout experience</p>
+                                        <h3 className="text-xl font-bold text-gray-900 mb-2">No addresses saved</h3>
+                                        <p className="text-gray-500 mb-8 text-center max-w-xs mx-auto">
+                                            Add an address for a super fast checkout experience.
+                                        </p>
                                         <button
                                             onClick={openAddAddressModal}
-                                            className="text-primary-600 font-medium hover:underline"
+                                            className="px-8 py-3.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-all shadow-xl shadow-gray-200 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
                                         >
-                                            Add your first address
+                                            <Plus size={18} strokeWidth={2.5} />
+                                            Add New Address
                                         </button>
                                     </div>
                                 )}
