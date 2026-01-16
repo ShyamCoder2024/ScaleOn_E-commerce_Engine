@@ -242,7 +242,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
     return (
         <Link
             to={`/products/${product.slug}`}
-            className="group relative block bg-white rounded-2xl overflow-hidden transition-shadow duration-300 hover:shadow-xl transform-gpu h-full flex flex-col"
+            className="group relative block bg-white rounded-xl sm:rounded-2xl overflow-hidden transition-shadow duration-300 hover:shadow-xl transform-gpu h-full flex flex-col border border-transparent hover:border-gray-100"
         >
             <div className="relative aspect-square bg-gray-100 overflow-hidden isolate">
                 <img
@@ -259,14 +259,14 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
                     aria-hidden="true"
                 />
 
-                <div className="absolute top-3 left-3 z-30 flex flex-col gap-2 pointer-events-none">
+                <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-30 flex flex-col gap-1.5 pointer-events-none">
                     {product.isFeatured && (
-                        <span className="bg-white/90 backdrop-blur-sm text-gray-900 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm tracking-wide uppercase">
+                        <span className="bg-white/90 backdrop-blur-sm text-gray-900 text-[10px] font-bold px-2 py-0.5 rounded shadow-sm tracking-wide uppercase">
                             Featured
                         </span>
                     )}
                     {hasDiscount && (
-                        <span className="bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm tracking-wide uppercase">
+                        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm tracking-wide uppercase">
                             -{discountPercent}%
                         </span>
                     )}
@@ -275,14 +275,14 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
                 {wishlistEnabled && (
                     <button
                         onClick={handleWishlistToggle}
-                        className={`absolute top-3 right-3 z-30 p-2.5 rounded-full shadow-sm transition-all duration-300 ${inWishlist
+                        className={`absolute top-2 right-2 sm:top-3 sm:right-3 z-30 p-2 rounded-full shadow-sm transition-all duration-300 ${inWishlist
                             ? 'bg-white text-red-500 opacity-100'
                             : 'bg-white/90 backdrop-blur-sm text-gray-600 md:opacity-0 md:translate-x-2'
                             } md:group-hover:opacity-100 md:group-hover:translate-x-0 hover:bg-white hover:text-red-500 active:scale-95`}
                         aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
                     >
                         <Heart
-                            size={18}
+                            size={16}
                             className={`transition-transform duration-200 ${inWishlist ? 'fill-current scale-110' : ''}`}
                         />
                     </button>
@@ -314,24 +314,24 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
                 )}
             </div>
 
-            <div className="p-4 pt-5 bg-white relative z-20 flex-1 flex flex-col justify-between">
+            <div className="p-3 sm:p-4 bg-white relative z-20 flex-1 flex flex-col justify-between">
                 <div>
                     {product.categories?.[0] && (
-                        <div className="text-[10px] font-bold text-primary-600 uppercase tracking-wider mb-1.5 opacity-80 truncate">
+                        <div className="text-[10px] font-bold text-primary-600 uppercase tracking-wider mb-1 opacity-80 truncate">
                             {product.categories[0].name}
                         </div>
                     )}
 
-                    <h3 className="font-semibold text-gray-900 text-base leading-tight mb-2 line-clamp-1 group-hover:text-primary-600 transition-colors">
+                    <h3 className="font-semibold text-gray-900 text-sm sm:text-base leading-tight mb-2 line-clamp-2 md:line-clamp-1 group-hover:text-primary-600 transition-colors h-[2.5em] md:h-auto">
                         {product.name}
                     </h3>
 
-                    <div className="flex items-center gap-3 mb-3">
-                        <span className="font-bold text-lg text-gray-900">
+                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 mb-3">
+                        <span className="font-bold text-base sm:text-lg text-gray-900">
                             {formatPrice(product.price)}
                         </span>
                         {hasDiscount && (
-                            <span className="text-sm font-medium text-gray-400 line-through decoration-gray-400/60">
+                            <span className="text-xs sm:text-sm font-medium text-gray-400 line-through decoration-gray-400/60 break-all">
                                 {formatPrice(product.compareAtPrice)}
                             </span>
                         )}
@@ -340,16 +340,18 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
 
                 {/* Mobile: Action Area */}
                 {inStock && (
-                    <div className="md:hidden mt-auto">
+                    <div className="md:hidden mt-auto pt-2">
                         {localQuantity > 0 ? (
-                            <QuantityCounter />
+                            <div className="h-9">
+                                <QuantityCounter />
+                            </div>
                         ) : (
                             <button
                                 onClick={handleAddToCart}
-                                className="w-full btn-primary py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg shadow-blue-500/20"
+                                className="w-full bg-primary-600 text-white h-9 rounded-lg font-medium text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform hover:bg-primary-700 whitespace-nowrap shadow-sm"
                             >
-                                <ShoppingCart size={16} />
-                                Add to Cart
+                                <ShoppingCart size={14} className="shrink-0" />
+                                Add
                             </button>
                         )}
                     </div>
