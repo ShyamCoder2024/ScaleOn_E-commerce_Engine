@@ -242,7 +242,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
     return (
         <Link
             to={`/products/${product.slug}`}
-            className="group relative block bg-white rounded-xl sm:rounded-2xl overflow-hidden transition-shadow duration-300 hover:shadow-xl transform-gpu h-full flex flex-col border border-transparent hover:border-gray-100"
+            className="group relative block w-full bg-white rounded-xl sm:rounded-2xl overflow-hidden transition-shadow duration-300 hover:shadow-xl transform-gpu h-full flex flex-col border border-transparent hover:border-gray-100"
         >
             <div className="relative aspect-square bg-gray-100 overflow-hidden isolate">
                 <img

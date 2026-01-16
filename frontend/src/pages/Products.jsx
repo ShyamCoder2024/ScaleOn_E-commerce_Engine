@@ -158,10 +158,10 @@ const Products = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 overflow-x-hidden">
             {/* Header Removed - merged into Global Header */}
 
-            <div className="container-custom py-4 sm:py-8">
+            <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8">
                 {/* Layout Container: Block on Mobile, Flex on Desktop */}
                 <div className="block lg:flex lg:gap-8 lg:items-start">
                     {/* Filters Sidebar */}
