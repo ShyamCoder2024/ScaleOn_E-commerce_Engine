@@ -118,12 +118,15 @@ const Checkout = () => {
     };
 
     const handlePlaceOrder = async () => {
+        console.log('handlePlaceOrder called', { validation, selectedPayment });
+
         if (!validation.valid) {
             toast.error('Please resolve cart issues before proceeding');
             return;
         }
 
         setLoading(true);
+        console.log('Starting checkout with payment method:', selectedPayment);
 
         try {
             const response = await paymentAPI.checkout({
@@ -132,6 +135,7 @@ const Checkout = () => {
                 shippingMethod: 'standard'
             });
 
+            console.log('Checkout response:', response.data);
             const data = response.data.data;
 
             if (!data.requiresPayment) {
@@ -146,12 +150,17 @@ const Checkout = () => {
 
             // Handle Razorpay payment
             if (data.paymentMethod === 'razorpay' && data.gatewayData) {
+                console.log('Initiating Razorpay payment with data:', data.gatewayData);
                 await handleRazorpayPayment(data);
+            } else {
+                console.error('No gateway data received for Razorpay');
+                toast.error('Payment gateway not configured properly. Please try again.');
             }
 
         } catch (err) {
             console.error('Checkout failed:', err);
-            toast.error(err.response?.data?.message || 'Checkout failed. Please try again.');
+            const errorMessage = err.response?.data?.message || err.message || 'Checkout failed. Please try again.';
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
