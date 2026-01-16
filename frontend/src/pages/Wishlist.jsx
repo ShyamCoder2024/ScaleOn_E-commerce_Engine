@@ -78,72 +78,83 @@ const Wishlist = () => {
     };
 
     return (
-        <div className="container-custom py-8">
-            <div className="flex items-center justify-between mb-6">
+        <div className="container-custom py-4 sm:py-8 min-h-screen">
+            <div className="flex items-end justify-between mb-6 sm:mb-8 border-b border-gray-100 pb-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">My Wishlist</h1>
-                    <p className="text-gray-500">{wishlist.length} item{wishlist.length !== 1 ? 's' : ''}</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">My Wishlist</h1>
+                    <p className="text-gray-500 mt-1 text-sm sm:text-base">
+                        {wishlist.length} {wishlist.length === 1 ? 'item' : 'items'} saved for later
+                    </p>
                 </div>
                 {wishlist.length > 0 && (
                     <button
                         onClick={clearWishlist}
-                        className="text-red-600 hover:text-red-700 text-sm font-medium"
+                        className="text-red-500 hover:text-red-600 text-sm font-medium hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors duration-200"
                     >
                         Clear All
                     </button>
                 )}
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
                 {wishlist.map(item => (
-                    <div key={item._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden group">
-                        {/* Image */}
-                        <Link to={`/products/${item.slug}`} className="block aspect-square overflow-hidden bg-gray-100">
-                            {item.primaryImage ? (
-                                <img
-                                    src={item.primaryImage}
-                                    alt={item.name}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                    No Image
-                                </div>
-                            )}
-                        </Link>
-
-                        {/* Info */}
-                        <div className="p-4">
-                            <Link to={`/products/${item.slug}`} className="block">
-                                <h3 className="font-medium text-gray-900 line-clamp-2 mb-1 hover:text-primary-600">
-                                    {item.name}
-                                </h3>
-                            </Link>
-
-                            <div className="flex items-center gap-2 mb-3">
-                                <span className="font-bold text-gray-900">{formatPrice(item.price)}</span>
-                                {item.compareAtPrice && (
-                                    <span className="text-sm text-gray-400 line-through">
-                                        {formatPrice(item.compareAtPrice)}
-                                    </span>
+                    <div
+                        key={item._id}
+                        className="group bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-row md:flex-col h-32 md:h-auto"
+                    >
+                        {/* Image - Responsive Layout */}
+                        <div className="relative w-28 sm:w-32 md:w-full aspect-[4/5] md:aspect-square shrink-0 bg-gray-50">
+                            <Link to={`/products/${item.slug}`} className="block h-full w-full">
+                                {item.primaryImage ? (
+                                    <img
+                                        src={item.primaryImage}
+                                        alt={item.name}
+                                        className="w-full h-full object-cover md:group-hover:scale-105 transition-transform duration-500"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                        <ShoppingCart size={24} className="opacity-20" />
+                                    </div>
                                 )}
+                            </Link>
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between min-w-0">
+                            <div>
+                                <Link to={`/products/${item.slug}`} className="block">
+                                    <h3 className="font-semibold text-gray-900 text-sm sm:text-base leading-tight line-clamp-2 mb-1 group-hover:text-primary-600 transition-colors">
+                                        {item.name}
+                                    </h3>
+                                </Link>
+
+                                <div className="flex items-baseline gap-2 mb-2">
+                                    <span className="font-bold text-gray-900 text-base sm:text-lg">
+                                        {formatPrice(item.price)}
+                                    </span>
+                                    {item.compareAtPrice && (
+                                        <span className="text-xs text-gray-400 line-through hidden sm:inline-block">
+                                            {formatPrice(item.compareAtPrice)}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Actions */}
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 items-center mt-auto">
                                 <button
                                     onClick={() => handleAddToCart(item)}
-                                    className="flex-1 btn-primary py-2 text-sm flex items-center justify-center gap-1"
+                                    className="flex-1 btn-primary py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg flex items-center justify-center gap-1.5 shadow-sm"
                                 >
-                                    <ShoppingCart size={16} />
-                                    Add to Cart
+                                    <ShoppingCart size={14} className="sm:w-4 sm:h-4" />
+                                    <span className="font-medium">Add</span>
                                 </button>
                                 <button
                                     onClick={() => removeFromWishlist(item._id)}
-                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                    title="Remove from wishlist"
+                                    className="p-1.5 sm:p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Remove"
                                 >
-                                    <Trash2 size={18} />
+                                    <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
                                 </button>
                             </div>
                         </div>
