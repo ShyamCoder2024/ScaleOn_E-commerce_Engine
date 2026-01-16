@@ -39,7 +39,14 @@ router.post('/checkout', protect, checkoutLimiter, checkoutValidator, asyncHandl
     }
 
     // Check if payment method is enabled
-    const isEnabled = await configService.isPaymentProviderEnabled(paymentMethod);
+    // For Razorpay, also check if the service is configured (has API keys)
+    let isEnabled = await configService.isPaymentProviderEnabled(paymentMethod);
+
+    // Special case: Allow Razorpay if API keys are configured even if not enabled in config
+    if (paymentMethod === 'razorpay' && !isEnabled && razorpayService.isConfigured()) {
+        isEnabled = true;
+    }
+
     if (!isEnabled && paymentMethod !== 'cod') {
         throw createError.badRequest('Selected payment method is not available');
     }

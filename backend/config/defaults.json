@@ -67,7 +67,7 @@
     "payment": {
         "providers": {
             "razorpay": {
-                "enabled": false,
+                "enabled": true,
                 "testMode": true
             },
             "stripe": {
