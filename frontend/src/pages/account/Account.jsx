@@ -233,21 +233,23 @@ const Account = () => {
                     {/* Mobile Navigation (Grid Layout & User Card) */}
                     <div className="lg:hidden flex flex-col gap-4 mb-6">
                         {/* Mobile User Card */}
-                        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center font-bold">
+                        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-primary-50 rounded-full blur-3xl -mr-16 -mt-16 opacity-50 pointer-events-none" />
+
+                            <div className="flex items-center gap-4 relative z-10">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-100 to-primary-50 text-primary-600 flex items-center justify-center font-bold text-lg shadow-inner border border-white">
                                     {user?.profile?.firstName?.[0] || user?.email?.[0]?.toUpperCase()}
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="font-bold text-gray-900 leading-tight">
+                                    <span className="font-bold text-gray-900 text-lg leading-tight">
                                         {user?.profile?.firstName || 'User'}
                                     </span>
-                                    <span className="text-xs text-gray-500">{user?.email}</span>
+                                    <span className="text-xs text-gray-500 font-medium">{user?.email}</span>
                                 </div>
                             </div>
                             <button
                                 onClick={logout}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-50"
+                                className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all relative z-10"
                                 title="Logout"
                             >
                                 <LogOut size={20} />
@@ -410,28 +412,35 @@ const Account = () => {
                                         </div>
                                     </form>
                                 ) : (
-                                    <div className="bg-gray-50 rounded-2xl p-6 sm:p-8">
-                                        <div className="grid sm:grid-cols-2 gap-8 mb-8">
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-500 mb-1">First Name</p>
-                                                <p className="text-lg font-semibold text-gray-900">
-                                                    {user?.profile?.firstName || '-'}
-                                                </p>
+                                    <div className="space-y-6">
+                                        <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-400 shadow-sm shrink-0">
+                                                <User size={20} />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-medium text-gray-500 mb-1">Last Name</p>
+                                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Full Name</p>
                                                 <p className="text-lg font-semibold text-gray-900">
-                                                    {user?.profile?.lastName || '-'}
+                                                    {user?.profile?.firstName || '-'} {user?.profile?.lastName || ''}
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="grid sm:grid-cols-2 gap-8">
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-500 mb-1">Email Address</p>
-                                                <p className="text-lg font-semibold text-gray-900">{user?.email}</p>
+
+                                        <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-400 shadow-sm shrink-0">
+                                                <Mail size={20} />
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Email Address</p>
+                                                <p className="text-lg font-semibold text-gray-900 break-all">{user?.email}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-400 shadow-sm shrink-0">
+                                                <Phone size={20} />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-medium text-gray-500 mb-1">Phone Number</p>
+                                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Phone Number</p>
                                                 <p className="text-lg font-semibold text-gray-900">
                                                     {user?.profile?.phone || '-'}
                                                 </p>
