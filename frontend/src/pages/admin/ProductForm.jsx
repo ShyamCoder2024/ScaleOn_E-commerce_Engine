@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     Save, ArrowLeft, Upload, X, Plus, Trash2, Image as ImageIcon,
     ChevronDown, ChevronUp, AlertCircle, Info, Tag, Box, DollarSign,
-    Layers, Truck, Search
+    Layers, Truck
 } from 'lucide-react';
 import { productAPI, categoryAPI } from '../../services/api';
 import { useConfig } from '../../context/ConfigContext';

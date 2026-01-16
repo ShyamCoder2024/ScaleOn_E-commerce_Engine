@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import ProductCard from './ProductCard';
 
 /**

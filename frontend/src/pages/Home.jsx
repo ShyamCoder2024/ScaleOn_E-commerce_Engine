@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { productAPI, featureCardsAPI } from '../services/api';
 import { useConfig } from '../context/ConfigContext';

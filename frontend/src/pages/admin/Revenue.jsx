@@ -1,9 +1,9 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import {
-    DollarSign, TrendingUp, Calendar, ArrowUpRight,
-    ArrowDownRight, CreditCard, Download, Filter,
-    ChevronDown, X, Check, CalendarDays, Printer
+    DollarSign, TrendingUp, ArrowUpRight,
+    ArrowDownRight, CreditCard, Download,
+    ChevronDown, Printer, Calendar, CalendarDays, Filter
 } from 'lucide-react';
 import { orderAPI } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -340,7 +340,7 @@ const AdminRevenue = () => {
             }
 
             setStats({
-                totalRevenue, netProfit, avgOrderValue: aov, ordersCount: count, chartData: finalChartData
+                totalRevenue, netProfit: net, avgOrderValue: aov, ordersCount: count, chartData: finalChartData
             });
 
         } catch (err) {

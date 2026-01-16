@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { ShoppingCart, User, Search, Heart, ChevronDown, Package, Settings, LogOut, Grid, List, Filter } from 'lucide-react';
+import { ShoppingCart, User, Heart, ChevronDown, Package, Settings, LogOut, Grid, List, ChevronLeft, ChevronRight, Search, Filter, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Truck, Clock, ExternalLink, Eye, Ban } from "lucide-react";
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';

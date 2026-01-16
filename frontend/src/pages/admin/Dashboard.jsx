@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
     Package, ShoppingCart, Users, DollarSign,
-    TrendingUp, AlertCircle, ArrowRight, Eye,
-    Clock, CheckCircle, Truck, XCircle
+    TrendingUp, AlertCircle, ArrowRight,
+    ClockCircle, Truck, XCircle, CheckCircle
 } from 'lucide-react';
 import { adminAPI, orderAPI, productAPI } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -179,7 +179,7 @@ const Dashboard = () => {
                 <SectionHeader title="Order Status Overview" />
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
                     {[
-                        { id: 'pending', label: 'Pending', icon: Clock, color: 'text-amber-600 bg-amber-50 border-amber-100' },
+                        { id: 'pending', label: 'Pending', icon: ClockCircle, color: 'text-amber-600 bg-amber-50 border-amber-100' },
                         { id: 'processing', label: 'Processing', icon: TrendingUp, color: 'text-blue-600 bg-blue-50 border-blue-100' },
                         { id: 'shipped', label: 'Shipped', icon: Truck, color: 'text-indigo-600 bg-indigo-50 border-indigo-100' },
                         { id: 'delivered', label: 'Delivered', icon: CheckCircle, color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },

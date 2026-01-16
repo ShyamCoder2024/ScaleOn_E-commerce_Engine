@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Home, ArrowLeft, Search } from 'lucide-react';
+import { Home, ArrowLeft , ChevronLeft, ChevronRight, Search, Filter, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Truck, Clock, ExternalLink, Eye, Ban, ChevronDown } from "lucide-react";
 
 const NotFound = () => {
     return (

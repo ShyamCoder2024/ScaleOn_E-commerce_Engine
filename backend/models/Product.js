@@ -242,15 +242,19 @@ productSchema.pre('save', async function (next) {
         let slug = baseSlug;
         let counter = 1;
 
-        while (true) {
+        let isUnique = false;
+        while (!isUnique) {
             const existing = await mongoose.model('Product').findOne({
                 slug,
                 _id: { $ne: this._id }
             });
 
-            if (!existing) break;
-            slug = `${baseSlug}-${counter}`;
-            counter++;
+            if (!existing) {
+                isUnique = true;
+            } else {
+                slug = `${baseSlug}-${counter}`;
+                counter++;
+            }
         }
 
         this.slug = slug;

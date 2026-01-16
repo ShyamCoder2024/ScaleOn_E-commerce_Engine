@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
-    Save, Store, CreditCard, Truck,
-    ToggleLeft, ToggleRight, Settings2, ShieldCheck,
-    UploadCloud, AlertCircle
+    Save, CreditCard, ToggleLeft, ToggleRight,
+    Store, Truck, Settings2, AlertCircle
 } from 'lucide-react';
 import { configAPI } from '../../services/api';
 import { useConfig } from '../../context/ConfigContext';

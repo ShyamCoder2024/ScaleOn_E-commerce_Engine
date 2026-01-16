@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
-    Plus, Search, Filter, Edit2, Trash2,
-    MoreVertical, Package, Eye, ChevronLeft, ChevronRight,
-    Image as ImageIcon, Archive, ExternalLink
-} from 'lucide-react';
+    Plus, Edit2, Trash2,
+    MoreVertical, Package,
+    Image as ImageIcon, Archive
+, ChevronLeft, ChevronRight, Search, Filter, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Truck, Clock, ExternalLink, Eye, Ban, ChevronDown } from "lucide-react";
 import { productAPI, categoryAPI, adminAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 

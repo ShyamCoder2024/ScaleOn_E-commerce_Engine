@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
-import { Filter, X, ChevronDown, Search, Grid, List } from 'lucide-react';
+import { X, ChevronDown, ChevronLeft, ChevronRight, Search, Filter, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Truck, Clock, ExternalLink, Eye, Ban } from "lucide-react";
 import { productAPI, categoryAPI } from '../services/api';
 import { useConfig } from '../context/ConfigContext';
 import ProductCard from '../components/ProductCard';
 
 const Products = () => {
-    const { formatPrice } = useConfig();
+    // const { formatPrice } = useConfig(); // Unused
     const [searchParams, setSearchParams] = useSearchParams();
 
     const [products, setProducts] = useState([]);

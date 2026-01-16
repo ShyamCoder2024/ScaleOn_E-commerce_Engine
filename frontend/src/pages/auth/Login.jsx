@@ -6,7 +6,7 @@ import { useConfig } from '../../context/ConfigContext';
 import toast from 'react-hot-toast';
 
 const Login = () => {
-    const { login, error } = useAuth();
+    const { login } = useAuth();
     const { storeName } = useConfig();
     const navigate = useNavigate();
     const location = useLocation();

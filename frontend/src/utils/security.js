@@ -77,7 +77,7 @@ export const isValidEmail = (email) => {
  */
 export const isValidPhone = (phone) => {
     if (!phone) return false;
-    const phoneRegex = /^(\+91[\-\s]?)?[0]?(91)?[6-9]\d{9}$/;
+    const phoneRegex = /^(\+91[-\s]?)?[0]?(91)?[6-9]\d{9}$/;
     return phoneRegex.test(phone.replace(/\s/g, ''));
 };
 

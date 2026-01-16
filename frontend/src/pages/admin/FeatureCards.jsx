@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Image, ExternalLink, AlertCircle, Upload, X, Link2 } from 'lucide-react';
+import { Plus, Trash2, Image, AlertCircle, Upload, X, Link2 } from 'lucide-react';
 import { featureCardsAPI } from '../../services/api';
 import { useConfig } from '../../context/ConfigContext';
 import toast from 'react-hot-toast';
