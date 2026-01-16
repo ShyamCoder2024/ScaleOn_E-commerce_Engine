@@ -318,7 +318,8 @@ const Header = () => {
                     </div>
                 )}
 
-                {/* Mobile Categories Bar (Hide on Products Page) */}
+                {/* Mobile Categories Bar - REMOVED per user request */}
+                {/* 
                 {!isProductsPage && (
                     <div className="md:hidden flex items-center gap-2 pb-3 overflow-x-auto scrollbar-hide">
                         {categories.slice(0, 6).map(cat => (
@@ -331,7 +332,8 @@ const Header = () => {
                             </Link>
                         ))}
                     </div>
-                )}
+                )} 
+                */}
             </div>
         </header>
     );
