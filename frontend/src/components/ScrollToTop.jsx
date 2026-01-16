@@ -9,8 +9,21 @@ const ScrollToTop = () => {
     const { pathname } = useLocation();
 
     useEffect(() => {
-        // Scroll to top on route change
-        window.scrollTo(0, 0);
+        // Disable browser's default scroll restoration to prevent conflicts
+        if ('scrollRestoration' in window.history) {
+            window.history.scrollRestoration = 'manual';
+        }
+
+        // Force scroll to top instantly
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'instant' // Instant jump to top, no animation
+        });
+
+        // Fallback: Also scroll the body/html just in case
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
     }, [pathname]);
 
     return null;
