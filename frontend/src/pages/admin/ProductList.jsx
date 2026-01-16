@@ -239,25 +239,25 @@ const ProductList = () => {
                                         </div>
                                     </div>
 
-                                    {/* Mobile Actions */}
-                                    <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-50">
+                                    {/* Mobile Actions - Fixed layout */}
+                                    <div className="flex gap-2 mt-4 pt-4 border-t border-slate-50">
                                         <Link
                                             to={`/admin/products/${product._id}/edit`}
-                                            className="flex items-center justify-center gap-2 py-2.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors"
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors"
                                         >
-                                            <Edit2 size={16} /> Edit
+                                            <Edit2 size={14} /> Edit
                                         </Link>
                                         <Link
                                             to={`/products/${product.slug}`}
-                                            className="flex items-center justify-center gap-2 py-2.5 bg-slate-50 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-100 transition-colors"
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-slate-50 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-100 transition-colors"
                                         >
-                                            <Eye size={16} /> View
+                                            <Eye size={14} /> View
                                         </Link>
                                         <button
                                             onClick={() => setShowDeleteModal(product)}
-                                            className="flex items-center justify-center gap-2 py-2.5 bg-rose-50 text-rose-600 rounded-lg text-sm font-medium hover:bg-rose-100 transition-colors"
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-rose-50 text-rose-600 rounded-lg text-sm font-medium hover:bg-rose-100 transition-colors"
                                         >
-                                            <Trash2 size={16} /> Del
+                                            <Trash2 size={14} /> Delete
                                         </button>
                                     </div>
                                 </div>

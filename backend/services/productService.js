@@ -27,9 +27,12 @@ class ProductService {
 
         const filter = {};
 
-        // Status filter
+        // Status filter - exclude archived by default unless explicitly requested
         if (status) {
             filter.status = status;
+        } else {
+            // By default, exclude archived products
+            filter.status = { $ne: PRODUCT_STATUS.ARCHIVED };
         }
 
         // Category filter
