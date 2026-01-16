@@ -337,8 +337,11 @@ router.get('/methods', asyncHandler(async (req, res) => {
         });
     }
 
-    // Razorpay
-    if (paymentConfig.providers?.razorpay?.enabled) {
+    // Razorpay - show if enabled in config OR if API keys are configured
+    const razorpayEnabledInConfig = paymentConfig.providers?.razorpay?.enabled;
+    const razorpayHasApiKeys = razorpayService.isConfigured();
+
+    if (razorpayEnabledInConfig || razorpayHasApiKeys) {
         methods.push({
             id: 'razorpay',
             name: 'Pay Online',
