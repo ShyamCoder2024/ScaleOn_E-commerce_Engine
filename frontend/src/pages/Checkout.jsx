@@ -95,11 +95,18 @@ const Checkout = () => {
     };
 
     const validateAddress = () => {
-        const required = ['firstName', 'lastName', 'street', 'city', 'state', 'postalCode', 'phone'];
+        const required = ['firstName', 'lastName', 'email', 'street', 'city', 'state', 'postalCode', 'phone'];
         const missing = required.filter(field => !shippingAddress[field]?.trim());
 
         if (missing.length > 0) {
-            toast.error('Please fill in all required fields');
+            toast.error(`Please fill in all required fields: ${missing.join(', ')}`);
+            return false;
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(shippingAddress.email)) {
+            toast.error('Please enter a valid email address');
             return false;
         }
 
@@ -159,7 +166,21 @@ const Checkout = () => {
 
         } catch (err) {
             console.error('Checkout failed:', err);
-            const errorMessage = err.response?.data?.message || err.message || 'Checkout failed. Please try again.';
+            console.error('Error response data:', err.response?.data);
+
+            // Extract specific error message
+            let errorMessage = 'Checkout failed. Please try again.';
+
+            if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+                // Handle validation errors
+                const validationErrors = err.response.data.errors.map(e => e.message || e.field).join(', ');
+                errorMessage = `Validation error: ${validationErrors}`;
+            } else if (err.response?.data?.message) {
+                errorMessage = err.response.data.message;
+            } else if (err.message) {
+                errorMessage = err.message;
+            }
+
             toast.error(errorMessage);
         } finally {
             setLoading(false);
@@ -341,6 +362,19 @@ const Checkout = () => {
                                             value={shippingAddress.lastName}
                                             onChange={(e) => handleAddressChange('lastName', e.target.value)}
                                             className="input-field"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="sm:col-span-2">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Email Address *
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={shippingAddress.email}
+                                            onChange={(e) => handleAddressChange('email', e.target.value)}
+                                            className="input-field"
+                                            placeholder="your@email.com"
                                             required
                                         />
                                     </div>
