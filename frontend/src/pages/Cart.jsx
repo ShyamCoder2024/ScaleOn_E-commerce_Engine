@@ -122,10 +122,10 @@ const Cart = () => {
                                         </div>
 
                                         {/* Price and Quantity Controls */}
-                                        <div className="flex items-end justify-between gap-4 mt-4 pt-3 border-t border-gray-50 sm:border-none sm:pt-0 sm:mt-auto">
+                                        <div className="flex items-end justify-start gap-4 sm:gap-6 mt-4 pt-3 border-t border-gray-50 sm:border-none sm:pt-0 sm:mt-auto">
                                             {/* Price Block */}
-                                            <div className="pb-1">
-                                                <p className="text-xs text-gray-400 font-medium mb-0.5">Price</p>
+                                            <div className="pb-0.5">
+                                                <p className="text-[10px] text-gray-400 font-medium mb-0.5 uppercase tracking-wider">Price</p>
                                                 <div className="flex items-baseline gap-1">
                                                     <span className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight leading-none">
                                                         {formatPrice(item.priceAtAdd || item.product?.price || 0)}
@@ -133,14 +133,14 @@ const Cart = () => {
                                                 </div>
                                             </div>
 
-                                            {/* Quantity Controls */}
+                                            {/* Quantity Controls - Compact */}
                                             <div className="flex items-center bg-white rounded-lg border border-gray-200 p-0.5 shadow-sm shrink-0">
                                                 <button
                                                     onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                                                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-md transition-all active:scale-95 disabled:opacity-30"
+                                                    className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-md transition-all active:scale-95 disabled:opacity-30"
                                                     disabled={item.quantity <= 1}
                                                 >
-                                                    <Minus size={16} />
+                                                    <Minus size={14} />
                                                 </button>
                                                 <input
                                                     type="number"
@@ -152,13 +152,13 @@ const Cart = () => {
                                                             updateQuantity(item._id, val);
                                                         }
                                                     }}
-                                                    className="w-10 text-center font-bold text-gray-900 text-base border-none focus:ring-0 p-0 appearance-none bg-transparent"
+                                                    className="w-8 text-center font-bold text-gray-900 text-sm border-none focus:ring-0 p-0 appearance-none bg-transparent"
                                                 />
                                                 <button
                                                     onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                                                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-md transition-all active:scale-95"
+                                                    className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-md transition-all active:scale-95"
                                                 >
-                                                    <Plus size={16} />
+                                                    <Plus size={14} />
                                                 </button>
                                             </div>
                                         </div>
