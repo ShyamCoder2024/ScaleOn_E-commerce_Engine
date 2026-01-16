@@ -36,24 +36,24 @@ const Cart = () => {
         return (
             <div className="min-h-[80vh] flex flex-col items-center justify-center bg-gray-50/50">
                 <div className="max-w-md mx-auto text-center px-4">
-                    <div className="mb-8 relative inline-block">
+                    <div className="mb-6 relative inline-block">
                         <div className="absolute inset-0 bg-primary-100 rounded-full animate-ping opacity-20" />
-                        <div className="relative bg-white p-6 rounded-full shadow-xl">
-                            <ShoppingBag size={64} className="text-primary-600" strokeWidth={1.5} />
+                        <div className="relative bg-white p-5 rounded-full shadow-lg">
+                            <ShoppingBag size={48} className="text-primary-600" strokeWidth={1.5} />
                         </div>
                     </div>
 
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Your cart is empty</h1>
-                    <p className="text-gray-500 mb-8 text-base md:text-lg max-w-sm mx-auto">
-                        Looks like you haven't added anything to your cart yet. Explore our products to find something you love.
+                    <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">Your cart is empty</h1>
+                    <p className="text-gray-500 mb-6 text-sm md:text-base max-w-sm mx-auto">
+                        Looks like you haven't added anything to your cart yet.
                     </p>
 
                     <Link
                         to="/products"
-                        className="btn-primary inline-flex items-center gap-2 px-8 py-4 rounded-full text-base font-bold shadow-lg shadow-primary-600/20 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                        className="btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-primary-600/20 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
                     >
                         Start Shopping
-                        <ArrowRight size={20} />
+                        <ArrowRight size={18} />
                     </Link>
                 </div>
             </div>
@@ -62,48 +62,48 @@ const Cart = () => {
 
     return (
         <div className="bg-gray-50/50 min-h-screen pb-20">
-            <div className="container-custom py-8 md:py-12">
-                <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                        Shopping Cart <span className="text-gray-500 text-lg font-medium ml-2">({totals.itemCount} items)</span>
+            <div className="container-custom py-6 md:py-10">
+                <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+                        Shopping Cart <span className="text-gray-500 text-base font-medium ml-1">({totals.itemCount})</span>
                     </h1>
                 </div>
 
-                <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
+                <div className="grid lg:grid-cols-12 gap-6 lg:gap-10">
                     {/* Cart Items List */}
-                    <div className="lg:col-span-8 space-y-6">
+                    <div className="lg:col-span-8 space-y-4">
                         {cart.items.map(item => (
-                            <div key={item._id} className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 transition-all hover:shadow-md">
-                                <div className="flex gap-4 sm:gap-6">
+                            <div key={item._id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                                <div className="flex gap-4">
                                     {/* Product Image */}
                                     <Link
                                         to={`/products/${item.product?.slug || item.productId}`}
-                                        className="shrink-0 relative group"
+                                        className="shrink-0 group"
                                     >
-                                        <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden bg-gray-100 border border-gray-100">
+                                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-gray-100 border border-gray-100">
                                             <img
                                                 src={item.image || item.product?.primaryImage || 'https://placehold.co/200x200/e2e8f0/475569?text=No+Image'}
                                                 alt={item.productName || item.product?.name}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                className="w-full h-full object-cover"
                                             />
                                         </div>
                                     </Link>
 
                                     {/* Product Details */}
-                                    <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                                        <div className="grid grid-cols-[1fr,auto] gap-4">
+                                    <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                                        <div className="flex justify-between items-start gap-3">
                                             <div>
                                                 <Link
                                                     to={`/products/${item.product?.slug || item.productId}`}
-                                                    className="text-base sm:text-lg font-bold text-gray-900 hover:text-primary-600 line-clamp-2 leading-tight mb-1"
+                                                    className="text-sm sm:text-base font-semibold text-gray-900 hover:text-primary-600 line-clamp-2 leading-snug mb-1"
                                                 >
                                                     {item.productName || item.product?.name}
                                                 </Link>
 
                                                 {item.variant && (
-                                                    <div className="flex flex-wrap gap-2 mt-2">
+                                                    <div className="flex flex-wrap gap-1.5 mt-1">
                                                         {Object.entries(item.variant.options || {}).map(([key, value]) => (
-                                                            <span key={key} className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md uppercase tracking-wide">
+                                                            <span key={key} className="text-[10px] sm:text-xs font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded uppercase tracking-wide">
                                                                 {value}
                                                             </span>
                                                         ))}
@@ -111,50 +111,47 @@ const Cart = () => {
                                                 )}
                                             </div>
 
-                                            {/* Delete Button (Top Right) */}
+                                            {/* Delete Button */}
                                             <button
                                                 onClick={() => removeItem(item._id)}
-                                                className="text-gray-400 hover:text-red-500 transition-colors p-2 -mr-2 hover:bg-red-50 rounded-full h-fit"
+                                                className="text-gray-400 hover:text-red-500 transition-colors p-1.5 -mr-1.5 -mt-1.5 hover:bg-red-50 rounded-full shrink-0"
                                                 title="Remove item"
                                             >
-                                                <Trash2 size={20} />
+                                                <Trash2 size={16} />
                                             </button>
                                         </div>
 
                                         {/* Price and Quantity Controls */}
-                                        <div className="flex flex-wrap items-end justify-between gap-4 mt-4 pt-4 border-t border-gray-50 sm:border-none sm:pt-0 sm:mt-auto">
+                                        <div className="flex items-center justify-between gap-4 mt-3">
                                             {/* Price Block */}
-                                            <div>
-                                                <p className="text-sm text-gray-500 font-medium mb-1">Price</p>
-                                                <div className="flex items-baseline gap-2">
-                                                    <span className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
-                                                        {formatPrice(item.priceAtAdd || item.product?.price || 0)}
+                                            <div className="flex items-baseline gap-1.5">
+                                                <span className="text-base sm:text-lg font-bold text-gray-900">
+                                                    {formatPrice(item.priceAtAdd || item.product?.price || 0)}
+                                                </span>
+                                                {item.quantity > 1 && (
+                                                    <span className="text-xs text-gray-400 font-medium">
+                                                        x{item.quantity}
                                                     </span>
-                                                    {item.quantity > 1 && (
-                                                        <span className="text-sm text-gray-400 font-medium">
-                                                            x{item.quantity}
-                                                        </span>
-                                                    )}
-                                                </div>
+                                                )}
                                             </div>
 
-                                            {/* Quantity Controls */}
-                                            <div className="flex items-center bg-gray-50 rounded-xl border border-gray-200 p-1 shadow-sm">
+                                            {/* Quantity Controls - More Compact */}
+                                            <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 p-0.5 shadow-sm">
                                                 <button
                                                     onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                                                    className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-sm rounded-lg transition-all active:scale-95 disabled:opacity-50"
+                                                    className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-sm rounded-md transition-all active:scale-95 disabled:opacity-50"
                                                     disabled={item.quantity <= 1}
                                                 >
-                                                    <Minus size={18} />
+                                                    <Minus size={14} />
                                                 </button>
-                                                <span className="w-12 text-center font-bold text-gray-900 text-lg tabular-nums">
+                                                <span className="w-8 text-center font-semibold text-gray-900 text-sm tabular-nums">
                                                     {item.quantity}
                                                 </span>
                                                 <button
                                                     onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                                                    className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-sm rounded-lg transition-all active:scale-95"
+                                                    className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-sm rounded-md transition-all active:scale-95"
                                                 >
-                                                    <Plus size={18} />
+                                                    <Plus size={14} />
                                                 </button>
                                             </div>
                                         </div>
@@ -163,12 +160,12 @@ const Cart = () => {
                             </div>
                         ))}
 
-                        <div className="flex justify-start pt-4">
+                        <div className="flex justify-start pt-2">
                             <Link
                                 to="/products"
-                                className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold group"
+                                className="inline-flex items-center gap-1.5 text-primary-600 hover:text-primary-700 text-sm font-semibold group"
                             >
-                                <ArrowRight size={20} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
+                                <ArrowRight size={16} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
                                 Continue Shopping
                             </Link>
                         </div>
@@ -176,23 +173,23 @@ const Cart = () => {
 
                     {/* Order Summary Sidebar */}
                     <div className="lg:col-span-4">
-                        <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-100 p-6 sm:p-8 sticky top-24">
-                            <h2 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sticky top-20">
+                            <h2 className="text-lg font-bold text-gray-900 mb-4">Order Summary</h2>
 
-                            <div className="space-y-4 mb-8">
-                                <div className="flex justify-between text-gray-600 text-base">
+                            <div className="space-y-3 mb-6">
+                                <div className="flex justify-between text-gray-500 text-sm">
                                     <span>Subtotal</span>
                                     <span className="font-medium text-gray-900">{formatPrice(totals.subtotal)}</span>
                                 </div>
 
                                 {totals.discountAmount > 0 && (
-                                    <div className="flex justify-between text-emerald-600 text-base">
+                                    <div className="flex justify-between text-emerald-600 text-sm">
                                         <span>Discount</span>
                                         <span className="font-medium">-{formatPrice(totals.discountAmount)}</span>
                                     </div>
                                 )}
 
-                                <div className="flex justify-between text-gray-600 text-base">
+                                <div className="flex justify-between text-gray-500 text-sm">
                                     <span>Shipping</span>
                                     <span className="font-medium text-gray-900">
                                         {totals.shippingCost > 0 ? formatPrice(totals.shippingCost) : <span className="text-emerald-600">Free</span>}
@@ -200,16 +197,16 @@ const Cart = () => {
                                 </div>
 
                                 {totals.taxAmount > 0 && (
-                                    <div className="flex justify-between text-gray-600 text-base">
+                                    <div className="flex justify-between text-gray-500 text-sm">
                                         <span>Tax</span>
                                         <span className="font-medium text-gray-900">{formatPrice(totals.taxAmount)}</span>
                                     </div>
                                 )}
 
-                                <div className="border-t border-gray-100 pt-4 mt-4">
+                                <div className="border-t border-gray-100 pt-3 mt-3">
                                     <div className="flex justify-between items-end">
-                                        <span className="text-base text-gray-500 font-medium">Total</span>
-                                        <span className="text-3xl font-bold text-gray-900 tracking-tight">{formatPrice(totals.total)}</span>
+                                        <span className="text-sm text-gray-900 font-medium">Total</span>
+                                        <span className="text-xl font-bold text-gray-900 tracking-tight">{formatPrice(totals.total)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -218,24 +215,24 @@ const Cart = () => {
                             {isAuthenticated ? (
                                 <Link
                                     to="/checkout"
-                                    className="btn-primary w-full py-4 text-lg font-bold flex items-center justify-center gap-2 shadow-xl shadow-primary-600/20 hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.98] rounded-xl"
+                                    className="btn-primary w-full py-3 text-base font-bold flex items-center justify-center gap-2 shadow-md shadow-primary-600/20 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.98] rounded-lg"
                                 >
                                     Proceed to Checkout
-                                    <ArrowRight size={22} />
+                                    <ArrowRight size={18} />
                                 </Link>
                             ) : (
-                                <div className="space-y-4">
+                                <div className="space-y-3">
                                     <Link
                                         to="/login"
                                         state={{ from: { pathname: '/checkout' } }}
-                                        className="btn-primary w-full py-4 text-lg font-bold flex items-center justify-center gap-2 shadow-xl shadow-primary-600/20 rounded-xl"
+                                        className="btn-primary w-full py-3 text-base font-bold flex items-center justify-center gap-2 shadow-md shadow-primary-600/20 rounded-lg"
                                     >
                                         Login to Checkout
-                                        <ArrowRight size={22} />
+                                        <ArrowRight size={18} />
                                     </Link>
                                     <div className="text-center">
-                                        <span className="text-gray-500">New customer? </span>
-                                        <Link to="/register" className="text-primary-600 font-bold hover:underline">
+                                        <span className="text-xs text-gray-500">New customer? </span>
+                                        <Link to="/register" className="text-xs text-primary-600 font-bold hover:underline">
                                             Create Account
                                         </Link>
                                     </div>
@@ -243,10 +240,10 @@ const Cart = () => {
                             )}
 
                             {/* Security Badge */}
-                            <div className="mt-8 pt-6 border-t border-gray-100">
-                                <div className="flex items-center justify-center gap-2 text-emerald-600 bg-emerald-50 py-3 rounded-xl">
-                                    <Lock size={16} />
-                                    <span className="text-sm font-semibold">Secure SSL Checkout</span>
+                            <div className="mt-6 pt-4 border-t border-gray-100/50">
+                                <div className="flex items-center justify-center gap-1.5 text-emerald-600 bg-emerald-50/50 py-2 rounded-lg">
+                                    <Lock size={14} />
+                                    <span className="text-xs font-semibold">Secure SSL Checkout</span>
                                 </div>
                             </div>
                         </div>
