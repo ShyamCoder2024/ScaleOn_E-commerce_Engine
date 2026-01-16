@@ -4,7 +4,8 @@ import {
     Plus, Edit2, Trash2,
     MoreVertical, Package,
     Image as ImageIcon, Archive
-, ChevronLeft, ChevronRight, Search, Filter, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Truck, Clock, ExternalLink, Eye, Ban, ChevronDown } from "lucide-react";
+    , ChevronLeft, ChevronRight, Search, Filter, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Truck, Clock, ExternalLink, Eye, Ban, ChevronDown
+} from "lucide-react";
 import { productAPI, categoryAPI, adminAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -99,7 +100,7 @@ const ProductList = () => {
     const handleDelete = async (productId) => {
         setDeleting(true);
         try {
-            await productAPI.delete(productId);
+            await adminAPI.deleteProduct(productId);
             toast.success('Product deleted');
             setShowDeleteModal(null);
             fetchProducts();
