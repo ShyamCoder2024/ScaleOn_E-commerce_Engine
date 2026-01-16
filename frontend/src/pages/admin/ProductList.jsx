@@ -28,6 +28,18 @@ const ProductList = () => {
         fetchCategories();
     }, [searchParams]);
 
+    // Body scroll lock when modal is open
+    useEffect(() => {
+        if (showDeleteModal) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [showDeleteModal]);
+
     const fetchProducts = async () => {
         setLoading(true);
         try {
@@ -394,31 +406,65 @@ const ProductList = () => {
                 )}
             </div>
 
-            {/* Delete Modal */}
+            {/* ScaleOn Premium Delete Modal */}
             {showDeleteModal && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl scale-100">
-                        <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mb-4 text-rose-600">
-                            <Trash2 size={24} />
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
+                    role="dialog"
+                    aria-modal="true"
+                >
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-slate-900/75 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+                        onClick={() => setShowDeleteModal(null)}
+                    />
+
+                    {/* Modal Panel */}
+                    <div className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-2xl transition-all animate-in zoom-in-95 fade-in duration-200 border border-slate-100 scale-100">
+
+                        {/* Icon */}
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-rose-50 mb-5 ring-4 ring-rose-50/50">
+                            <Trash2 className="h-6 w-6 text-rose-600" />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900">Delete Product?</h3>
-                        <p className="text-slate-500 mt-2 mb-6">
-                            Are you sure you want to delete <span className="font-semibold text-slate-900">"{showDeleteModal.name}"</span>? This action cannot be undone.
-                        </p>
-                        <div className="flex gap-3">
+
+                        {/* Text */}
+                        <div className="text-center">
+                            <h3 className="text-xl font-bold text-slate-900 leading-6">
+                                Delete Product
+                            </h3>
+                            <div className="mt-2">
+                                <p className="text-sm text-slate-500 leading-relaxed">
+                                    Are you sure you want to delete <span className="font-bold text-slate-900">"{showDeleteModal.name}"</span>?
+                                    <br />
+                                    This action cannot be undone.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="mt-8 flex flex-col-reverse sm:flex-row gap-3 sm:gap-4">
                             <button
+                                type="button"
+                                className="inline-flex w-full justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-base font-bold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200 focus:ring-offset-2 sm:w-1/2 sm:text-sm transition-colors"
                                 onClick={() => setShowDeleteModal(null)}
                                 disabled={deleting}
-                                className="flex-1 py-2.5 border border-slate-200 rounded-xl font-medium text-slate-600 hover:bg-slate-50 transition-colors"
                             >
                                 Cancel
                             </button>
                             <button
+                                type="button"
+                                className="inline-flex w-full justify-center rounded-xl bg-rose-600 px-4 py-3 text-base font-bold text-white shadow-lg shadow-rose-600/30 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 sm:w-1/2 sm:text-sm transition-all active:scale-95"
                                 onClick={() => handleDelete(showDeleteModal._id)}
                                 disabled={deleting}
-                                className="flex-1 py-2.5 bg-rose-600 text-white rounded-xl font-bold hover:bg-rose-700 shadow-lg shadow-rose-500/20 transition-colors"
                             >
-                                {deleting ? 'Deleting...' : 'Yes, Delete'}
+                                {deleting ? (
+                                    <span className="flex items-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        Deleting...
+                                    </span>
+                                ) : (
+                                    'Yes, Delete'
+                                )}
                             </button>
                         </div>
                     </div>

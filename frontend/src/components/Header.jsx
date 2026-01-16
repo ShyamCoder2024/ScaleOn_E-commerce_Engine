@@ -59,7 +59,7 @@ const Header = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await categoryAPI.getAll();
+                const response = await categoryAPI.getCategories();
                 setCategories(response.data.data.categories || []);
             } catch (err) {
                 console.error('Failed to fetch categories:', err);
