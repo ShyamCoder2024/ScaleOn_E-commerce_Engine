@@ -34,7 +34,7 @@ const OrderDetail = () => {
     const [reviewingItem, setReviewingItem] = useState(null);
     const [submittingReview, setSubmittingReview] = useState(false);
     const [newReview, setNewReview] = useState({
-        rating: 5,
+        rating: 0,
         title: '',
         content: ''
     });
@@ -99,13 +99,18 @@ const OrderDetail = () => {
 
     const openReviewModal = (item) => {
         setReviewingItem(item);
-        setNewReview({ rating: 5, title: '', content: '' });
+        setNewReview({ rating: 0, title: '', content: '' });
         setShowReviewModal(true);
     };
 
     const handleSubmitReview = async (e) => {
         e.preventDefault();
         if (!reviewingItem || !order) return;
+
+        if (newReview.rating === 0) {
+            toast.error('Please select a star rating');
+            return;
+        }
 
         setSubmittingReview(true);
         try {
@@ -276,9 +281,9 @@ const OrderDetail = () => {
                                                 ) : (
                                                     <button
                                                         onClick={() => openReviewModal(item)}
-                                                        className="inline-flex items-center gap-1.5 text-sm text-primary-600 bg-primary-50 hover:bg-primary-100 px-3 py-1.5 rounded-lg font-medium transition-colors"
+                                                        className="inline-flex items-center gap-2 text-sm text-gray-700 bg-white border border-gray-200 shadow-sm hover:bg-gray-50 hover:shadow hover:border-gray-300 px-4 py-2.5 rounded-xl font-medium transition-all group"
                                                     >
-                                                        <Star size={14} />
+                                                        <Star size={16} className="text-gray-400 group-hover:text-yellow-400 transition-colors" />
                                                         Write a Review
                                                     </button>
                                                 )}
@@ -487,45 +492,59 @@ const OrderDetail = () => {
 
             {/* Review Modal */}
             {showReviewModal && reviewingItem && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowReviewModal(false)} />
-                    <div className="bg-white rounded-2xl w-full max-w-lg relative z-10 shadow-2xl animate-in fade-in zoom-in duration-300">
-                        <button
-                            onClick={() => setShowReviewModal(false)}
-                            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
-                        >
-                            <X size={20} />
-                        </button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+                    <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" onClick={() => setShowReviewModal(false)} />
 
-                        <div className="p-8">
-                            <h3 className="text-2xl font-bold text-gray-900 mb-1">Write a Review</h3>
-                            <p className="text-gray-500 mb-6">for {reviewingItem.productName}</p>
+                    <div className="bg-white rounded-2xl w-full max-w-md relative z-10 shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]">
+                        {/* Header */}
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <div>
+                                <h3 className="font-bold text-gray-900 text-lg">Write Review</h3>
+                                <p className="text-sm text-gray-500 truncate max-w-[200px]">{reviewingItem.productName}</p>
+                            </div>
+                            <button
+                                onClick={() => setShowReviewModal(false)}
+                                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
 
-                            <form onSubmit={handleSubmitReview} className="space-y-6">
+                        <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
+                            <form onSubmit={handleSubmitReview} className="space-y-5">
                                 {/* Star Rating Input */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Overall Rating</label>
+                                <div className="flex flex-col items-center justify-center py-2">
                                     <div className="flex gap-2">
                                         {[1, 2, 3, 4, 5].map((star) => (
                                             <button
                                                 key={star}
                                                 type="button"
                                                 onClick={() => setNewReview({ ...newReview, rating: star })}
-                                                className="transition-transform hover:scale-110 focus:outline-none"
+                                                className="group p-1 focus:outline-none transition-transform active:scale-95"
                                             >
                                                 <Star
-                                                    size={32}
-                                                    className={`${star <= newReview.rating ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-100 text-gray-200'}`}
+                                                    size={36}
+                                                    className={`transition-colors duration-200 ${star <= newReview.rating
+                                                            ? 'fill-yellow-400 text-yellow-400 drop-shadow-sm'
+                                                            : 'fill-gray-50 text-gray-200 group-hover:text-gray-300'
+                                                        }`}
                                                 />
                                             </button>
                                         ))}
                                     </div>
+                                    <p className="text-sm font-medium text-gray-500 mt-2">
+                                        {newReview.rating === 0 ? 'Select a rating' :
+                                            newReview.rating === 5 ? 'Excellent!' :
+                                                newReview.rating === 4 ? 'Great!' :
+                                                    newReview.rating === 3 ? 'Good' :
+                                                        newReview.rating === 2 ? 'Fair' : 'Poor'}
+                                    </p>
                                 </div>
 
                                 {/* Title Input */}
                                 <div>
-                                    <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Review Headline
+                                    <label htmlFor="title" className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                                        Headline
                                     </label>
                                     <input
                                         type="text"
@@ -534,44 +553,36 @@ const OrderDetail = () => {
                                         placeholder="What's most important to know?"
                                         value={newReview.title}
                                         onChange={(e) => setNewReview({ ...newReview, title: e.target.value })}
-                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-50 transition-all outline-none"
+                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all outline-none text-sm"
                                     />
                                 </div>
 
                                 {/* Content Input */}
                                 <div>
-                                    <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Your Review
+                                    <label htmlFor="content" className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                                        Review
                                     </label>
                                     <textarea
                                         id="content"
                                         required
-                                        rows={4}
-                                        placeholder="What did you like or dislike?"
+                                        rows={3}
+                                        placeholder="What did you like or dislike? Details help other shoppers."
                                         value={newReview.content}
                                         onChange={(e) => setNewReview({ ...newReview, content: e.target.value })}
-                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-50 transition-all outline-none resize-none"
+                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all outline-none resize-none text-sm leading-relaxed"
                                     />
                                 </div>
 
-                                {/* Actions */}
-                                <div className="flex gap-3 pt-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowReviewModal(false)}
-                                        className="flex-1 px-6 py-3 border border-gray-200 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
+                                <div className="pt-2">
                                     <button
                                         type="submit"
-                                        disabled={submittingReview}
-                                        className="flex-1 px-6 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                        disabled={submittingReview || newReview.rating === 0}
+                                        className="w-full py-3.5 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-primary-600/20 active:scale-[0.99]"
                                     >
                                         {submittingReview ? (
                                             <>
-                                                <Loader2 size={20} className="animate-spin" />
-                                                Submitting...
+                                                <Loader2 size={18} className="animate-spin" />
+                                                Publishing Review...
                                             </>
                                         ) : (
                                             'Submit Review'
