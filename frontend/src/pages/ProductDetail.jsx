@@ -372,48 +372,48 @@ const ProductDetail = () => {
                                     )}
                                 </div>
                                 <div className="flex items-center gap-4">
-                                    <div className="flex items-center bg-white rounded-xl shadow-sm border border-gray-200 p-1">
+                                    <div className="flex items-center bg-white rounded-lg shadow-sm border border-gray-200 p-0.5">
                                         <button
                                             onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors active:scale-95 disabled:opacity-50"
+                                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-md flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors active:scale-95 disabled:opacity-50"
                                             disabled={quantity <= 1}
                                         >
-                                            <Minus size={18} />
+                                            <Minus size={16} />
                                         </button>
                                         <input
                                             type="number"
                                             value={quantity}
                                             onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                            className="w-12 sm:w-16 bg-transparent text-center font-bold text-gray-900 text-lg focus:outline-none"
+                                            className="w-10 sm:w-12 bg-transparent text-center font-bold text-gray-900 text-base sm:text-lg focus:outline-none"
                                             min="1"
                                         />
                                         <button
                                             onClick={() => setQuantity(quantity + 1)}
-                                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors active:scale-95 disabled:opacity-50"
+                                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-md flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors active:scale-95 disabled:opacity-50"
                                             disabled={isFeatureEnabled('inventory') && quantity >= getCurrentStock()}
                                         >
-                                            <Plus size={18} />
+                                            <Plus size={16} />
                                         </button>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Actions - Responsive Grid/Flex */}
-                            <div className="flex gap-3 pt-2">
+                            {/* Actions - Vertical on Mobile, Row on Desktop */}
+                            <div className="flex flex-col sm:flex-row gap-3 pt-2">
                                 {isInStock() ? (
                                     <>
                                         <button
                                             onClick={handleAddToCart}
                                             disabled={addingToCart}
-                                            className="flex-1 btn-secondary py-3 px-2 sm:px-4 text-xs sm:text-base font-bold flex items-center justify-center gap-1.5 sm:gap-2 border-gray-200 hover:bg-gray-50 text-gray-900 shadow-sm rounded-xl active:scale-95 transition-all text-center leading-tight"
+                                            className="flex-1 btn-secondary py-3.5 px-4 text-base font-bold flex items-center justify-center gap-2 border-gray-200 hover:bg-gray-50 text-gray-900 shadow-sm rounded-xl active:scale-95 transition-all w-full"
                                         >
-                                            <ShoppingCart size={18} className="shrink-0" />
+                                            <ShoppingCart size={20} className="shrink-0" />
                                             {addingToCart ? 'Adding...' : 'Add to Cart'}
                                         </button>
                                         <button
                                             onClick={handleBuyNow}
                                             disabled={addingToCart}
-                                            className="flex-1 btn-primary py-3 px-2 sm:px-4 text-xs sm:text-base font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-all rounded-xl whitespace-nowrap text-center leading-tight"
+                                            className="flex-1 btn-primary py-3.5 px-4 text-base font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-all rounded-xl w-full"
                                         >
                                             Buy Now
                                         </button>
@@ -427,13 +427,13 @@ const ProductDetail = () => {
                                 {isFeatureEnabled('wishlist') && (
                                     <button
                                         onClick={() => toggleWishlist(product)}
-                                        className={`hidden sm:flex w-12 sm:w-14 shrink-0 rounded-xl items-center justify-center border-2 transition-all ${isInWishlist(product._id)
+                                        className={`hidden sm:flex w-14 shrink-0 rounded-xl items-center justify-center border-2 transition-all ${isInWishlist(product._id)
                                             ? 'bg-rose-50 border-rose-200 text-rose-500'
                                             : 'bg-white border-gray-200 text-gray-400 hover:text-rose-500 hover:border-gray-300'
                                             }`}
                                         title="Add to Wishlist"
                                     >
-                                        <Heart size={20} className={isInWishlist(product._id) ? 'fill-rose-500' : ''} />
+                                        <Heart size={22} className={isInWishlist(product._id) ? 'fill-rose-500' : ''} />
                                     </button>
                                 )}
                             </div>
@@ -466,6 +466,14 @@ const ProductDetail = () => {
                                         color: 'text-amber-600',
                                         bg: 'bg-amber-50/50',
                                         border: 'border-amber-100'
+                                    },
+                                    {
+                                        icon: Award,
+                                        title: 'Authentic',
+                                        sub: '100% Genuine',
+                                        color: 'text-purple-600',
+                                        bg: 'bg-purple-50/50',
+                                        border: 'border-purple-100'
                                     }
                                 ].map((feature, i) => (
                                     <div key={i} className={`flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2 sm:gap-3 p-3 rounded-xl border bg-white ${feature.border}`}>
