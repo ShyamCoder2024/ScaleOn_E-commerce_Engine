@@ -101,6 +101,46 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const loginWithGoogle = async (userData) => {
+        try {
+            setError(null);
+            const response = await authAPI.loginWithGoogle(userData);
+            const { user, accessToken, refreshToken } = response.data.data;
+
+            localStorage.setItem('token', accessToken);
+            if (refreshToken) {
+                localStorage.setItem('refreshToken', refreshToken);
+            }
+            setUser(user);
+
+            return { success: true, user, isNewUser: response.data.data.isNewUser };
+        } catch (err) {
+            const message = err.response?.data?.message || 'Google sign-in failed';
+            setError(message);
+            return { success: false, error: message };
+        }
+    };
+
+    const loginWithApple = async (userData) => {
+        try {
+            setError(null);
+            const response = await authAPI.loginWithApple(userData);
+            const { user, accessToken, refreshToken } = response.data.data;
+
+            localStorage.setItem('token', accessToken);
+            if (refreshToken) {
+                localStorage.setItem('refreshToken', refreshToken);
+            }
+            setUser(user);
+
+            return { success: true, user, isNewUser: response.data.data.isNewUser };
+        } catch (err) {
+            const message = err.response?.data?.message || 'Apple sign-in failed';
+            setError(message);
+            return { success: false, error: message };
+        }
+    };
+
     const logout = async () => {
         try {
             await authAPI.logout();
@@ -137,6 +177,8 @@ export const AuthProvider = ({ children }) => {
         isSuperAdmin,
         login,
         register,
+        loginWithGoogle,
+        loginWithApple,
         logout,
         updateProfile,
         setUser,

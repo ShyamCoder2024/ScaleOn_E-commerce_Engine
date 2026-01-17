@@ -130,6 +130,9 @@ export const authAPI = {
     addAddress: (data) => api.post('/auth/addresses', data),
     updateAddress: (id, data) => api.put(`/auth/addresses/${id}`, data),
     deleteAddress: (id) => api.delete(`/auth/addresses/${id}`),
+    // Social Authentication
+    loginWithGoogle: (userData) => api.post('/auth/google', { userData }),
+    loginWithApple: (userData) => api.post('/auth/apple', { userData }),
 };
 
 // Product API

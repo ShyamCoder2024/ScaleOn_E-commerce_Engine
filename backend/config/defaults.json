@@ -107,10 +107,27 @@
         }
     },
     "policies": {
-        "shipping": "",
-        "returns": "",
-        "privacy": "",
-        "terms": ""
+        "return": {
+            "allowed": true,
+            "windowDays": 7,
+            "exchangeAllowed": true,
+            "exchangeWindowDays": 7,
+            "shippingCost": "customer",
+            "refundMethod": "original",
+            "condition": "unused"
+        },
+        "privacy": {
+            "collectEmail": true,
+            "collectPhone": true,
+            "shareData": false,
+            "useCookies": true,
+            "storePayment": false
+        },
+        "terms": {
+            "minAge": 18,
+            "accountRequired": false,
+            "cancelBeforeShipping": true
+        }
     },
     "social": {
         "facebook": "",

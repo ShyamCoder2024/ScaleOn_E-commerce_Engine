@@ -113,6 +113,138 @@ router.post('/logout', protect, asyncHandler(async (req, res) => {
 }));
 
 /**
+ * @route   POST /api/auth/google
+ * @desc    Login or register with Google
+ * @access  Public
+ */
+router.post('/google', authLimiter, asyncHandler(async (req, res) => {
+    const { idToken, userData } = req.body;
+
+    if (!idToken && !userData) {
+        return res.status(400).json({
+            success: false,
+            message: 'Google ID token or user data is required'
+        });
+    }
+
+    let googleData;
+
+    // If we have userData directly from frontend Google Sign-In
+    if (userData) {
+        googleData = {
+            id: userData.id || userData.sub,
+            email: userData.email,
+            firstName: userData.given_name || userData.name?.split(' ')[0] || '',
+            lastName: userData.family_name || userData.name?.split(' ').slice(1).join(' ') || '',
+            avatar: userData.picture
+        };
+    } else {
+        // Verify Google ID token (for server-side verification)
+        try {
+            const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+            const payload = await response.json();
+
+            if (payload.error) {
+                throw new Error(payload.error_description || 'Invalid token');
+            }
+
+            googleData = {
+                id: payload.sub,
+                email: payload.email,
+                firstName: payload.given_name || '',
+                lastName: payload.family_name || '',
+                avatar: payload.picture
+            };
+        } catch (error) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid Google token'
+            });
+        }
+    }
+
+    const result = await authService.loginWithOAuth(
+        'google',
+        googleData,
+        req.ip,
+        req.get('user-agent')
+    );
+
+    res.json({
+        success: true,
+        message: result.isNewUser ? 'Account created successfully' : 'Login successful',
+        data: {
+            user: result.user,
+            accessToken: result.accessToken,
+            refreshToken: result.refreshToken
+        }
+    });
+}));
+
+/**
+ * @route   POST /api/auth/apple
+ * @desc    Login or register with Apple
+ * @access  Public
+ */
+router.post('/apple', authLimiter, asyncHandler(async (req, res) => {
+    const { authorizationCode, identityToken, userData } = req.body;
+
+    if (!identityToken && !userData) {
+        return res.status(400).json({
+            success: false,
+            message: 'Apple identity token or user data is required'
+        });
+    }
+
+    let appleData;
+
+    // If we have userData directly from frontend Apple Sign-In
+    if (userData) {
+        appleData = {
+            id: userData.id || userData.sub,
+            email: userData.email,
+            firstName: userData.name?.firstName || '',
+            lastName: userData.name?.lastName || ''
+        };
+    } else {
+        // Decode Apple identity token (JWT)
+        try {
+            const tokenParts = identityToken.split('.');
+            const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+
+            appleData = {
+                id: payload.sub,
+                email: payload.email,
+                firstName: '',
+                lastName: ''
+            };
+        } catch (error) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid Apple token'
+            });
+        }
+    }
+
+    const result = await authService.loginWithOAuth(
+        'apple',
+        appleData,
+        req.ip,
+        req.get('user-agent')
+    );
+
+    res.json({
+        success: true,
+        message: result.isNewUser ? 'Account created successfully' : 'Login successful',
+        data: {
+            user: result.user,
+            accessToken: result.accessToken,
+            refreshToken: result.refreshToken
+        }
+    });
+}));
+
+/**
  * @route   POST /api/auth/refresh
  * @desc    Refresh access token
  * @access  Public

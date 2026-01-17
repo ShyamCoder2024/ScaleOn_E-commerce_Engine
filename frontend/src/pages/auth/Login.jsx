@@ -3,10 +3,11 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useConfig } from '../../context/ConfigContext';
+import SocialAuthButtons from '../../components/SocialAuthButtons';
 import toast from 'react-hot-toast';
 
 const Login = () => {
-    const { login } = useAuth();
+    const { login, loginWithGoogle, loginWithApple } = useAuth();
     const { storeName } = useConfig();
     const navigate = useNavigate();
     const location = useLocation();
@@ -17,6 +18,7 @@ const Login = () => {
     });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [socialLoading, setSocialLoading] = useState(false);
 
     const from = location.state?.from?.pathname || '/';
 
@@ -41,6 +43,36 @@ const Login = () => {
         }
 
         setLoading(false);
+    };
+
+    const handleGoogleSuccess = async (userData) => {
+        setSocialLoading(true);
+        const result = await loginWithGoogle(userData);
+
+        if (result.success) {
+            toast.success(result.isNewUser ? 'Account created successfully!' : 'Welcome back!');
+            navigate(from, { replace: true });
+        } else {
+            toast.error(result.error);
+        }
+        setSocialLoading(false);
+    };
+
+    const handleAppleSuccess = async (userData) => {
+        setSocialLoading(true);
+        const result = await loginWithApple(userData);
+
+        if (result.success) {
+            toast.success(result.isNewUser ? 'Account created successfully!' : 'Welcome back!');
+            navigate(from, { replace: true });
+        } else {
+            toast.error(result.error);
+        }
+        setSocialLoading(false);
+    };
+
+    const handleSocialError = (error) => {
+        toast.error(error);
     };
 
     return (
@@ -119,13 +151,22 @@ const Login = () => {
                         <div>
                             <button
                                 type="submit"
-                                disabled={loading}
+                                disabled={loading || socialLoading}
                                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-gray-900 hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-[0.98]"
                             >
                                 {loading ? 'Signing in...' : 'Sign in'}
                             </button>
                         </div>
                     </form>
+
+                    {/* Social Auth Buttons */}
+                    <SocialAuthButtons
+                        onGoogleSuccess={handleGoogleSuccess}
+                        onAppleSuccess={handleAppleSuccess}
+                        onError={handleSocialError}
+                        loading={loading || socialLoading}
+                        mode="signin"
+                    />
 
                     <div className="mt-6">
                         <div className="relative">
@@ -155,3 +196,4 @@ const Login = () => {
 };
 
 export default Login;
+

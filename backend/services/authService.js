@@ -175,6 +175,100 @@ class AuthService {
     }
 
     /**
+     * Login or register with OAuth (Google/Apple)
+     */
+    async loginWithOAuth(provider, oauthData, ipAddress = null, userAgent = null) {
+        const { id, email, firstName, lastName, avatar } = oauthData;
+
+        if (!id || !email) {
+            throw createError.badRequest('Invalid OAuth data');
+        }
+
+        const providerKey = `oauthProviders.${provider}.id`;
+
+        // First, try to find user by OAuth provider ID
+        let user = await User.findOne({ [providerKey]: id });
+
+        if (!user) {
+            // Check if user exists with this email
+            user = await User.findOne({ email: email.toLowerCase() });
+
+            if (user) {
+                // Link OAuth provider to existing account
+                if (!user.oauthProviders) {
+                    user.oauthProviders = {};
+                }
+                user.oauthProviders[provider] = { id, email };
+                await user.save();
+            } else {
+                // Create new user with OAuth
+                user = new User({
+                    email: email.toLowerCase(),
+                    oauthProviders: {
+                        [provider]: { id, email }
+                    },
+                    profile: {
+                        firstName: firstName || email.split('@')[0],
+                        lastName: lastName || '',
+                        avatar: avatar || undefined
+                    },
+                    emailVerified: true, // OAuth emails are pre-verified
+                    status: 'active'
+                });
+                await user.save();
+
+                // Log registration
+                await AuditLog.log({
+                    action: AUDIT_ACTIONS.USER_REGISTER,
+                    actor: user._id,
+                    resourceType: 'user',
+                    resourceId: user._id,
+                    resourceName: user.email,
+                    details: { provider, oauthLogin: true },
+                    ipAddress,
+                    userAgent
+                });
+            }
+        }
+
+        // Check if account is blocked
+        if (user.status === 'blocked') {
+            throw createError.forbidden('Your account has been blocked');
+        }
+
+        // Update last login
+        user.lastLogin = new Date();
+        user.failedLoginAttempts = 0;
+        user.lockUntil = undefined;
+
+        // Generate tokens
+        const accessToken = this.generateAccessToken(user._id);
+        const refreshToken = this.generateRefreshToken(user._id);
+
+        user.refreshToken = this.hashToken(refreshToken);
+        await user.save();
+
+        // Log login
+        await AuditLog.log({
+            action: AUDIT_ACTIONS.USER_LOGIN,
+            actor: user._id,
+            resourceType: 'user',
+            resourceId: user._id,
+            resourceName: user.email,
+            details: { provider, oauthLogin: true },
+            ipAddress,
+            userAgent
+        });
+
+        return {
+            user: user.toJSON(),
+            accessToken,
+            refreshToken,
+            isNewUser: !user.createdAt || (new Date() - user.createdAt) < 10000 // Within 10 seconds
+        };
+    }
+
+    /**
      * Logout user
      */
     async logout(userId, ipAddress = null, userAgent = null) {

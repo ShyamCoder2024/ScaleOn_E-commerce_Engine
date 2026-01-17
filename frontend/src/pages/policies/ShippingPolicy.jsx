@@ -1,42 +1,83 @@
+import { useConfig } from '../../context/ConfigContext';
 
 const ShippingPolicy = () => {
+    const { shipping = {}, storeName } = useConfig();
+
+    // Generate shipping info from config
+    const method = shipping?.method || 'flat';
+    const flatRate = shipping?.flatRate ? (shipping.flatRate / 100) : 50;
+    const freeThreshold = shipping?.freeThreshold ? (shipping.freeThreshold / 100) : 0;
+
     return (
-        <div className="container-custom py-12 max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">Shipping Policy</h1>
+        <div className="container-custom py-12 max-w-4xl mx-auto px-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Shipping Policy</h1>
 
             <div className="prose prose-blue max-w-none text-gray-600">
                 <p className="lead text-lg mb-8">
-                    At ScaleOn, we want to ensure your products arrive safely and on time. This policy outlines our shipping practices and what you can expect when ordering from us.
+                    {storeName} is committed to delivering your orders quickly and safely.
                 </p>
 
-                <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">Processing Time</h2>
-                <p className="mb-4">
-                    All orders are processed within 1-2 business days. Orders are not shipped or delivered on weekends or holidays. If we are experiencing a high volume of orders, shipments may be delayed by a few days. Please allow additional days in transit for delivery.
-                </p>
+                <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">Shipping Rates</h2>
+                {method === 'free' ? (
+                    <p className="mb-4">
+                        We offer <strong>free shipping</strong> on all orders! No minimum purchase required.
+                    </p>
+                ) : method === 'flat' ? (
+                    <div className="mb-4">
+                        <p className="mb-2">
+                            Standard shipping rate: <strong>₹{flatRate}</strong> per order.
+                        </p>
+                        {freeThreshold > 0 && (
+                            <p className="text-emerald-600 font-medium">
+                                🎉 Free shipping on orders above ₹{freeThreshold}!
+                            </p>
+                        )}
+                    </div>
+                ) : (
+                    <p className="mb-4">
+                        Shipping costs are calculated based on your order value and delivery location.
+                        The exact amount will be displayed at checkout.
+                    </p>
+                )}
 
-                <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">Shipping Rates & Delivery Estimates</h2>
+                <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">Delivery Time</h2>
                 <p className="mb-4">
-                    Shipping charges for your order will be calculated and displayed at checkout.
+                    Estimated delivery time is <strong>3-7 business days</strong> for most locations.
+                    Delivery to remote areas may take an additional 2-3 business days.
                 </p>
-                <ul className="list-disc pl-5 space-y-2 mb-4">
-                    <li><strong>Standard Shipping:</strong> 3-5 business days - Free for orders over $50</li>
-                    <li><strong>Expedited Shipping:</strong> 2 business days - $12.95</li>
-                    <li><strong>Overnight Shipping:</strong> 1 business day - $24.95</li>
+                <p className="mb-4">
+                    Please note that delivery times are estimates and may vary based on:
+                </p>
+                <ul className="list-disc list-inside mb-4 space-y-2">
+                    <li>Your delivery location</li>
+                    <li>Product availability</li>
+                    <li>Public holidays</li>
+                    <li>Weather conditions</li>
                 </ul>
 
-                <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">Shipment Confirmation & Order Tracking</h2>
+                <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">Order Processing</h2>
                 <p className="mb-4">
-                    You will receive a Shipment Confirmation email once your order has shipped containing your tracking number(s). The tracking number will be active within 24 hours.
+                    Orders are typically processed within 1-2 business days. You will receive an email confirmation with tracking information once your order has been shipped.
                 </p>
 
-                <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">Customs, Duties and Taxes</h2>
+                <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">Tracking Your Order</h2>
                 <p className="mb-4">
-                    ScaleOn is not responsible for any customs and taxes applied to your order. All fees imposed during or after shipping are the responsibility of the customer (tariffs, taxes, etc.).
+                    Once your order is shipped, you will receive tracking information via email. You can also track your order by logging into your account and viewing your order history.
                 </p>
 
-                <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">Damages</h2>
+                <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">Shipping Restrictions</h2>
                 <p className="mb-4">
-                    ScaleOn is not liable for any products damaged or lost during shipping. If you received your order damaged, please contact the shipment carrier to file a claim. Please save all packaging materials and damaged goods before filing a claim.
+                    We currently ship to addresses within India. For international shipping inquiries, please contact our customer support team.
+                </p>
+
+                <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">Damaged or Lost Packages</h2>
+                <p className="mb-4">
+                    If your package arrives damaged or is lost in transit, please contact us within 48 hours of the expected delivery date. We will work with our shipping partner to resolve the issue promptly.
+                </p>
+
+                <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">Contact Us</h2>
+                <p className="mb-4">
+                    If you have any questions about shipping, please contact our customer support team.
                 </p>
             </div>
         </div>
