@@ -263,24 +263,25 @@ const Checkout = () => {
         razorpay.open();
 
         // Optimizing Razorpay Overlay for Mobile
-        // We apply styles dynamically only when the modal is opened to avoid
-        // global CSS overriding the container's hidden state.
+        // We apply styles dynamically only when the modal is opened.
+        // Using setProperty with 'important' ensures we override any inline styles added by the library itself.
         setTimeout(() => {
             const container = document.querySelector('.razorpay-container');
             if (container) {
-                container.style.position = 'fixed';
-                container.style.top = '0';
-                container.style.left = '0';
-                container.style.width = '100%';
-                container.style.height = '100%';
-                container.style.zIndex = '2147483647';
+                container.style.setProperty('position', 'fixed', 'important');
+                container.style.setProperty('top', '0', 'important');
+                container.style.setProperty('left', '0', 'important');
+                container.style.setProperty('width', '100%', 'important');
+                container.style.setProperty('height', '100%', 'important');
+                container.style.setProperty('z-index', '2147483647', 'important');
+                container.style.setProperty('display', 'block', 'important'); // Ensure it's visible
             }
             const iframe = document.querySelector('iframe.razorpay-checkout-frame');
             if (iframe) {
-                iframe.style.height = '100%';
-                iframe.style.minHeight = '100vh';
-                iframe.style.width = '100%';
-                iframe.style.border = 'none';
+                iframe.style.setProperty('height', '100%', 'important');
+                iframe.style.setProperty('min-height', '100vh', 'important');
+                iframe.style.setProperty('width', '100%', 'important');
+                iframe.style.setProperty('border', 'none', 'important');
             }
         }, 100);
     };
