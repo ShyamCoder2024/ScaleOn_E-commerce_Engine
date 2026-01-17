@@ -50,11 +50,14 @@ const AdminLayout = () => {
             )}
 
             {/* Sidebar */}
-            <aside className={`
-                fixed top-0 left-0 z-50 h-full w-72 bg-slate-900 text-slate-300 transform transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]
-                lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                shadow-2xl lg:shadow-none flex flex-col
-            `}>
+            <aside
+                className={`
+                    fixed top-0 left-0 z-50 w-72 bg-slate-900 text-slate-300 transform transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]
+                    lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                    shadow-2xl lg:shadow-none flex flex-col
+                `}
+                style={{ height: '100dvh', maxHeight: '100dvh' }}
+            >
                 {/* Sidebar Header */}
                 <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800/50 shrink-0">
                     <Link to="/admin" className="text-lg font-bold text-white tracking-wide flex items-center gap-2">
