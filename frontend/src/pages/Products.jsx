@@ -96,7 +96,14 @@ const Products = () => {
             setPagination(data.pagination || { page: 1, pages: 1, total: 0 });
         } catch (err) {
             console.error('Failed to fetch products:', err);
-            setProducts([]);
+            // CRITICAL FIX: Don't clear products on error - keep existing data
+            // This prevents the "zero products" issue on network errors
+            // Only clear if we truly have no products and this was the first load
+            if (products.length === 0) {
+                // First load failed - show error state but don't set empty array
+                console.error('Initial product load failed');
+            }
+            // Keep existing pagination on error
         } finally {
             setLoading(false);
         }

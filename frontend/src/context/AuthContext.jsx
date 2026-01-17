@@ -5,6 +5,10 @@ const AuthContext = createContext(null);
 
 const USER_CACHE_KEY = 'app_user_cache';
 
+// ===========================================
+// ENTERPRISE-GRADE USER CACHE MANAGEMENT
+// ===========================================
+
 // Get cached user from localStorage (instant)
 const getCachedUser = () => {
     try {
@@ -47,69 +51,134 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(cachedUser);
     const [loading, setLoading] = useState(hasToken && !cachedUser); // Only loading if token exists but no cache
     const [error, setError] = useState(null);
-    const isValidating = useRef(false);
 
-    // Validate user with API in background (non-blocking)
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            setLoading(false);
-            return;
-        }
+    // Enterprise-grade fetch state management
+    const fetchStateRef = useRef({
+        isValidating: false,
+        abortController: null,
+        validationCount: 0,
+    });
 
-        // Skip if already validating
-        if (isValidating.current) return;
-        isValidating.current = true;
-
-        const validateUser = async () => {
-            try {
-                const response = await authAPI.getMe();
-                const freshUser = response.data.data.user;
-                setUser(freshUser);
-                setCachedUser(freshUser);
-            } catch (err) {
-                console.error('User validation failed:', err);
-                // Only logout on auth errors (401/403)
-                if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-                    await handleTokenRefresh();
-                }
-            } finally {
-                setLoading(false);
-                isValidating.current = false;
-            }
-        };
-
-        validateUser();
-    }, []);
-
-    const handleTokenRefresh = async () => {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) {
-            clearAuthState();
-            return;
-        }
-
-        try {
-            const refreshResponse = await authAPI.refresh(refreshToken);
-            if (refreshResponse.data?.data?.accessToken) {
-                localStorage.setItem('token', refreshResponse.data.data.accessToken);
-                const retryResponse = await authAPI.getMe();
-                const freshUser = retryResponse.data.data.user;
-                setUser(freshUser);
-                setCachedUser(freshUser);
-            }
-        } catch (refreshErr) {
-            console.error('Token refresh failed:', refreshErr);
-            clearAuthState();
-        }
-    };
-
+    // Clear auth state helper
     const clearAuthState = useCallback(() => {
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         setCachedUser(null);
         setUser(null);
     }, []);
+
+    // Token refresh handler
+    const handleTokenRefresh = useCallback(async () => {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) {
+            clearAuthState();
+            return false;
+        }
+
+        try {
+            const refreshResponse = await authAPI.refresh(refreshToken);
+            if (refreshResponse.data?.data?.accessToken) {
+                localStorage.setItem('token', refreshResponse.data.data.accessToken);
+                return true;
+            }
+        } catch (refreshErr) {
+            console.error('Token refresh failed:', refreshErr);
+            clearAuthState();
+        }
+        return false;
+    }, [clearAuthState]);
+
+    // Validate user with race condition protection
+    const validateUser = useCallback(async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setLoading(false);
+            return;
+        }
+
+        const fetchState = fetchStateRef.current;
+
+        // Skip if already validating (prevents duplicate calls on rapid refresh)
+        if (fetchState.isValidating) {
+            return;
+        }
+
+        // Cancel any in-flight request
+        if (fetchState.abortController) {
+            fetchState.abortController.abort();
+        }
+
+        // Create new abort controller
+        const abortController = new AbortController();
+        fetchState.abortController = abortController;
+        fetchState.isValidating = true;
+        fetchState.validationCount++;
+        const currentCount = fetchState.validationCount;
+
+        try {
+            const response = await authAPI.getMe();
+
+            // Verify this is still the latest validation
+            if (currentCount !== fetchStateRef.current.validationCount) {
+                return;
+            }
+
+            const freshUser = response.data.data.user;
+            setUser(freshUser);
+            setCachedUser(freshUser);
+            setError(null);
+
+        } catch (err) {
+            // Ignore aborted requests
+            if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') {
+                return;
+            }
+
+            // Verify this is still the latest validation
+            if (currentCount !== fetchStateRef.current.validationCount) {
+                return;
+            }
+
+            console.error('User validation failed:', err);
+
+            // Only clear auth on explicit auth errors (401/403)
+            if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+                // Try to refresh token first
+                const refreshed = await handleTokenRefresh();
+                if (refreshed) {
+                    // Retry validation after refresh
+                    try {
+                        const retryResponse = await authAPI.getMe();
+                        const freshUser = retryResponse.data.data.user;
+                        setUser(freshUser);
+                        setCachedUser(freshUser);
+                    } catch (retryErr) {
+                        clearAuthState();
+                    }
+                }
+            }
+            // CRITICAL: On network errors, keep existing cached user
+            // This prevents logout on temporary connection issues
+
+        } finally {
+            if (currentCount === fetchStateRef.current.validationCount) {
+                fetchState.isValidating = false;
+                setLoading(false);
+            }
+        }
+    }, [handleTokenRefresh, clearAuthState]);
+
+    // Validate user on mount
+    useEffect(() => {
+        validateUser();
+
+        // Cleanup on unmount
+        return () => {
+            if (fetchStateRef.current.abortController) {
+                fetchStateRef.current.abortController.abort();
+            }
+        };
+    }, []); // Empty deps - only run once on mount
 
     const login = async (email, password) => {
         try {
@@ -218,6 +287,12 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const refetchUser = useCallback(async () => {
+        fetchStateRef.current.validationCount++; // Force new validation
+        fetchStateRef.current.isValidating = false;
+        await validateUser();
+    }, [validateUser]);
+
     const isAuthenticated = !!user;
     const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
     const isSuperAdmin = user?.role === 'super_admin';
@@ -236,16 +311,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         updateProfile,
         setUser,
-        refetchUser: async () => {
-            try {
-                const response = await authAPI.getMe();
-                const freshUser = response.data.data.user;
-                setUser(freshUser);
-                setCachedUser(freshUser);
-            } catch (err) {
-                console.error('Refetch user failed:', err);
-            }
-        },
+        refetchUser,
     };
 
     return (

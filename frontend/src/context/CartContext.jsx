@@ -7,12 +7,32 @@ const CartContext = createContext(null);
 
 const CART_CACHE_KEY = 'app_cart_cache';
 
+// ===========================================
+// ENTERPRISE-GRADE CART CACHE MANAGEMENT
+// ===========================================
+
+// Default empty cart state
+const EMPTY_CART = { items: [] };
+const EMPTY_TOTALS = {
+    itemCount: 0,
+    subtotal: 0,
+    discountCode: null,
+    discountAmount: 0,
+    shippingCost: 0,
+    taxAmount: 0,
+    total: 0,
+};
+
 // Get cached cart (for instant UI)
 const getCachedCart = () => {
     try {
         const cached = localStorage.getItem(CART_CACHE_KEY);
         if (cached) {
-            return JSON.parse(cached);
+            const data = JSON.parse(cached);
+            // Validate cache structure
+            if (data && data.cart && Array.isArray(data.cart.items)) {
+                return data;
+            }
         }
     } catch (e) {
         console.error('Cart cache read error:', e);
@@ -50,85 +70,19 @@ export const CartProvider = ({ children }) => {
     const { isAuthenticated, user } = useAuth();
     const cachedData = getCachedCart();
 
-    const [cart, setCart] = useState(cachedData?.cart || { items: [] });
-    const [totals, setTotals] = useState(cachedData?.totals || {
-        itemCount: 0,
-        subtotal: 0,
-        discountCode: null,
-        discountAmount: 0,
-        shippingCost: 0,
-        taxAmount: 0,
-        total: 0,
+    const [cart, setCart] = useState(cachedData?.cart || EMPTY_CART);
+    const [totals, setTotals] = useState(cachedData?.totals || EMPTY_TOTALS);
+    const [loading, setLoading] = useState(false); // Start as false - we have cache/defaults
+
+    // Enterprise-grade fetch state management
+    const fetchStateRef = useRef({
+        isFetching: false,
+        abortController: null,
+        fetchCount: 0,
+        lastUserId: null,
     });
-    const [loading, setLoading] = useState(!cachedData);
 
-    // Track previous user ID to detect actual login/logout
-    const prevUserIdRef = useRef(user?._id);
-    const hasFetched = useRef(!!cachedData);
-
-    // Only fetch when user actually changes (login/logout), not on every re-render
-    useEffect(() => {
-        const currentUserId = user?._id;
-        const prevUserId = prevUserIdRef.current;
-
-        // Check if user actually changed
-        const userChanged = currentUserId !== prevUserId;
-        prevUserIdRef.current = currentUserId;
-
-        // Skip if no change and we already fetched
-        if (!userChanged && hasFetched.current) {
-            return;
-        }
-
-        // Clear cache on logout
-        if (prevUserId && !currentUserId) {
-            clearCartCache();
-            setCart({ items: [] });
-            setTotals({
-                itemCount: 0,
-                subtotal: 0,
-                discountCode: null,
-                discountAmount: 0,
-                shippingCost: 0,
-                taxAmount: 0,
-                total: 0,
-            });
-            setLoading(false);
-            hasFetched.current = true;
-            return;
-        }
-
-        // Fetch fresh cart
-        const fetchCartData = async () => {
-            try {
-                const response = await cartAPI.getCart();
-                const data = response.data.data;
-                const newCart = data.cart || { items: [] };
-                const newTotals = {
-                    itemCount: data.itemCount || newCart.items?.reduce((sum, item) => sum + item.quantity, 0) || 0,
-                    subtotal: data.subtotal || 0,
-                    discountCode: data.discountCode || newCart.discountCode,
-                    discountAmount: data.discountAmount || newCart.discountAmount || 0,
-                    shippingCost: data.shippingCost || 0,
-                    taxAmount: data.taxAmount || 0,
-                    total: data.total || 0,
-                };
-
-                setCart(newCart);
-                setTotals(newTotals);
-                setCachedCart(newCart, newTotals);
-                hasFetched.current = true;
-            } catch (err) {
-                console.error('Failed to fetch cart:', err);
-                setCart({ items: [] });
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCartData();
-    }, [user?._id]);
-
+    // Update totals from API response
     const updateTotalsFromResponse = useCallback((data) => {
         const newTotals = {
             itemCount: data.itemCount || data.cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0,
@@ -143,11 +97,108 @@ export const CartProvider = ({ children }) => {
         return newTotals;
     }, []);
 
+    // Fetch cart with race condition protection
+    const fetchCart = useCallback(async (forceRefresh = false) => {
+        const fetchState = fetchStateRef.current;
+
+        // Skip if already fetching (prevents duplicate calls on rapid refresh)
+        if (fetchState.isFetching && !forceRefresh) {
+            return;
+        }
+
+        // Cancel any in-flight request
+        if (fetchState.abortController) {
+            fetchState.abortController.abort();
+        }
+
+        // Create new abort controller
+        const abortController = new AbortController();
+        fetchState.abortController = abortController;
+        fetchState.isFetching = true;
+        fetchState.fetchCount++;
+        const currentCount = fetchState.fetchCount;
+
+        try {
+            const response = await cartAPI.getCart();
+
+            // Verify this is still the latest fetch
+            if (currentCount !== fetchStateRef.current.fetchCount) {
+                return;
+            }
+
+            const data = response.data.data;
+            const newCart = data.cart || EMPTY_CART;
+            const newTotals = {
+                itemCount: data.itemCount || newCart.items?.reduce((sum, item) => sum + item.quantity, 0) || 0,
+                subtotal: data.subtotal || 0,
+                discountCode: data.discountCode || newCart.discountCode,
+                discountAmount: data.discountAmount || newCart.discountAmount || 0,
+                shippingCost: data.shippingCost || 0,
+                taxAmount: data.taxAmount || 0,
+                total: data.total || 0,
+            };
+
+            setCart(newCart);
+            setTotals(newTotals);
+            setCachedCart(newCart, newTotals);
+
+        } catch (err) {
+            // Ignore aborted requests
+            if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') {
+                return;
+            }
+
+            // Verify this is still the latest fetch
+            if (currentCount !== fetchStateRef.current.fetchCount) {
+                return;
+            }
+
+            console.error('Failed to fetch cart:', err);
+            // CRITICAL: Keep existing cart on error - don't reset
+
+        } finally {
+            if (currentCount === fetchStateRef.current.fetchCount) {
+                fetchState.isFetching = false;
+                setLoading(false);
+            }
+        }
+    }, []);
+
+    // Handle user changes (login/logout)
+    useEffect(() => {
+        const currentUserId = user?._id;
+        const prevUserId = fetchStateRef.current.lastUserId;
+
+        // Check if user actually changed
+        const userChanged = currentUserId !== prevUserId;
+        fetchStateRef.current.lastUserId = currentUserId;
+
+        // On logout - clear cart
+        if (prevUserId && !currentUserId) {
+            clearCartCache();
+            setCart(EMPTY_CART);
+            setTotals(EMPTY_TOTALS);
+            return;
+        }
+
+        // On login or initial load with user - fetch cart
+        if (currentUserId && (userChanged || !cachedData)) {
+            fetchCart();
+        }
+
+        // Cleanup on unmount
+        return () => {
+            if (fetchStateRef.current.abortController) {
+                fetchStateRef.current.abortController.abort();
+            }
+        };
+    }, [user?._id, fetchCart]);
+
     const addToCart = async (productId, quantity = 1, variant = null) => {
         try {
             const response = await cartAPI.addItem(productId, quantity, variant);
             const data = response.data.data;
-            const newCart = data.cart || { items: [] };
+            const newCart = data.cart || EMPTY_CART;
             setCart(newCart);
             const newTotals = updateTotalsFromResponse(data);
             setCachedCart(newCart, newTotals);
@@ -175,12 +226,13 @@ export const CartProvider = ({ children }) => {
         try {
             const response = await cartAPI.updateItem(itemId, quantity);
             const data = response.data.data;
-            const newCart = data.cart || { items: [] };
+            const newCart = data.cart || EMPTY_CART;
             setCart(newCart);
             const newTotals = updateTotalsFromResponse(data);
             setCachedCart(newCart, newTotals);
             return { success: true };
         } catch (err) {
+            // Revert on error
             setCart(prevCart);
             setTotals(prevTotals);
             const message = err.response?.data?.message || 'Failed to update cart';
@@ -202,13 +254,14 @@ export const CartProvider = ({ children }) => {
         try {
             const response = await cartAPI.removeItem(itemId);
             const data = response.data.data;
-            const newCart = data.cart || { items: [] };
+            const newCart = data.cart || EMPTY_CART;
             setCart(newCart);
             const newTotals = updateTotalsFromResponse(data);
             setCachedCart(newCart, newTotals);
             toast.success('Item removed');
             return { success: true };
         } catch (err) {
+            // Revert on error
             setCart(prevCart);
             setTotals(prevTotals);
             const message = err.response?.data?.message || 'Failed to remove item';
@@ -220,19 +273,9 @@ export const CartProvider = ({ children }) => {
     const clearCart = async () => {
         try {
             await cartAPI.clearCart();
-            const emptyCart = { items: [] };
-            const emptyTotals = {
-                itemCount: 0,
-                subtotal: 0,
-                discountCode: null,
-                discountAmount: 0,
-                shippingCost: 0,
-                taxAmount: 0,
-                total: 0,
-            };
-            setCart(emptyCart);
-            setTotals(emptyTotals);
-            setCachedCart(emptyCart, emptyTotals);
+            setCart(EMPTY_CART);
+            setTotals(EMPTY_TOTALS);
+            setCachedCart(EMPTY_CART, EMPTY_TOTALS);
             return { success: true };
         } catch (err) {
             const message = err.response?.data?.message || 'Failed to clear cart';
@@ -245,7 +288,7 @@ export const CartProvider = ({ children }) => {
         try {
             const response = await cartAPI.applyDiscount(code);
             const data = response.data.data;
-            const newCart = data.cart || { items: [] };
+            const newCart = data.cart || EMPTY_CART;
             setCart(newCart);
             const newTotals = updateTotalsFromResponse(data);
             setCachedCart(newCart, newTotals);
@@ -262,7 +305,7 @@ export const CartProvider = ({ children }) => {
         try {
             const response = await cartAPI.removeDiscount();
             const data = response.data.data;
-            const newCart = data.cart || { items: [] };
+            const newCart = data.cart || EMPTY_CART;
             setCart(newCart);
             const newTotals = updateTotalsFromResponse(data);
             setCachedCart(newCart, newTotals);
@@ -282,18 +325,10 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    const refetchCart = async () => {
-        try {
-            const response = await cartAPI.getCart();
-            const data = response.data.data;
-            const newCart = data.cart || { items: [] };
-            setCart(newCart);
-            const newTotals = updateTotalsFromResponse(data);
-            setCachedCart(newCart, newTotals);
-        } catch (err) {
-            console.error('Failed to refetch cart:', err);
-        }
-    };
+    const refetchCart = useCallback(async () => {
+        setLoading(true);
+        await fetchCart(true);
+    }, [fetchCart]);
 
     const value = {
         cart,

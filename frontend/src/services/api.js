@@ -1,9 +1,57 @@
 import axios from 'axios';
 
+// ===========================================
+// REQUEST DEDUPLICATION & RETRY SYSTEM
+// ===========================================
+
+// In-flight request cache to prevent duplicate calls
+const pendingRequests = new Map();
+
+// Generate a unique key for each request
+const getRequestKey = (config) => {
+    return `${config.method}:${config.url}:${JSON.stringify(config.params || {})}`;
+};
+
+// Retry configuration
+const RETRY_CONFIG = {
+    maxRetries: 3,
+    baseDelay: 1000, // 1 second
+    maxDelay: 10000, // 10 seconds
+};
+
+// Sleep utility for retry delay
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Calculate exponential backoff delay
+const getRetryDelay = (retryCount) => {
+    const delay = Math.min(
+        RETRY_CONFIG.baseDelay * Math.pow(2, retryCount),
+        RETRY_CONFIG.maxDelay
+    );
+    // Add jitter to prevent thundering herd
+    return delay + Math.random() * 1000;
+};
+
+// Check if request should be retried
+const shouldRetry = (error, retryCount) => {
+    if (retryCount >= RETRY_CONFIG.maxRetries) return false;
+
+    // Don't retry on client errors (4xx) except 429 (rate limit)
+    if (error.response) {
+        const status = error.response.status;
+        if (status >= 400 && status < 500 && status !== 429) {
+            return false;
+        }
+    }
+
+    // Retry on network errors, timeouts, and server errors
+    return !error.response || error.response.status >= 500 || error.code === 'ECONNABORTED';
+};
+
 // Create axios instance with base configuration
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || '/api',
-    timeout: 15000,
+    timeout: 30000, // Increased to 30 seconds for slow connections
     headers: {
         'Content-Type': 'application/json',
     },
@@ -57,13 +105,19 @@ const getErrorMessage = (error) => {
     }
 };
 
-// Request interceptor for adding auth token
+// Request interceptor for adding auth token and deduplication
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+
+        // Initialize retry count
+        if (config._retryCount === undefined) {
+            config._retryCount = 0;
+        }
+
         return config;
     },
     (error) => {
@@ -71,11 +125,22 @@ api.interceptors.request.use(
     }
 );
 
-// Response interceptor for handling errors
+// Response interceptor for handling errors with retry logic
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        // Clear from pending requests on success
+        const key = getRequestKey(response.config);
+        pendingRequests.delete(key);
+        return response;
+    },
     async (error) => {
         const originalRequest = error.config;
+
+        // Clear from pending requests
+        if (originalRequest) {
+            const key = getRequestKey(originalRequest);
+            pendingRequests.delete(key);
+        }
 
         // Handle 401 Unauthorized - Token refresh
         if (error.response?.status === 401 && !originalRequest._retry) {
@@ -106,14 +171,46 @@ api.interceptors.response.use(
             }
         }
 
-        // Don't show automatic toasts - let components handle their own errors
-        // This prevents excessive/duplicate notifications
+        // Retry logic for failed requests
+        const retryCount = originalRequest?._retryCount || 0;
+        if (originalRequest && shouldRetry(error, retryCount)) {
+            originalRequest._retryCount = retryCount + 1;
+            const delay = getRetryDelay(retryCount);
+
+            console.log(`Retrying request (${retryCount + 1}/${RETRY_CONFIG.maxRetries}): ${originalRequest.url}`);
+
+            await sleep(delay);
+            return api(originalRequest);
+        }
 
         // Enhance error with user-friendly message for components to use if needed
         error.userMessage = getErrorMessage(error);
         return Promise.reject(error);
     }
 );
+
+// ===========================================
+// SMART REQUEST WRAPPER WITH DEDUPLICATION
+// ===========================================
+
+// Wrapper for GET requests with deduplication
+const deduplicatedGet = (url, config = {}) => {
+    const fullConfig = { ...config, method: 'get', url };
+    const key = getRequestKey(fullConfig);
+
+    // If same request is already in flight, return the existing promise
+    if (pendingRequests.has(key)) {
+        return pendingRequests.get(key);
+    }
+
+    // Create new request and cache it
+    const promise = api.get(url, config).finally(() => {
+        pendingRequests.delete(key);
+    });
+
+    pendingRequests.set(key, promise);
+    return promise;
+};
 
 // Auth API
 export const authAPI = {
@@ -135,24 +232,24 @@ export const authAPI = {
     loginWithApple: (userData) => api.post('/auth/apple', { userData }),
 };
 
-// Product API
+// Product API - Using deduplication for read operations
 export const productAPI = {
-    getProducts: (params) => api.get('/products', { params }),
-    getFeatured: (limit = 8) => api.get('/products/featured', { params: { limit } }),
-    search: (query, params) => api.get('/products/search', { params: { q: query, ...params } }),
-    getBySlug: (slug) => api.get(`/products/slug/${slug}`),
-    getById: (id) => api.get(`/products/${id}`),
-    // Admin operations
+    getProducts: (params) => deduplicatedGet('/products', { params }),
+    getFeatured: (limit = 8) => deduplicatedGet('/products/featured', { params: { limit } }),
+    search: (query, params) => deduplicatedGet('/products/search', { params: { q: query, ...params } }),
+    getBySlug: (slug) => deduplicatedGet(`/products/slug/${slug}`),
+    getById: (id) => deduplicatedGet(`/products/${id}`),
+    // Admin operations (no deduplication needed for mutations)
     create: (data) => api.post('/products', data),
     update: (id, data) => api.put(`/products/${id}`, data),
     delete: (id) => api.delete(`/products/${id}`),
 };
 
-// Category API
+// Category API - Using deduplication
 export const categoryAPI = {
-    getCategories: () => api.get('/categories'),
-    getCategoryTree: () => api.get('/categories/tree'),
-    getBySlug: (slug) => api.get(`/categories/slug/${slug}`),
+    getCategories: () => deduplicatedGet('/categories'),
+    getCategoryTree: () => deduplicatedGet('/categories/tree'),
+    getBySlug: (slug) => deduplicatedGet(`/categories/slug/${slug}`),
 };
 
 // Cart API
@@ -197,11 +294,11 @@ export const paymentAPI = {
     getStatus: (paymentId) => api.get(`/payments/${paymentId}/status`),
 };
 
-// Config API
+// Config API - Using deduplication for critical config requests
 export const configAPI = {
-    getPublic: () => api.get('/config/public'),
-    getBranding: () => api.get('/config/branding'),
-    getFeatures: () => api.get('/config/features'),
+    getPublic: () => deduplicatedGet('/config/public'),
+    getBranding: () => deduplicatedGet('/config/branding'),
+    getFeatures: () => deduplicatedGet('/config/features'),
     // Admin config operations
     getConfig: () => api.get('/config/admin'),
     getAdminFeatures: () => api.get('/config/admin/features'),
@@ -209,9 +306,9 @@ export const configAPI = {
     toggleFeature: (featureName, enabled) => api.put(`/config/admin/features/${featureName}`, { enabled }),
 };
 
-// Feature Cards API (Promotional Banners)
+// Feature Cards API (Promotional Banners) - Using deduplication
 export const featureCardsAPI = {
-    getAll: () => api.get('/config/feature-cards'),
+    getAll: () => deduplicatedGet('/config/feature-cards'),
     // Admin operations
     getAdminCards: () => api.get('/config/admin/feature-cards'),
     add: (data) => api.post('/config/admin/feature-cards', data),

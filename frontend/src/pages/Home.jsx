@@ -117,46 +117,89 @@ const Home = () => {
     const { isFeatureEnabled } = useConfig();
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [featureCards, setFeatureCards] = useState([]);
     const [cardsLoading, setCardsLoading] = useState(true);
+
+    // Track if component is mounted to prevent state updates after unmount
+    const isMountedRef = useRef(true);
+    const fetchControllerRef = useRef(null);
 
     const featureCardsEnabled = isFeatureEnabled('featureCards');
 
     useEffect(() => {
-        const fetchFeatured = async () => {
+        isMountedRef.current = true;
+
+        // Create abort controller for cleanup
+        const controller = new AbortController();
+        fetchControllerRef.current = controller;
+
+        // Fetch all data in parallel for faster loading
+        const fetchAllData = async () => {
             try {
-                const response = await productAPI.getFeatured(8);
-                setFeaturedProducts(response.data.data.products || []);
+                // Create promises for parallel fetching
+                const fetchPromises = [
+                    productAPI.getFeatured(8).catch(err => {
+                        console.error('Failed to fetch featured products:', err);
+                        return null; // Return null on error, don't throw
+                    })
+                ];
+
+                // Only fetch feature cards if enabled
+                if (featureCardsEnabled) {
+                    fetchPromises.push(
+                        featureCardsAPI.getAll().catch(err => {
+                            console.error('Failed to fetch feature cards:', err);
+                            return null;
+                        })
+                    );
+                }
+
+                // Wait for all to complete
+                const results = await Promise.all(fetchPromises);
+
+                // Check if still mounted
+                if (!isMountedRef.current) return;
+
+                // Process products result
+                const productsResult = results[0];
+                if (productsResult?.data?.data?.products) {
+                    setFeaturedProducts(productsResult.data.data.products);
+                    setError(null);
+                } else if (!featuredProducts.length) {
+                    // Only set error if we don't have any cached products
+                    setError('Failed to load products');
+                }
+
+                // Process feature cards result
+                if (featureCardsEnabled && results[1]?.data?.data?.cards) {
+                    setFeatureCards(results[1].data.data.cards);
+                }
+
             } catch (err) {
-                console.error('Failed to fetch featured products:', err);
+                // This shouldn't happen since we catch individual errors above
+                console.error('Unexpected error in fetchAllData:', err);
+                if (isMountedRef.current && !featuredProducts.length) {
+                    setError('Failed to load data');
+                }
             } finally {
-                setLoading(false);
+                if (isMountedRef.current) {
+                    setLoading(false);
+                    setCardsLoading(false);
+                }
             }
         };
 
-        fetchFeatured();
-    }, []);
+        fetchAllData();
 
-    // Fetch admin feature cards only when feature is enabled
-    useEffect(() => {
-        const fetchCards = async () => {
-            if (!featureCardsEnabled) {
-                setFeatureCards([]);
-                setCardsLoading(false);
-                return;
-            }
-            try {
-                const response = await featureCardsAPI.getAll();
-                setFeatureCards(response.data.data.cards || []);
-            } catch (err) {
-                console.error('Failed to fetch feature cards:', err);
-            } finally {
-                setCardsLoading(false);
+        // Cleanup function
+        return () => {
+            isMountedRef.current = false;
+            if (fetchControllerRef.current) {
+                fetchControllerRef.current.abort();
             }
         };
-
-        fetchCards();
-    }, [featureCardsEnabled]);
+    }, [featureCardsEnabled]); // Only re-run if feature flag changes
 
     // Only show hero carousel if feature is enabled AND cards exist
     const showHeroCarousel = featureCardsEnabled && featureCards.length > 0;
