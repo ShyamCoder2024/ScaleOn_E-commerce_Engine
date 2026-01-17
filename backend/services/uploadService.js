@@ -99,6 +99,11 @@ class UploadService {
                     provider: 'cloudinary'
                 };
             } else {
+                // Warn in production that Cloudinary should be configured
+                if (process.env.NODE_ENV === 'production') {
+                    console.warn('⚠️ Cloudinary not configured. Using local storage (files may be lost on restart). Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET in environment variables.');
+                }
+
                 // Use local storage
                 const result = await this.saveLocally(file, folder);
                 return {
@@ -110,6 +115,7 @@ class UploadService {
         } catch (error) {
             // Clean up temp file on error
             this.deleteFile(file.path);
+            console.error('Upload error details:', error);
             throw createError.internal(`Upload failed: ${error.message}`);
         }
     }
@@ -147,8 +153,11 @@ class UploadService {
         // Move from temp to final destination
         fs.renameSync(file.path, destPath);
 
-        // Generate URL (will need server to serve static files)
-        const url = `/uploads/${folder}/${fileName}`;
+        // Generate absolute URL using BACKEND_URL for production (cross-domain support)
+        // Falls back to relative path for local development
+        const backendUrl = process.env.BACKEND_URL || process.env.API_URL || '';
+        const relativePath = `/uploads/${folder}/${fileName}`;
+        const url = backendUrl ? `${backendUrl}${relativePath}` : relativePath;
 
         return {
             url,
