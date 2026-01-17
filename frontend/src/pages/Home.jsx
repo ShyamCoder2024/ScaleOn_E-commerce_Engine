@@ -124,6 +124,7 @@ const Home = () => {
     // Track if component is mounted to prevent state updates after unmount
     const isMountedRef = useRef(true);
     const fetchControllerRef = useRef(null);
+    const hasLoadedProductsRef = useRef(false);
 
     const featureCardsEnabled = isFeatureEnabled('featureCards');
 
@@ -165,8 +166,9 @@ const Home = () => {
                 const productsResult = results[0];
                 if (productsResult?.data?.data?.products) {
                     setFeaturedProducts(productsResult.data.data.products);
+                    hasLoadedProductsRef.current = true;
                     setError(null);
-                } else if (!featuredProducts.length) {
+                } else if (!hasLoadedProductsRef.current) {
                     // Only set error if we don't have any cached products
                     setError('Failed to load products');
                 }

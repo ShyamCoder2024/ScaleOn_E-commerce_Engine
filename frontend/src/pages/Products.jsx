@@ -31,7 +31,14 @@ const Products = () => {
     useEffect(() => {
         const view = searchParams.get('view');
         if (view) setViewMode(view);
+
+        // Also sync sort parameter from URL to local state
+        const sort = searchParams.get('sort');
+        if (sort && sort !== filters.sort) {
+            setFilters(prev => ({ ...prev, sort }));
+        }
     }, [searchParams]);
+
 
     // Listen for hash changes to open mobile filters
     const location = useLocation();

@@ -169,6 +169,9 @@ export const CartProvider = ({ children }) => {
         const currentUserId = user?._id;
         const prevUserId = fetchStateRef.current.lastUserId;
 
+        // Get fresh cached data inside effect to avoid stale closure
+        const currentCachedData = getCachedCart();
+
         // Check if user actually changed
         const userChanged = currentUserId !== prevUserId;
         fetchStateRef.current.lastUserId = currentUserId;
@@ -182,7 +185,7 @@ export const CartProvider = ({ children }) => {
         }
 
         // On login or initial load with user - fetch cart
-        if (currentUserId && (userChanged || !cachedData)) {
+        if (currentUserId && (userChanged || !currentCachedData)) {
             fetchCart();
         }
 
@@ -193,6 +196,7 @@ export const CartProvider = ({ children }) => {
             }
         };
     }, [user?._id, fetchCart]);
+
 
     const addToCart = async (productId, quantity = 1, variant = null) => {
         try {
