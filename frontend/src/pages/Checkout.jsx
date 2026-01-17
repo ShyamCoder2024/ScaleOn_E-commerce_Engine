@@ -263,20 +263,47 @@ const Checkout = () => {
         razorpay.open();
 
         // Optimizing Razorpay Overlay for Mobile
-        // Strategy: We rely on the CSS class .razorpay-mobile-fix to handle all styling (fixed, full screen, z-index).
-        // We simply add this class to the container when opened, and remove it when dismissed/closed.
-        const applyMobileFix = () => {
+        // Strategy: Use MutationObserver to detect when Razorpay appends its container to the body.
+        // This is robust against network delays or library quirks.
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1) {
+                        // Check if the node itself is the container or contains it
+                        const container = node.classList.contains('razorpay-container') ? node : node.querySelector('.razorpay-container');
+
+                        if (container) {
+                            // Force immediate styling
+                            container.classList.add('razorpay-mobile-fix');
+
+                            // Also force style properties directly to be safe against inline rewrites
+                            container.style.setProperty('position', 'fixed', 'important');
+                            container.style.setProperty('top', '0', 'important');
+                            container.style.setProperty('left', '0', 'important');
+                            container.style.setProperty('width', '100vw', 'important');
+                            container.style.setProperty('height', '100dvh', 'important');
+                            container.style.setProperty('z-index', '2147483647', 'important');
+                            container.style.setProperty('display', 'block', 'important');
+
+                            // Disconnect observer once found to save resources
+                            // But wait a bit to ensure it doesn't get overwritten immediately
+                            setTimeout(() => observer.disconnect(), 2000);
+                        }
+                    }
+                });
+            });
+        });
+
+        // Start observing the document body for added nodes
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        // Backup constraint: Check manually after a delay just in case
+        setTimeout(() => {
             const container = document.querySelector('.razorpay-container');
             if (container) {
                 container.classList.add('razorpay-mobile-fix');
-            } else {
-                // Retry briefly if container isn't in DOM yet
-                setTimeout(applyMobileFix, 200);
             }
-        };
-
-        // Apply immediately after open
-        setTimeout(applyMobileFix, 300);
+        }, 1000);
     };
 
     if (!cart.items || cart.items.length === 0) {
