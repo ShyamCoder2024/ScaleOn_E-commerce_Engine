@@ -360,7 +360,7 @@ const ProductDetail = () => {
                         )}
 
                         {/* Quantity & Actions Wrapper */}
-                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-4 sm:space-y-6">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-4">
                             {/* Quantity */}
                             <div>
                                 <div className="flex items-center justify-between mb-2">
@@ -398,22 +398,22 @@ const ProductDetail = () => {
                                 </div>
                             </div>
 
-                            {/* Actions - Side by Side on Mobile */}
-                            <div className="flex gap-3 pt-2">
+                            {/* Actions - Responsive Grid/Flex */}
+                            <div className="flex gap-3 pt-1">
                                 {isInStock() ? (
                                     <>
                                         <button
                                             onClick={handleAddToCart}
                                             disabled={addingToCart}
-                                            className="flex-1 btn-secondary py-3.5 px-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 border-gray-200 hover:bg-gray-50 text-gray-900 shadow-sm rounded-xl active:scale-95 transition-all"
+                                            className="flex-1 btn-secondary py-3.5 px-3 sm:px-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 border-gray-200 hover:bg-gray-50 text-gray-900 shadow-sm rounded-xl active:scale-95 transition-all"
                                         >
-                                            <ShoppingCart size={18} />
-                                            {addingToCart ? 'Adding...' : 'Add to Cart'}
+                                            <ShoppingCart size={18} className="shrink-0" />
+                                            <span className="truncate">{addingToCart ? 'Adding...' : 'Add to Cart'}</span>
                                         </button>
                                         <button
                                             onClick={handleBuyNow}
                                             disabled={addingToCart}
-                                            className="flex-1 btn-primary py-3.5 px-4 text-sm sm:text-base font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-all rounded-xl"
+                                            className="flex-1 btn-primary py-3.5 px-3 sm:px-4 text-sm sm:text-base font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-all rounded-xl whitespace-nowrap"
                                         >
                                             Buy Now
                                         </button>
@@ -423,16 +423,17 @@ const ProductDetail = () => {
                                         Out of Stock
                                     </button>
                                 )}
-                                {/* Desktop Wishlist (Hidden on Mobile) */}
+                                {/* Desktop Wishlist (Square Icon) */}
                                 {isFeatureEnabled('wishlist') && (
                                     <button
                                         onClick={() => toggleWishlist(product)}
-                                        className={`hidden sm:flex py-3.5 px-4 rounded-xl items-center justify-center border-2 transition-all ${isInWishlist(product._id)
+                                        className={`hidden sm:flex w-14 shrink-0 rounded-xl items-center justify-center border-2 transition-all ${isInWishlist(product._id)
                                             ? 'bg-rose-50 border-rose-200 text-rose-500'
                                             : 'bg-white border-gray-200 text-gray-400 hover:text-rose-500 hover:border-gray-300'
                                             }`}
+                                        title="Add to Wishlist"
                                     >
-                                        <Heart size={20} className={isInWishlist(product._id) ? 'fill-rose-500' : ''} />
+                                        <Heart size={22} className={isInWishlist(product._id) ? 'fill-rose-500' : ''} />
                                     </button>
                                 )}
                             </div>
@@ -442,11 +443,32 @@ const ProductDetail = () => {
                         <div className="pt-6 md:pt-8 border-t border-gray-100">
                             <div className="flex sm:grid sm:grid-cols-3 gap-3 sm:gap-4 overflow-x-auto pb-4 sm:pb-0 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
                                 {[
-                                    { icon: Truck, title: 'Free Shipping', sub: 'On orders ₹999+', color: 'text-blue-600', bg: 'bg-blue-50/50', border: 'border-blue-100' },
-                                    { icon: Shield, title: 'Secure Payment', sub: '100% protected', color: 'text-emerald-600', bg: 'bg-emerald-50/50', border: 'border-emerald-100' },
-                                    { icon: RotateCcw, title: 'Easy Returns', sub: '7-day policy', color: 'text-amber-600', bg: 'bg-amber-50/50', border: 'border-amber-100' }
+                                    {
+                                        icon: Truck,
+                                        title: 'Free Shipping',
+                                        sub: 'On orders ₹999+',
+                                        color: 'text-blue-600',
+                                        bg: 'bg-blue-50/50',
+                                        border: 'border-blue-100'
+                                    },
+                                    {
+                                        icon: Shield,
+                                        title: 'Secure Payment',
+                                        sub: '100% protected',
+                                        color: 'text-emerald-600',
+                                        bg: 'bg-emerald-50/50',
+                                        border: 'border-emerald-100'
+                                    },
+                                    {
+                                        icon: RotateCcw,
+                                        title: 'Easy Returns',
+                                        sub: '7-day policy',
+                                        color: 'text-amber-600',
+                                        bg: 'bg-amber-50/50',
+                                        border: 'border-amber-100'
+                                    }
                                 ].map((feature, i) => (
-                                    <div key={i} className={`flex items-center gap-3 p-3.5 rounded-xl border shrink-0 w-[240px] sm:w-auto bg-white ${feature.border}`}>
+                                    <div key={i} className={`flex items-center gap-3 p-3 rounded-xl border shrink-0 w-[200px] sm:w-auto bg-white ${feature.border}`}>
                                         <div className={`w-10 h-10 ${feature.bg} rounded-full flex items-center justify-center shrink-0`}>
                                             <feature.icon className={feature.color} size={20} />
                                         </div>
