@@ -399,21 +399,21 @@ const ProductDetail = () => {
                             </div>
 
                             {/* Actions - Responsive Grid/Flex */}
-                            <div className="flex gap-3 pt-1">
+                            <div className="flex gap-3 pt-2">
                                 {isInStock() ? (
                                     <>
                                         <button
                                             onClick={handleAddToCart}
                                             disabled={addingToCart}
-                                            className="flex-1 btn-secondary py-3.5 px-3 sm:px-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 border-gray-200 hover:bg-gray-50 text-gray-900 shadow-sm rounded-xl active:scale-95 transition-all"
+                                            className="flex-1 btn-secondary py-3 px-2 sm:px-4 text-xs sm:text-base font-bold flex items-center justify-center gap-1.5 sm:gap-2 border-gray-200 hover:bg-gray-50 text-gray-900 shadow-sm rounded-xl active:scale-95 transition-all text-center leading-tight"
                                         >
                                             <ShoppingCart size={18} className="shrink-0" />
-                                            <span className="truncate">{addingToCart ? 'Adding...' : 'Add to Cart'}</span>
+                                            {addingToCart ? 'Adding...' : 'Add to Cart'}
                                         </button>
                                         <button
                                             onClick={handleBuyNow}
                                             disabled={addingToCart}
-                                            className="flex-1 btn-primary py-3.5 px-3 sm:px-4 text-sm sm:text-base font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-all rounded-xl whitespace-nowrap"
+                                            className="flex-1 btn-primary py-3 px-2 sm:px-4 text-xs sm:text-base font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-all rounded-xl whitespace-nowrap text-center leading-tight"
                                         >
                                             Buy Now
                                         </button>
@@ -427,21 +427,21 @@ const ProductDetail = () => {
                                 {isFeatureEnabled('wishlist') && (
                                     <button
                                         onClick={() => toggleWishlist(product)}
-                                        className={`hidden sm:flex w-14 shrink-0 rounded-xl items-center justify-center border-2 transition-all ${isInWishlist(product._id)
+                                        className={`hidden sm:flex w-12 sm:w-14 shrink-0 rounded-xl items-center justify-center border-2 transition-all ${isInWishlist(product._id)
                                             ? 'bg-rose-50 border-rose-200 text-rose-500'
                                             : 'bg-white border-gray-200 text-gray-400 hover:text-rose-500 hover:border-gray-300'
                                             }`}
                                         title="Add to Wishlist"
                                     >
-                                        <Heart size={22} className={isInWishlist(product._id) ? 'fill-rose-500' : ''} />
+                                        <Heart size={20} className={isInWishlist(product._id) ? 'fill-rose-500' : ''} />
                                     </button>
                                 )}
                             </div>
                         </div>
 
-                        {/* Features Grid - Premium Horizontal Scroll on Mobile */}
+                        {/* Features Grid - Clean Grid on Mobile (No Scroll) */}
                         <div className="pt-6 md:pt-8 border-t border-gray-100">
-                            <div className="flex sm:grid sm:grid-cols-3 gap-3 sm:gap-4 overflow-x-auto pb-4 sm:pb-0 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                 {[
                                     {
                                         icon: Truck,
@@ -468,13 +468,13 @@ const ProductDetail = () => {
                                         border: 'border-amber-100'
                                     }
                                 ].map((feature, i) => (
-                                    <div key={i} className={`flex items-center gap-3 p-3 rounded-xl border shrink-0 w-[200px] sm:w-auto bg-white ${feature.border}`}>
-                                        <div className={`w-10 h-10 ${feature.bg} rounded-full flex items-center justify-center shrink-0`}>
-                                            <feature.icon className={feature.color} size={20} />
+                                    <div key={i} className={`flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2 sm:gap-3 p-3 rounded-xl border bg-white ${feature.border}`}>
+                                        <div className={`w-8 h-8 sm:w-10 sm:h-10 ${feature.bg} rounded-full flex items-center justify-center shrink-0`}>
+                                            <feature.icon className={feature.color} size={16} />
                                         </div>
                                         <div>
-                                            <p className="font-bold text-gray-900 text-sm">{feature.title}</p>
-                                            <p className="text-[11px] text-gray-500 font-medium">{feature.sub}</p>
+                                            <p className="font-bold text-gray-900 text-xs sm:text-sm">{feature.title}</p>
+                                            <p className="text-[10px] text-gray-500 font-medium">{feature.sub}</p>
                                         </div>
                                     </div>
                                 ))}
