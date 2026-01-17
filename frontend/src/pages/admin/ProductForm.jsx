@@ -350,11 +350,11 @@ const ProductForm = () => {
                             {formData.images.length > 0 && (
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                                     {formData.images.map((image, index) => (
-                                        <div key={index} className="relative group aspect-square rounded-xl overflow-hidden border border-slate-200">
+                                        <div key={index} className="relative group aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white">
                                             <img
                                                 src={image.url}
                                                 alt={image.alt || `Product image ${index + 1}`}
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-contain p-1"
                                                 onError={(e) => {
                                                     e.target.onerror = null;
                                                     e.target.src = 'https://placehold.co/200x200/fee2e2/dc2626?text=Upload+Failed';

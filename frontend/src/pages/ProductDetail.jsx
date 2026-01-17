@@ -159,13 +159,13 @@ const ProductDetail = () => {
                     <div className="space-y-4 w-full">
                         {/* Main Image */}
                         <div
-                            className="aspect-square bg-gray-100 rounded-2xl overflow-hidden relative shadow-sm border border-gray-100 cursor-zoom-in group"
+                            className="aspect-square bg-white rounded-2xl overflow-hidden relative shadow-sm border border-gray-200 cursor-zoom-in group"
                             onClick={() => setLightboxOpen(true)}
                         >
                             <img
                                 src={images[selectedImage]?.url}
                                 alt={images[selectedImage]?.alt || product.name}
-                                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                                className="w-full h-full object-contain p-2 transform group-hover:scale-105 transition-transform duration-500"
                             />
 
                             {/* Zoom Indicator */}
@@ -221,7 +221,7 @@ const ProductDetail = () => {
                                         <img
                                             src={img.url}
                                             alt={img.alt}
-                                            className="w-full h-full object-cover"
+                                            className="w-full h-full object-contain bg-white"
                                         />
                                     </button>
                                 ))}
