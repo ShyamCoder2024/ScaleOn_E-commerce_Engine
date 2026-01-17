@@ -423,39 +423,39 @@ const ProductDetail = () => {
                                         Out of Stock
                                     </button>
                                 )}
-                                {/* Mobile-Optimized Wishlist */}
                                 {isFeatureEnabled('wishlist') && (
                                     <button
                                         onClick={() => toggleWishlist(product)}
-                                        className={`sm:w-auto w-full py-3.5 sm:px-6 rounded-xl flex items-center justify-center gap-2 border-2 font-bold transition-all ${isInWishlist(product._id)
+                                        className={`hidden sm:flex py-3.5 px-6 rounded-xl items-center justify-center gap-2 border-2 font-bold transition-all ${isInWishlist(product._id)
                                             ? 'bg-rose-50 border-rose-200 text-rose-500'
                                             : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                                             }`}
                                     >
                                         <Heart size={20} className={isInWishlist(product._id) ? 'fill-rose-500' : ''} />
-                                        <span className="sm:hidden">Wishlist</span>
                                     </button>
                                 )}
                             </div>
                         </div>
 
-                        {/* Features Grid - Stack on mobile */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 md:pt-8 border-t border-gray-100">
-                            {[
-                                { icon: Truck, title: 'Free Shipping', sub: 'On orders ₹999+', color: 'text-blue-600', bg: 'bg-blue-50' },
-                                { icon: Shield, title: 'Secure Payment', sub: '100% protected', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                                { icon: RotateCcw, title: 'Easy Returns', sub: '7-day policy', color: 'text-amber-600', bg: 'bg-amber-50' }
-                            ].map((feature, i) => (
-                                <div key={i} className="flex sm:flex-col items-center gap-4 sm:gap-2 p-4 sm:p-0 bg-gray-50 sm:bg-transparent rounded-xl sm:rounded-none border border-gray-100 sm:border-none">
-                                    <div className={`w-12 h-12 ${feature.bg} rounded-full flex items-center justify-center shrink-0`}>
-                                        <feature.icon className={feature.color} size={24} />
+                        {/* Features Grid - Premium Horizontal Scroll on Mobile */}
+                        <div className="pt-6 md:pt-8 border-t border-gray-100">
+                            <div className="flex sm:grid sm:grid-cols-3 gap-3 sm:gap-4 overflow-x-auto pb-4 sm:pb-0 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+                                {[
+                                    { icon: Truck, title: 'Free Shipping', sub: 'On orders ₹999+', color: 'text-blue-600', bg: 'bg-blue-50/50', border: 'border-blue-100' },
+                                    { icon: Shield, title: 'Secure Payment', sub: '100% protected', color: 'text-emerald-600', bg: 'bg-emerald-50/50', border: 'border-emerald-100' },
+                                    { icon: RotateCcw, title: 'Easy Returns', sub: '7-day policy', color: 'text-amber-600', bg: 'bg-amber-50/50', border: 'border-amber-100' }
+                                ].map((feature, i) => (
+                                    <div key={i} className={`flex items-center gap-3 p-3.5 rounded-xl border shrink-0 w-[240px] sm:w-auto bg-white ${feature.border}`}>
+                                        <div className={`w-10 h-10 ${feature.bg} rounded-full flex items-center justify-center shrink-0`}>
+                                            <feature.icon className={feature.color} size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-gray-900 text-sm">{feature.title}</p>
+                                            <p className="text-[11px] text-gray-500 font-medium">{feature.sub}</p>
+                                        </div>
                                     </div>
-                                    <div className="text-left sm:text-center">
-                                        <p className="font-bold text-gray-900">{feature.title}</p>
-                                        <p className="text-xs text-gray-500 font-medium">{feature.sub}</p>
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>

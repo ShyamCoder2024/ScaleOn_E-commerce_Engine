@@ -169,8 +169,8 @@ const ProductReviews = ({ productId }) => {
                                                 <div className="flex items-center gap-2 text-sm text-gray-500">
                                                     <span>{formatDate(review.createdAt)}</span>
                                                     {review.verified && (
-                                                        <span className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded-full text-xs font-medium border border-green-100">
-                                                            <CheckCircle size={10} /> Verified Purchase
+                                                        <span className="flex items-center gap-1 text-emerald-600 text-[10px] font-bold uppercase tracking-wider">
+                                                            <CheckCircle size={12} className="fill-emerald-100" /> Verified
                                                         </span>
                                                     )}
                                                 </div>
