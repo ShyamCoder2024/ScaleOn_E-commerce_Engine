@@ -210,7 +210,19 @@ const ImageLightbox = ({
     return (
         <div
             ref={containerRef}
-            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex items-center justify-center"
+            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm overflow-hidden"
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: '100vw',
+                height: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
@@ -218,14 +230,18 @@ const ImageLightbox = ({
             {/* Close Button */}
             <button
                 onClick={onClose}
-                className="absolute top-4 right-4 z-20 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors backdrop-blur-sm"
+                className="absolute top-4 right-4 z-30 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors backdrop-blur-sm"
+                style={{ position: 'fixed', top: '16px', right: '16px' }}
                 aria-label="Close"
             >
                 <X size={24} />
             </button>
 
             {/* Zoom Controls - Desktop */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 hidden sm:flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+            <div
+                className="absolute top-4 left-1/2 -translate-x-1/2 z-30 hidden sm:flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2"
+                style={{ position: 'fixed', top: '16px' }}
+            >
                 <button
                     onClick={zoomOut}
                     disabled={scale <= MIN_SCALE}
@@ -260,14 +276,16 @@ const ImageLightbox = ({
                 <>
                     <button
                         onClick={prevImage}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors backdrop-blur-sm hidden sm:block"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors backdrop-blur-sm hidden sm:block"
+                        style={{ position: 'fixed', left: '16px', top: '50%', transform: 'translateY(-50%)' }}
                         aria-label="Previous image"
                     >
                         <ChevronLeft size={28} />
                     </button>
                     <button
                         onClick={nextImage}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors backdrop-blur-sm hidden sm:block"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors backdrop-blur-sm hidden sm:block"
+                        style={{ position: 'fixed', right: '16px', top: '50%', transform: 'translateY(-50%)' }}
                         aria-label="Next image"
                     >
                         <ChevronRight size={28} />
@@ -275,9 +293,16 @@ const ImageLightbox = ({
                 </>
             )}
 
-            {/* Image Container */}
+            {/* Image Container - Centered */}
             <div
-                className="w-full h-full flex items-center justify-center p-4 sm:p-12"
+                className="flex items-center justify-center"
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    padding: '60px 16px 120px 16px',
+                    boxSizing: 'border-box',
+                    overflow: 'hidden',
+                }}
                 onWheel={handleWheel}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
@@ -288,8 +313,11 @@ const ImageLightbox = ({
                     ref={imageRef}
                     src={currentImage?.url || currentImage}
                     alt={currentImage?.alt || `Image ${currentIndex + 1}`}
-                    className={`max-w-full max-h-full object-contain select-none transition-transform duration-100 ${scale > 1 ? 'cursor-grab' : 'cursor-zoom-in'} ${isDragging ? 'cursor-grabbing' : ''}`}
+                    className={`select-none transition-transform duration-100 ${scale > 1 ? 'cursor-grab' : 'cursor-zoom-in'} ${isDragging ? 'cursor-grabbing' : ''}`}
                     style={{
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        objectFit: 'contain',
                         transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
                     }}
                     onMouseDown={handleMouseDown}
