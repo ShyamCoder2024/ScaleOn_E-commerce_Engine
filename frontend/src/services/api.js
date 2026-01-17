@@ -277,6 +277,15 @@ export const adminAPI = {
         api.get('/admin/audit-logs/recent', { params: { limit } }),
 };
 
+// Review API
+export const reviewAPI = {
+    create: (data) => api.post('/reviews', data),
+    getByProduct: (productId, params) => api.get(`/reviews/product/${productId}`, { params }),
+    getByUser: () => api.get('/reviews/user'),
+    canReview: (orderId, orderItemId) => api.get(`/reviews/can-review/${orderId}/${orderItemId}`),
+    delete: (id) => api.delete(`/reviews/${id}`),
+};
+
 // Utility to create abort controller for cancellable requests
 export const createAbortController = () => {
     const controller = new AbortController();

@@ -9,37 +9,77 @@ import {
     CreditCard,
     Clock,
     XCircle,
-    ExternalLink
+    ExternalLink,
+    Star,
+    X,
+    Loader2
 } from 'lucide-react';
-import { orderAPI } from '../../services/api';
+import { orderAPI, reviewAPI } from '../../services/api';
 import { useConfig } from '../../context/ConfigContext';
 import toast from 'react-hot-toast';
 
 const OrderDetail = () => {
     const { id } = useParams();
     const location = useLocation();
-    const { formatPrice } = useConfig();
+    const { formatPrice, isFeatureEnabled } = useConfig();
 
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [cancelling, setCancelling] = useState(false);
 
+    // Review states
+    const reviewsEnabled = isFeatureEnabled('reviews');
+    const [reviewedItems, setReviewedItems] = useState(new Set());
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [reviewingItem, setReviewingItem] = useState(null);
+    const [submittingReview, setSubmittingReview] = useState(false);
+    const [newReview, setNewReview] = useState({
+        rating: 5,
+        title: '',
+        content: ''
+    });
+
     useEffect(() => {
         fetchOrder();
-        // Note: success toast is already shown in Checkout.jsx
     }, [id]);
 
     const fetchOrder = async () => {
         setLoading(true);
         try {
             const response = await orderAPI.getById(id);
-            setOrder(response.data.data.order);
+            const orderData = response.data.data.order;
+            setOrder(orderData);
+
+            // Check which items are already reviewed
+            if (reviewsEnabled && canReview(orderData)) {
+                checkReviewedItems(orderData);
+            }
         } catch (err) {
             console.error('Failed to fetch order:', err);
             toast.error('Order not found');
         } finally {
             setLoading(false);
         }
+    };
+
+    const checkReviewedItems = async (orderData) => {
+        const reviewed = new Set();
+        for (const item of orderData.items || []) {
+            try {
+                const response = await reviewAPI.canReview(orderData._id, item._id);
+                if (response.data.data.alreadyReviewed) {
+                    reviewed.add(item._id);
+                }
+            } catch (err) {
+                // Ignore errors
+            }
+        }
+        setReviewedItems(reviewed);
+    };
+
+    const canReview = (orderData) => {
+        // Only allow reviews after delivery
+        return ['delivered', 'completed'].includes(orderData?.status);
     };
 
     const handleCancelOrder = async () => {
@@ -54,6 +94,38 @@ const OrderDetail = () => {
             toast.error(err.response?.data?.message || 'Failed to cancel order');
         } finally {
             setCancelling(false);
+        }
+    };
+
+    const openReviewModal = (item) => {
+        setReviewingItem(item);
+        setNewReview({ rating: 5, title: '', content: '' });
+        setShowReviewModal(true);
+    };
+
+    const handleSubmitReview = async (e) => {
+        e.preventDefault();
+        if (!reviewingItem || !order) return;
+
+        setSubmittingReview(true);
+        try {
+            await reviewAPI.create({
+                productId: reviewingItem.product,
+                orderId: order._id,
+                orderItemId: reviewingItem._id,
+                rating: newReview.rating,
+                title: newReview.title,
+                content: newReview.content
+            });
+
+            toast.success('Review submitted successfully!');
+            setShowReviewModal(false);
+            setReviewedItems(prev => new Set([...prev, reviewingItem._id]));
+            setReviewingItem(null);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to submit review');
+        } finally {
+            setSubmittingReview(false);
         }
     };
 
@@ -129,6 +201,7 @@ const OrderDetail = () => {
     }
 
     const StatusIcon = getStatusIcon(order.status);
+    const showReviewButtons = reviewsEnabled && canReview(order);
 
     return (
         <div className="bg-gray-50 min-h-screen">
@@ -171,24 +244,46 @@ const OrderDetail = () => {
 
                             <div className="divide-y">
                                 {order.items?.map((item, idx) => (
-                                    <div key={idx} className="py-4 first:pt-0 last:pb-0 flex gap-4">
-                                        <img
-                                            src={item.image || 'https://placehold.co/80x80/e2e8f0/475569'}
-                                            alt={item.productName}
-                                            className="w-20 h-20 object-cover rounded-lg"
-                                        />
-                                        <div className="flex-1">
-                                            <h3 className="font-medium text-gray-900">{item.productName}</h3>
-                                            {item.variant && (
-                                                <p className="text-sm text-gray-500">
-                                                    {Object.entries(item.variant).map(([k, v]) => `${k}: ${v}`).join(', ')}
-                                                </p>
-                                            )}
-                                            <div className="flex items-center justify-between mt-2">
-                                                <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
-                                                <p className="font-medium">{formatPrice(item.subtotal)}</p>
+                                    <div key={idx} className="py-4 first:pt-0 last:pb-0">
+                                        <div className="flex gap-4">
+                                            <img
+                                                src={item.productImage || item.image || 'https://placehold.co/80x80/e2e8f0/475569'}
+                                                alt={item.productName}
+                                                className="w-20 h-20 object-cover rounded-lg"
+                                            />
+                                            <div className="flex-1">
+                                                <h3 className="font-medium text-gray-900">{item.productName}</h3>
+                                                {item.variant && (
+                                                    <p className="text-sm text-gray-500">
+                                                        {Object.entries(item.variant.options || item.variant).map(([k, v]) => `${k}: ${v}`).join(', ')}
+                                                    </p>
+                                                )}
+                                                <div className="flex items-center justify-between mt-2">
+                                                    <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                                                    <p className="font-medium">{formatPrice(item.subtotal)}</p>
+                                                </div>
                                             </div>
                                         </div>
+
+                                        {/* Write Review Button - Only show after delivery */}
+                                        {showReviewButtons && (
+                                            <div className="mt-3 ml-24">
+                                                {reviewedItems.has(item._id) ? (
+                                                    <span className="inline-flex items-center gap-1.5 text-sm text-green-600 bg-green-50 px-3 py-1.5 rounded-lg">
+                                                        <Check size={14} />
+                                                        Reviewed
+                                                    </span>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => openReviewModal(item)}
+                                                        className="inline-flex items-center gap-1.5 text-sm text-primary-600 bg-primary-50 hover:bg-primary-100 px-3 py-1.5 rounded-lg font-medium transition-colors"
+                                                    >
+                                                        <Star size={14} />
+                                                        Write a Review
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -201,17 +296,14 @@ const OrderDetail = () => {
                                 <div className="space-y-0">
                                     {order.statusHistory.map((entry, idx) => {
                                         const isLast = idx === order.statusHistory.length - 1;
-                                        const isCompleted = !isLast; // All except last are completed
 
                                         return (
                                             <div key={idx} className="flex gap-4">
                                                 <div className="flex flex-col items-center">
-                                                    {/* Status dot */}
                                                     <div className={`w-3 h-3 rounded-full ${isLast
                                                         ? 'bg-primary-600 ring-4 ring-primary-100'
                                                         : 'bg-green-500'
                                                         }`} />
-                                                    {/* Connecting line */}
                                                     {!isLast && (
                                                         <div className="w-0.5 h-12 bg-green-300 my-1" />
                                                     )}
@@ -243,7 +335,6 @@ const OrderDetail = () => {
                                     Shipping Information
                                 </h2>
                                 <div className="space-y-4">
-                                    {/* Courier Partner */}
                                     {order.shippingMethod && (
                                         <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
                                             <div>
@@ -254,13 +345,11 @@ const OrderDetail = () => {
                                         </div>
                                     )}
 
-                                    {/* Tracking Number */}
                                     <div>
                                         <p className="text-sm text-gray-500">Tracking / AWB Number</p>
                                         <p className="font-mono font-medium text-lg">{order.trackingNumber}</p>
                                     </div>
 
-                                    {/* Track Order Button */}
                                     {order.trackingUrl ? (
                                         <a
                                             href={order.trackingUrl}
@@ -349,7 +438,6 @@ const OrderDetail = () => {
                                 <h2 className="font-bold text-gray-900">Payment</h2>
                             </div>
                             <div className="text-sm text-gray-600">
-                                {/* Payment Method */}
                                 <div className="flex items-center gap-2">
                                     <span className="font-medium text-gray-900">
                                         {order.payment?.method === 'cod' || !order.payment?.method
@@ -361,9 +449,8 @@ const OrderDetail = () => {
                                                     : order.payment?.method?.charAt(0).toUpperCase() + order.payment?.method?.slice(1)}
                                     </span>
                                 </div>
-                                {/* Payment Status */}
                                 <p className={`mt-2 font-medium ${order.payment?.status === 'completed' ? 'text-green-600' :
-                                        order.payment?.method === 'cod' || !order.payment?.method ? 'text-blue-600' : 'text-yellow-600'
+                                    order.payment?.method === 'cod' || !order.payment?.method ? 'text-blue-600' : 'text-yellow-600'
                                     }`}>
                                     {order.payment?.status === 'completed'
                                         ? '✓ Paid'
@@ -397,6 +484,105 @@ const OrderDetail = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Review Modal */}
+            {showReviewModal && reviewingItem && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowReviewModal(false)} />
+                    <div className="bg-white rounded-2xl w-full max-w-lg relative z-10 shadow-2xl animate-in fade-in zoom-in duration-300">
+                        <button
+                            onClick={() => setShowReviewModal(false)}
+                            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+                        >
+                            <X size={20} />
+                        </button>
+
+                        <div className="p-8">
+                            <h3 className="text-2xl font-bold text-gray-900 mb-1">Write a Review</h3>
+                            <p className="text-gray-500 mb-6">for {reviewingItem.productName}</p>
+
+                            <form onSubmit={handleSubmitReview} className="space-y-6">
+                                {/* Star Rating Input */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Overall Rating</label>
+                                    <div className="flex gap-2">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                key={star}
+                                                type="button"
+                                                onClick={() => setNewReview({ ...newReview, rating: star })}
+                                                className="transition-transform hover:scale-110 focus:outline-none"
+                                            >
+                                                <Star
+                                                    size={32}
+                                                    className={`${star <= newReview.rating ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-100 text-gray-200'}`}
+                                                />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Title Input */}
+                                <div>
+                                    <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Review Headline
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="title"
+                                        required
+                                        placeholder="What's most important to know?"
+                                        value={newReview.title}
+                                        onChange={(e) => setNewReview({ ...newReview, title: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-50 transition-all outline-none"
+                                    />
+                                </div>
+
+                                {/* Content Input */}
+                                <div>
+                                    <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Your Review
+                                    </label>
+                                    <textarea
+                                        id="content"
+                                        required
+                                        rows={4}
+                                        placeholder="What did you like or dislike?"
+                                        value={newReview.content}
+                                        onChange={(e) => setNewReview({ ...newReview, content: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-50 transition-all outline-none resize-none"
+                                    />
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowReviewModal(false)}
+                                        className="flex-1 px-6 py-3 border border-gray-200 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={submittingReview}
+                                        className="flex-1 px-6 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        {submittingReview ? (
+                                            <>
+                                                <Loader2 size={20} className="animate-spin" />
+                                                Submitting...
+                                            </>
+                                        ) : (
+                                            'Submit Review'
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

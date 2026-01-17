@@ -464,7 +464,7 @@ const ProductDetail = () => {
                 {/* Reviews */}
                 {isFeatureEnabled('reviews') && (
                     <div className="mt-12 sm:mt-16">
-                        <ProductReviews />
+                        <ProductReviews productId={product._id} />
                     </div>
                 )}
             </div>
