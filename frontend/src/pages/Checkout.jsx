@@ -263,27 +263,20 @@ const Checkout = () => {
         razorpay.open();
 
         // Optimizing Razorpay Overlay for Mobile
-        // We apply styles dynamically only when the modal is opened.
-        // Using setProperty with 'important' ensures we override any inline styles added by the library itself.
-        setTimeout(() => {
+        // Strategy: We rely on the CSS class .razorpay-mobile-fix to handle all styling (fixed, full screen, z-index).
+        // We simply add this class to the container when opened, and remove it when dismissed/closed.
+        const applyMobileFix = () => {
             const container = document.querySelector('.razorpay-container');
             if (container) {
-                container.style.setProperty('position', 'fixed', 'important');
-                container.style.setProperty('top', '0', 'important');
-                container.style.setProperty('left', '0', 'important');
-                container.style.setProperty('width', '100%', 'important');
-                container.style.setProperty('height', '100%', 'important');
-                container.style.setProperty('z-index', '2147483647', 'important');
-                container.style.setProperty('display', 'block', 'important'); // Ensure it's visible
+                container.classList.add('razorpay-mobile-fix');
+            } else {
+                // Retry briefly if container isn't in DOM yet
+                setTimeout(applyMobileFix, 200);
             }
-            const iframe = document.querySelector('iframe.razorpay-checkout-frame');
-            if (iframe) {
-                iframe.style.setProperty('height', '100%', 'important');
-                iframe.style.setProperty('min-height', '100vh', 'important');
-                iframe.style.setProperty('width', '100%', 'important');
-                iframe.style.setProperty('border', 'none', 'important');
-            }
-        }, 100);
+        };
+
+        // Apply immediately after open
+        setTimeout(applyMobileFix, 300);
     };
 
     if (!cart.items || cart.items.length === 0) {

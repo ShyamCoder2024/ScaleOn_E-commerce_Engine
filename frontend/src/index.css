@@ -197,3 +197,28 @@ a,
      Since we used print-color-adjust: exact, backgrounds should stay.
   */
 }
+
+/* 
+  ROBUST RAZORPAY MOBILE FIX 
+  Applied via JS class toggling only when modal is open.
+*/
+.razorpay-mobile-fix {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  /* Use dynamic viewport height for mobile browsers */
+  background: rgba(0, 0, 0, 0.6) !important;
+  /* Dim background to focus on modal */
+  z-index: 2147483647 !important;
+  display: block !important;
+}
+
+/* Ensure the iframe inside matches the container */
+.razorpay-mobile-fix iframe {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100dvh !important;
+  border: none !important;
+}
