@@ -410,18 +410,35 @@ const ProductList = () => {
             {/* ScaleOn Premium Delete Modal */}
             {showDeleteModal && (
                 <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
+                    className="fixed inset-0 z-[100] overflow-hidden"
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        width: '100vw',
+                        height: '100vh',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '16px',
+                    }}
                     role="dialog"
                     aria-modal="true"
                 >
                     {/* Backdrop */}
                     <div
                         className="absolute inset-0 bg-slate-900/75 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
                         onClick={() => setShowDeleteModal(null)}
                     />
 
-                    {/* Modal Panel */}
-                    <div className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-2xl transition-all animate-in zoom-in-95 fade-in duration-200 border border-slate-100 scale-100">
+                    {/* Modal Panel - Centered */}
+                    <div
+                        className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-2xl transition-all animate-in zoom-in-95 fade-in duration-200 border border-slate-100"
+                        style={{ position: 'relative', zIndex: 10 }}
+                    >
 
                         {/* Icon */}
                         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-rose-50 mb-5 ring-4 ring-rose-50/50">
