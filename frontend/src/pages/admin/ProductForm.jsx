@@ -355,6 +355,10 @@ const ProductForm = () => {
                                                 src={image.url}
                                                 alt={image.alt || `Product image ${index + 1}`}
                                                 className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = 'https://placehold.co/200x200/fee2e2/dc2626?text=Upload+Failed';
+                                                }}
                                             />
                                             <button
                                                 type="button"
