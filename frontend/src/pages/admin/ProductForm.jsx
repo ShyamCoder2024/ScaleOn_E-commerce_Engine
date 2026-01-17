@@ -402,10 +402,10 @@ const ProductForm = () => {
                                                 <Upload className="w-6 h-6" />
                                             </div>
                                             <p className="font-semibold text-slate-900">Click to upload or drag and drop</p>
-                                            <p className="text-sm text-slate-500 mt-1">SVG, PNG, JPG or GIF (max. 5MB)</p>
+                                            <p className="text-sm text-slate-500 mt-1">SVG, PNG, JPG or GIF (max. 20MB)</p>
                                         </div>
                                     }
-                                    maxSize={5}
+                                    maxSize={20}
                                     showUrlInput={false}
                                 />
                             </div>

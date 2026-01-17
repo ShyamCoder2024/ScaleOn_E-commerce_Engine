@@ -166,8 +166,8 @@ export const VALIDATION = {
     PRODUCT_NAME_MAX_LENGTH: 200,
     DESCRIPTION_MAX_LENGTH: 10000,
     SKU_MAX_LENGTH: 50,
-    MAX_IMAGES_PER_PRODUCT: 10,
-    MAX_FILE_SIZE_BYTES: 5 * 1024 * 1024, // 5MB
+    MAX_IMAGES_PER_PRODUCT: 50, // Effectively unlimited
+    MAX_FILE_SIZE_BYTES: 20 * 1024 * 1024, // 20MB for high-quality images
     ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
     MAX_CART_ITEMS: 100,
     MAX_QUANTITY_PER_ITEM: 99
