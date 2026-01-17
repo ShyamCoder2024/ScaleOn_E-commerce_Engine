@@ -40,8 +40,8 @@ const AdminLayout = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-            {/* Mobile sidebar backdrop with fade/blur */}
+        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
+            {/* Mobile Backdrop */}
             {sidebarOpen && (
                 <div
                     className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
@@ -52,19 +52,18 @@ const AdminLayout = () => {
             {/* Sidebar */}
             <aside
                 className={`
-                    fixed top-0 left-0 z-50 w-72 h-screen bg-slate-900 text-slate-300 transform transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]
-                    lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                    shadow-2xl lg:shadow-none flex flex-col overflow-hidden
+                    fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 text-slate-300 transform transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]
+                    lg:relative lg:translate-x-0 lg:shadow-none flex flex-col h-full
+                    ${sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
                 `}
-                style={{ height: '100vh', maxHeight: '100vh' }}
             >
                 {/* Sidebar Header */}
-                <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800/50 shrink-0">
+                <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800/50 shrink-0 bg-slate-900">
                     <Link to="/admin" className="text-lg font-bold text-white tracking-wide flex items-center gap-2">
                         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
                             {storeName?.[0] || 'S'}
                         </div>
-                        {storeName || 'Store'} <span className="text-slate-500 font-normal">Admin</span>
+                        <span className="truncate">{storeName || 'Store'} <span className="text-slate-500 font-normal">Admin</span></span>
                     </Link>
                     <button
                         className="lg:hidden p-1 text-slate-400 hover:text-white transition-colors"
@@ -74,7 +73,7 @@ const AdminLayout = () => {
                     </button>
                 </div>
 
-                {/* Nav Items - Scrollable area */}
+                {/* Nav Items */}
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-hide">
                     <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-2">Menu</p>
                     {navItems.map((item) => {
@@ -102,10 +101,10 @@ const AdminLayout = () => {
                     })}
                 </nav>
 
-                {/* User Info / Footer - Always visible at bottom */}
-                <div className="shrink-0 p-4 border-t border-slate-800/50 bg-slate-900">
+                {/* User Info / Footer */}
+                <div className="shrink-0 p-4 border-t border-slate-800/50 bg-slate-900 mt-auto">
                     <div className="flex items-center gap-3 px-2 mb-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-slate-800">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-slate-800 shrink-0">
                             {user?.profile?.firstName?.[0] || user?.email?.[0]?.toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -125,39 +124,37 @@ const AdminLayout = () => {
                 </div>
             </aside>
 
-            {/* Main Content Wrapper */}
-            <div className={`
-                lg:pl-72 min-h-screen flex flex-col transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]
-                ${sidebarOpen ? 'blur-sm lg:blur-none opacity-50 lg:opacity-100 pointer-events-none lg:pointer-events-auto' : ''}
-            `}>
-                {/* Top Navbar */}
-                <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 sticky top-0 z-30 supports-[backdrop-filter]:bg-white/60">
-                    <div className="flex items-center justify-between px-4 sm:px-6 py-4">
-                        <button
-                            className="lg:hidden p-2.5 -ml-2 text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition-colors active:scale-95"
-                            onClick={() => setSidebarOpen(true)}
-                            aria-label="Open Sidebar"
+            {/* Main Content Area */}
+            <div className={`flex-1 flex flex-col min-w-0 transition-opacity duration-200 ${sidebarOpen ? 'opacity-50 lg:opacity-100' : ''}`}>
+                {/* Navbar */}
+                <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 flex items-center justify-between px-4 sm:px-6 shrink-0 z-30">
+                    <button
+                        className="lg:hidden p-2 -ml-2 text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition-colors"
+                        onClick={() => setSidebarOpen(true)}
+                    >
+                        <Menu size={24} />
+                    </button>
+
+                    <div className="flex-1" />
+
+                    <div className="flex items-center gap-4">
+                        <a
+                            href="/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors flex items-center gap-1.5 group px-3 py-1.5 rounded-lg hover:bg-blue-50"
                         >
-                            <Menu size={24} />
-                        </button>
-
-                        <div className="flex-1" /> {/* Spacer */}
-
-                        <div className="flex items-center gap-4">
-                            <Link
-                                to="/"
-                                className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors flex items-center gap-1.5 group px-3 py-1.5 rounded-lg hover:bg-blue-50"
-                            >
-                                View Store
-                                <ExternalLink size={14} className="group-hover:translate-x-0.5 transition-transform" />
-                            </Link>
-                        </div>
+                            View Store
+                            <ExternalLink size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                        </a>
                     </div>
                 </header>
 
-                {/* Page Content */}
-                <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
-                    <Outlet />
+                {/* Scrollable Content */}
+                <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 scroll-smooth will-change-scroll">
+                    <div className="max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <Outlet />
+                    </div>
                 </main>
             </div>
         </div>
