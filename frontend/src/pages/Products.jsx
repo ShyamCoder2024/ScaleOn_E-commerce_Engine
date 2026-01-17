@@ -398,14 +398,60 @@ const Products = () => {
                                 )}
                             </>
                         ) : (
-                            <div className="text-center py-16">
-                                <div className="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                    <Search className="text-gray-400" size={40} />
+                            <div className="text-center py-16 px-4">
+                                {/* Animated Icon */}
+                                <div className="relative inline-block mb-6">
+                                    <div className="absolute inset-0 bg-gray-100 rounded-full animate-ping opacity-30" />
+                                    <div className="relative w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-50 rounded-full flex items-center justify-center shadow-inner">
+                                        <Search className="text-gray-400" size={40} strokeWidth={1.5} />
+                                    </div>
                                 </div>
-                                <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-                                <p className="text-gray-500 mb-4">Try adjusting your filters or search terms</p>
-                                <button onClick={clearFilters} className="btn-primary">
-                                    Clear Filters
+
+                                {/* Dynamic Message based on search/filter */}
+                                {searchParams.get('search') ? (
+                                    <>
+                                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                            No results for "{searchParams.get('search')}"
+                                        </h3>
+                                        <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                                            We couldn't find any products matching your search. Try different keywords or browse our categories.
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                            No products found
+                                        </h3>
+                                        <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                                            Try adjusting your filters to find what you're looking for.
+                                        </p>
+                                    </>
+                                )}
+
+                                {/* Suggestions */}
+                                <div className="bg-gray-50 rounded-xl p-4 mb-6 max-w-sm mx-auto text-left">
+                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Suggestions</p>
+                                    <ul className="space-y-2 text-sm text-gray-600">
+                                        <li className="flex items-start gap-2">
+                                            <span className="text-primary-500 mt-0.5">•</span>
+                                            Check your spelling
+                                        </li>
+                                        <li className="flex items-start gap-2">
+                                            <span className="text-primary-500 mt-0.5">•</span>
+                                            Try more general keywords
+                                        </li>
+                                        <li className="flex items-start gap-2">
+                                            <span className="text-primary-500 mt-0.5">•</span>
+                                            Browse by category instead
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <button
+                                    onClick={clearFilters}
+                                    className="btn-primary px-6 py-3 rounded-full font-bold shadow-lg shadow-primary-600/20 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+                                >
+                                    Clear All Filters
                                 </button>
                             </div>
                         )}
