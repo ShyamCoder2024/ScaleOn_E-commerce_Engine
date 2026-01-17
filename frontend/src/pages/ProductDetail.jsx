@@ -11,6 +11,7 @@ import {
     Truck,
     Shield,
     RotateCcw,
+    Award,
     Star
 } from 'lucide-react';
 import { productAPI } from '../services/api';
