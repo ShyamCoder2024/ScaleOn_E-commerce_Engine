@@ -1,3 +1,4 @@
+/* global google, AppleID */
 import { useState } from 'react';
 
 /**
