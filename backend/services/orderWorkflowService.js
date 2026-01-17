@@ -174,9 +174,9 @@ class OrderWorkflowService {
             await Cart.findOneAndDelete({ user: order.user });
         }
 
-        // Send notifications
-        await notificationService.sendOrderConfirmation(order._id);
-        await notificationService.sendAdminNewOrderNotification(order._id);
+        // Send notifications in background
+        notificationService.sendOrderConfirmation(order._id).catch(err => console.error('Bg Notification Error:', err));
+        notificationService.sendAdminNewOrderNotification(order._id).catch(err => console.error('Bg Notification Error:', err));
 
         return Order.findById(orderId).populate('payment');
     }
@@ -232,9 +232,9 @@ class OrderWorkflowService {
             await Cart.findOneAndDelete({ user: order.user });
         }
 
-        // Send notifications
-        await notificationService.sendOrderConfirmation(order._id);
-        await notificationService.sendAdminNewOrderNotification(order._id);
+        // Send notifications in background
+        notificationService.sendOrderConfirmation(order._id).catch(err => console.error('Bg Notification Error:', err));
+        notificationService.sendAdminNewOrderNotification(order._id).catch(err => console.error('Bg Notification Error:', err));
 
         return order;
     }
@@ -312,8 +312,8 @@ class OrderWorkflowService {
             }
         });
 
-        // Send notification
-        await notificationService.sendOrderShipped(order._id);
+        // Send notification in background
+        notificationService.sendOrderShipped(order._id).catch(err => console.error('Bg Notification Error:', err));
 
         // Return fresh order
         return Order.findById(orderId);
@@ -351,8 +351,8 @@ class OrderWorkflowService {
             resourceName: order.orderId
         });
 
-        // Send notification
-        await notificationService.sendOrderDelivered(order._id);
+        // Send notification in background
+        notificationService.sendOrderDelivered(order._id).catch(err => console.error('Bg Notification Error:', err));
 
         return Order.findById(orderId);
     }
@@ -402,8 +402,8 @@ class OrderWorkflowService {
             details: { reason }
         });
 
-        // Send notification
-        await notificationService.sendOrderCancelled(order._id, reason);
+        // Send notification in background
+        notificationService.sendOrderCancelled(order._id, reason).catch(err => console.error('Bg Notification Error:', err));
 
         return order;
     }
@@ -482,8 +482,8 @@ class OrderWorkflowService {
             details: { refundAmount, reason }
         });
 
-        // Send notification
-        await notificationService.sendRefundNotification(order._id, refundAmount);
+        // Send notification in background
+        notificationService.sendRefundNotification(order._id, refundAmount).catch(err => console.error('Bg Notification Error:', err));
 
         return order;
     }
@@ -550,7 +550,7 @@ class OrderWorkflowService {
         const lowStockProducts = await inventoryService.getLowStockProducts(threshold);
 
         if (lowStockProducts.length > 0) {
-            await notificationService.sendLowStockAlert(lowStockProducts);
+            notificationService.sendLowStockAlert(lowStockProducts).catch(err => console.error('Bg Notification Error:', err));
         }
 
         return lowStockProducts;

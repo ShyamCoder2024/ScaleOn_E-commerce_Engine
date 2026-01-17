@@ -218,8 +218,8 @@ router.put('/:id/status', protect, adminOnly, updateOrderStatusValidator, asyncH
                 req.user._id,
                 note
             );
-            // Send notification
-            await notificationService.sendStatusUpdate(req.params.id, status, note);
+            // Send notification in background
+            notificationService.sendStatusUpdate(req.params.id, status, note).catch(err => console.error('Bg Notification Error:', err));
             break;
 
         case ORDER_STATUS.DELIVERED:
@@ -246,8 +246,8 @@ router.put('/:id/status', protect, adminOnly, updateOrderStatusValidator, asyncH
                 req.user._id,
                 note
             );
-            // Send status update notification
-            await notificationService.sendStatusUpdate(req.params.id, status, note);
+            // Send status update notification in background
+            notificationService.sendStatusUpdate(req.params.id, status, note).catch(err => console.error('Bg Notification Error:', err));
     }
 
     res.json({
