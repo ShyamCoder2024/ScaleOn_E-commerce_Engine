@@ -99,46 +99,56 @@ const ProductReviews = ({ productId }) => {
             <div className="grid lg:grid-cols-3 gap-12">
                 {/* Left Column: Summary & Distribution */}
                 <div className="lg:col-span-1 space-y-8">
-                    {/* Overall Rating */}
-                    <div className="bg-gray-50 p-6 rounded-xl text-center">
-                        <div className="text-5xl font-extrabold text-gray-900 mb-2">
-                            {stats.averageRating || '0.0'}
-                        </div>
-                        <div className="flex justify-center gap-1 mb-2">
-                            {[...Array(5)].map((_, i) => (
-                                <Star
-                                    key={i}
-                                    size={20}
-                                    className={i < Math.round(stats.averageRating)
-                                        ? 'fill-yellow-400 text-yellow-400'
-                                        : 'fill-gray-200 text-gray-200'
-                                    }
-                                />
-                            ))}
-                        </div>
-                        <p className="text-gray-500 text-sm">Based on {stats.totalReviews} reviews</p>
-                    </div>
-
-                    {/* Star Distribution */}
-                    <div className="space-y-3">
-                        {stats.distribution.map((item) => (
-                            <div key={item.stars} className="flex items-center gap-3 text-sm">
-                                <div className="flex items-center gap-1 w-16 text-gray-600">
-                                    <span className="font-medium">{item.stars}</span>
-                                    <Star size={12} className="fill-gray-400 text-gray-400" />
+                    {stats.totalReviews > 0 ? (
+                        <>
+                            {/* Overall Rating */}
+                            <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
+                                <div className="text-5xl font-black text-gray-900 mb-2 tracking-tight">
+                                    {stats.averageRating || '0.0'}
                                 </div>
-                                <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full bg-yellow-400 rounded-full"
-                                        style={{ width: `${item.percent}%` }}
-                                    />
+                                <div className="flex justify-center gap-1.5 mb-2">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star
+                                            key={i}
+                                            size={20}
+                                            className={i < Math.round(stats.averageRating)
+                                                ? 'fill-amber-400 text-amber-400'
+                                                : 'fill-gray-200 text-gray-200'
+                                            }
+                                        />
+                                    ))}
                                 </div>
-                                <div className="w-10 text-right text-gray-400 text-xs">
-                                    {item.percent}%
-                                </div>
+                                <p className="text-gray-500 text-sm font-medium">Based on {stats.totalReviews} reviews</p>
                             </div>
-                        ))}
-                    </div>
+
+                            {/* Star Distribution */}
+                            <div className="space-y-3">
+                                {stats.distribution.map((item) => (
+                                    <div key={item.stars} className="flex items-center gap-3 text-sm">
+                                        <div className="flex items-center gap-1 w-12 text-gray-600 font-medium">
+                                            <span>{item.stars}</span>
+                                            <Star size={12} className="fill-gray-400 text-gray-400" />
+                                        </div>
+                                        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-amber-400 rounded-full"
+                                                style={{ width: `${item.percent}%` }}
+                                            />
+                                        </div>
+                                        <div className="w-8 text-right text-gray-400 text-xs font-medium">
+                                            {item.percent}%
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        <div className="bg-gray-50 p-8 rounded-2xl text-center border border-gray-100 border-dashed">
+                            <Star className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                            <h3 className="font-bold text-gray-900 mb-1">No Reviews Yet</h3>
+                            <p className="text-sm text-gray-500">Be the first to share your thoughts!</p>
+                        </div>
+                    )}
 
                     <div className="text-xs text-center text-gray-400 px-4">
                         Only verified buyers can leave reviews

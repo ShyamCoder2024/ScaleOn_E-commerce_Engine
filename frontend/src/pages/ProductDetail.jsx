@@ -398,22 +398,22 @@ const ProductDetail = () => {
                                 </div>
                             </div>
 
-                            {/* Actions */}
-                            <div className="flex flex-col sm:flex-row gap-3">
+                            {/* Actions - Side by Side on Mobile */}
+                            <div className="flex gap-3 pt-2">
                                 {isInStock() ? (
                                     <>
                                         <button
                                             onClick={handleAddToCart}
                                             disabled={addingToCart}
-                                            className="flex-1 btn-secondary py-3.5 text-base font-bold flex items-center justify-center gap-2 border-gray-200 hover:bg-white hover:border-primary-600 hover:text-primary-600 shadow-sm"
+                                            className="flex-1 btn-secondary py-3.5 px-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 border-gray-200 hover:bg-gray-50 text-gray-900 shadow-sm rounded-xl active:scale-95 transition-all"
                                         >
-                                            <ShoppingCart size={20} />
+                                            <ShoppingCart size={18} />
                                             {addingToCart ? 'Adding...' : 'Add to Cart'}
                                         </button>
                                         <button
                                             onClick={handleBuyNow}
                                             disabled={addingToCart}
-                                            className="flex-1 btn-primary py-3.5 text-base font-bold shadow-lg shadow-primary-600/20 active:scale-[0.98] transition-transform"
+                                            className="flex-1 btn-primary py-3.5 px-4 text-sm sm:text-base font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-all rounded-xl"
                                         >
                                             Buy Now
                                         </button>
@@ -423,12 +423,13 @@ const ProductDetail = () => {
                                         Out of Stock
                                     </button>
                                 )}
+                                {/* Desktop Wishlist (Hidden on Mobile) */}
                                 {isFeatureEnabled('wishlist') && (
                                     <button
                                         onClick={() => toggleWishlist(product)}
-                                        className={`hidden sm:flex py-3.5 px-6 rounded-xl items-center justify-center gap-2 border-2 font-bold transition-all ${isInWishlist(product._id)
+                                        className={`hidden sm:flex py-3.5 px-4 rounded-xl items-center justify-center border-2 transition-all ${isInWishlist(product._id)
                                             ? 'bg-rose-50 border-rose-200 text-rose-500'
-                                            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                                            : 'bg-white border-gray-200 text-gray-400 hover:text-rose-500 hover:border-gray-300'
                                             }`}
                                     >
                                         <Heart size={20} className={isInWishlist(product._id) ? 'fill-rose-500' : ''} />
