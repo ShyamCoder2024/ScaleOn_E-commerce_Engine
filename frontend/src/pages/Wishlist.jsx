@@ -110,6 +110,7 @@ const Wishlist = () => {
                                         src={item.primaryImage}
                                         alt={item.name}
                                         className="w-full h-full object-cover md:group-hover:scale-105 transition-transform duration-500"
+                                        onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/200x200/e2e8f0/475569?text=${encodeURIComponent(item.name?.slice(0, 10) || 'Product')}`; }}
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-400">

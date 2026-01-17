@@ -84,6 +84,7 @@ const Cart = () => {
                                             src={item.image || item.product?.primaryImage || 'https://placehold.co/200x200/e2e8f0/475569?text=No+Image'}
                                             alt={item.productName || item.product?.name}
                                             className="w-full h-full object-cover"
+                                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/200x200/e2e8f0/475569?text=No+Image'; }}
                                         />
                                     </Link>
 

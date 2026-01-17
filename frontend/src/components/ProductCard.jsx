@@ -110,6 +110,9 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
 
     const secondaryImage = product.images?.find(img => img.url !== primaryImage)?.url || primaryImage;
 
+    // Fallback placeholder for broken images
+    const placeholderImage = `https://placehold.co/400x400/e2e8f0/475569?text=${encodeURIComponent(product.name?.slice(0, 10) || 'Product')}`;
+
     // Fix: Proper stock check - respect trackInventory setting and variant inventory
     const checkInStock = () => {
         // If inventory feature is disabled globally, always show in stock
@@ -164,6 +167,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
                         src={primaryImage}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-500 transform font-sans group-hover:scale-105"
+                        onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
                     />
                     {hasDiscount && (
                         <span className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full tracking-wide uppercase">
@@ -250,6 +254,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
                     alt={product.name}
                     className="absolute inset-0 w-full h-full object-cover z-10 transition-opacity duration-300 group-hover:opacity-0 will-change-opacity"
                     loading="lazy"
+                    onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
                 />
 
                 <img
@@ -257,6 +262,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
                     alt={product.name}
                     className="absolute inset-0 w-full h-full object-cover z-0 transition-transform duration-500 scale-100 group-hover:scale-105 transform-gpu will-change-transform"
                     aria-hidden="true"
+                    onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
                 />
 
                 <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-30 flex flex-col gap-1.5 pointer-events-none">
