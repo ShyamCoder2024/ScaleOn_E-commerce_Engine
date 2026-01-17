@@ -19,6 +19,7 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import toast from 'react-hot-toast';
 import ProductReviews from '../components/ProductReviews';
+import ImageLightbox from '../components/ImageLightbox';
 
 const ProductDetail = () => {
     const { slug } = useParams();
@@ -33,6 +34,7 @@ const ProductDetail = () => {
     const [quantity, setQuantity] = useState(1);
     const [selectedVariant, setSelectedVariant] = useState(null);
     const [addingToCart, setAddingToCart] = useState(false);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
 
     useEffect(() => {
         fetchProduct();
@@ -156,12 +158,21 @@ const ProductDetail = () => {
                     {/* Image Gallery */}
                     <div className="space-y-4 w-full">
                         {/* Main Image */}
-                        <div className="aspect-square bg-gray-100 rounded-2xl overflow-hidden relative shadow-sm border border-gray-100">
+                        <div
+                            className="aspect-square bg-gray-100 rounded-2xl overflow-hidden relative shadow-sm border border-gray-100 cursor-zoom-in group"
+                            onClick={() => setLightboxOpen(true)}
+                        >
                             <img
                                 src={images[selectedImage]?.url}
                                 alt={images[selectedImage]?.alt || product.name}
-                                className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+                                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                             />
+
+                            {/* Zoom Indicator */}
+                            <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-2 rounded-full text-xs font-medium flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /><path d="M11 8v6" /><path d="M8 11h6" /></svg>
+                                Click to zoom
+                            </div>
 
                             {/* Wishlist Button */}
                             {isFeatureEnabled('wishlist') && (
@@ -468,6 +479,14 @@ const ProductDetail = () => {
                     </div>
                 )}
             </div>
+
+            {/* Image Lightbox */}
+            <ImageLightbox
+                images={images}
+                initialIndex={selectedImage}
+                isOpen={lightboxOpen}
+                onClose={() => setLightboxOpen(false)}
+            />
         </div>
     );
 };
