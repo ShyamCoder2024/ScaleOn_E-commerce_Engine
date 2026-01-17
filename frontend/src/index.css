@@ -197,25 +197,3 @@ a,
      Since we used print-color-adjust: exact, backgrounds should stay.
   */
 }
-
-/* 
-  Fix for Razorpay Payment Modal/Overlay on Mobile 
-  Ensures the iframe/container handles viewport correctly and isn't clipped
-*/
-.razorpay-container {
-  z-index: 2147483647 !important;
-  /* Max Z-Index */
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  overflow: hidden !important;
-}
-
-iframe.razorpay-checkout-frame {
-  height: 100% !important;
-  min-height: 100vh !important;
-  width: 100% !important;
-  border: none !important;
-}

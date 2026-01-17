@@ -261,6 +261,28 @@ const Checkout = () => {
             setLoading(false);
         });
         razorpay.open();
+
+        // Optimizing Razorpay Overlay for Mobile
+        // We apply styles dynamically only when the modal is opened to avoid
+        // global CSS overriding the container's hidden state.
+        setTimeout(() => {
+            const container = document.querySelector('.razorpay-container');
+            if (container) {
+                container.style.position = 'fixed';
+                container.style.top = '0';
+                container.style.left = '0';
+                container.style.width = '100%';
+                container.style.height = '100%';
+                container.style.zIndex = '2147483647';
+            }
+            const iframe = document.querySelector('iframe.razorpay-checkout-frame');
+            if (iframe) {
+                iframe.style.height = '100%';
+                iframe.style.minHeight = '100vh';
+                iframe.style.width = '100%';
+                iframe.style.border = 'none';
+            }
+        }, 100);
     };
 
     if (!cart.items || cart.items.length === 0) {
