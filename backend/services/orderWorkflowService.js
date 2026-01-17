@@ -8,6 +8,7 @@ import orderService from './orderService.js';
 import inventoryService from './inventoryService.js';
 import notificationService from './notificationService.js';
 import configService from './configService.js';
+import razorpayService from './razorpayService.js';
 import { ORDER_STATUS, PAYMENT_STATUS, AUDIT_ACTIONS } from '../config/constants.js';
 
 class OrderWorkflowService {
@@ -357,10 +358,10 @@ class OrderWorkflowService {
     }
 
     /**
-     * Cancel order
+     * Cancel order - with auto-refund for online payments
      */
     async cancelOrder(orderId, reason, actorId = null, isAdmin = false) {
-        const order = await Order.findById(orderId);
+        const order = await Order.findById(orderId).populate('payment');
         if (!order) {
             throw new Error('Order not found');
         }
@@ -368,6 +369,21 @@ class OrderWorkflowService {
         // Check if order can be cancelled
         if (!isAdmin && !order.canCancel) {
             throw new Error('Order cannot be cancelled at this stage');
+        }
+
+        // Auto-refund for online payments that were completed
+        const payment = await Payment.findOne({ order: order._id });
+        if (payment &&
+            payment.method !== 'cod' &&
+            (payment.status === PAYMENT_STATUS.COMPLETED || payment.status === PAYMENT_STATUS.CAPTURED)) {
+            try {
+                // Process full refund
+                await this.processRefund(orderId, payment.refundableAmount, reason, actorId);
+                console.log(`Auto-refund initiated for cancelled order ${order.orderId}`);
+            } catch (refundError) {
+                console.error(`Auto-refund failed for order ${order.orderId}:`, refundError);
+                // Continue with cancellation even if refund fails - admin can manually refund later
+            }
         }
 
         // Release inventory
@@ -393,35 +409,62 @@ class OrderWorkflowService {
     }
 
     /**
-     * Process refund
+     * Process refund - integrates with payment gateway
      */
     async processRefund(orderId, refundAmount, reason, actorId) {
-        const order = await Order.findById(orderId);
+        const order = await Order.findById(orderId).populate('payment');
         if (!order) {
             throw new Error('Order not found');
         }
 
         // Only refund if payment was online
-        if (order.payment.method === 'cod') {
+        if (order.payment?.method === 'cod') {
             throw new Error('COD orders cannot be refunded online');
         }
 
-        // Create refund record
-        const refundDetails = {
-            amount: refundAmount,
-            reason,
-            processedAt: new Date(),
-            processedBy: actorId
-        };
+        // Verify payment exists and was completed
+        const payment = await Payment.findOne({ order: order._id });
+        if (!payment || (payment.status !== PAYMENT_STATUS.COMPLETED && payment.status !== PAYMENT_STATUS.CAPTURED)) {
+            throw new Error('No completed payment found for this order');
+        }
 
-        // Update order
+        // Check refundable amount
+        if (refundAmount > payment.refundableAmount) {
+            throw new Error(`Refund amount exceeds refundable amount. Maximum: ${payment.refundableAmount}`);
+        }
+
+        // Call Razorpay API to process actual refund
+        let providerRefundId = null;
+        if (payment.providerPaymentId && razorpayService.isConfigured()) {
+            try {
+                console.log(`Processing Razorpay refund for payment ${payment.providerPaymentId}, amount: ${refundAmount}`);
+                const refundResponse = await razorpayService.createRefund(
+                    payment.providerPaymentId,
+                    refundAmount // Amount in paise
+                );
+                providerRefundId = refundResponse.id;
+                console.log(`Razorpay refund successful: ${providerRefundId}`);
+            } catch (error) {
+                console.error('Razorpay refund failed:', error);
+                throw new Error(`Payment gateway refund failed: ${error.message}`);
+            }
+        } else if (!razorpayService.isConfigured()) {
+            console.warn('Razorpay not configured - recording refund without gateway call');
+        }
+
+        // Record refund in Payment model
+        await payment.processRefund(refundAmount, reason, providerRefundId);
+
+        // Update order payment status
         order.payment.refundAmount = (order.payment.refundAmount || 0) + refundAmount;
         order.payment.refundReason = reason;
         order.payment.refundedAt = new Date();
 
-        if (order.payment.refundAmount >= order.pricing.total) {
+        if (payment.isFullyRefunded) {
             order.payment.status = PAYMENT_STATUS.REFUNDED;
             await order.updateStatus(ORDER_STATUS.REFUNDED, actorId, reason);
+        } else {
+            order.payment.status = PAYMENT_STATUS.PARTIALLY_REFUNDED;
         }
 
         await order.save();
