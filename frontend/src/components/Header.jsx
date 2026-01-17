@@ -1,11 +1,42 @@
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { ShoppingCart, User, Heart, ChevronDown, Package, Settings, LogOut, Grid, List, ChevronLeft, ChevronRight, Search, Filter, CheckCircle, ThumbsUp, ShieldCheck, Headphones, Lock, Calendar, Truck, Clock, ExternalLink, Eye, Ban } from "lucide-react";
-import { useState, useEffect } from 'react';
+import { ShoppingCart, User, Heart, ChevronDown, Package, Settings, LogOut, Grid, List, Search, Filter } from "lucide-react";
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useConfig } from '../context/ConfigContext';
 import { useWishlist } from '../context/WishlistContext';
 import { categoryAPI } from '../services/api';
+
+const CATEGORIES_CACHE_KEY = 'app_categories_cache';
+const CATEGORIES_CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
+
+// Get cached categories
+const getCachedCategories = () => {
+    try {
+        const cached = sessionStorage.getItem(CATEGORIES_CACHE_KEY);
+        if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+            if (data && timestamp && Date.now() - timestamp < CATEGORIES_CACHE_EXPIRY) {
+                return data;
+            }
+        }
+    } catch (e) {
+        console.error('Categories cache read error:', e);
+    }
+    return null;
+};
+
+// Save categories to cache
+const setCachedCategories = (data) => {
+    try {
+        sessionStorage.setItem(CATEGORIES_CACHE_KEY, JSON.stringify({
+            data,
+            timestamp: Date.now()
+        }));
+    } catch (e) {
+        console.error('Categories cache write error:', e);
+    }
+};
 
 const Header = () => {
     const navigate = useNavigate();
@@ -16,12 +47,12 @@ const Header = () => {
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [categories, setCategories] = useState([]);
+    const [categories, setCategories] = useState(() => getCachedCategories() || []);
     const [showMobileSearch, setShowMobileSearch] = useState(false);
+    const hasFetchedCategories = useRef(!!getCachedCategories());
 
     // Feature flags
     const wishlistEnabled = isFeatureEnabled('wishlist');
-    const categoriesEnabled = isFeatureEnabled('categories');
     const searchEnabled = isFeatureEnabled('search');
 
     // Products Page Logic
@@ -56,11 +87,17 @@ const Header = () => {
         { value: '-salesCount', label: 'Best Selling' },
     ];
 
+    // Fetch categories only if not cached
     useEffect(() => {
+        if (hasFetchedCategories.current) return;
+
         const fetchCategories = async () => {
             try {
                 const response = await categoryAPI.getCategories();
-                setCategories(response.data.data.categories || []);
+                const cats = response.data.data.categories || [];
+                setCategories(cats);
+                setCachedCategories(cats);
+                hasFetchedCategories.current = true;
             } catch (err) {
                 console.error('Failed to fetch categories:', err);
             }
@@ -95,7 +132,7 @@ const Header = () => {
                         <span className="text-lg md:text-xl font-bold text-gray-900 tracking-tight">{storeName}</span>
                     </Link>
 
-                    {/* Center: Search Bar (Desktop Only) - Only show if search feature enabled */}
+                    {/* Center: Search Bar (Desktop Only) */}
                     {searchEnabled && (
                         <form onSubmit={handleSearch} className="hidden md:flex flex-1 mx-10 max-w-2xl">
                             <div className="relative w-full">
@@ -114,7 +151,7 @@ const Header = () => {
                     {/* Right: Actions */}
                     <div className="flex items-center gap-3 md:gap-5">
 
-                        {/* Categories Dropdown (Desktop) - Show when NOT on products page */}
+                        {/* Categories Dropdown (Desktop) */}
                         {!isProductsPage && categories.length > 0 && (
                             <div className="relative hidden md:block">
                                 <button
@@ -145,7 +182,6 @@ const Header = () => {
                         {/* Product Controls (Only on Products Page) */}
                         {isProductsPage && (
                             <div className="hidden md:flex items-center gap-3">
-                                {/* Sort Dropdown */}
                                 <div className="relative">
                                     <select
                                         value={currentSort}
@@ -159,7 +195,6 @@ const Header = () => {
                                     <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={14} />
                                 </div>
 
-                                {/* View Toggle */}
                                 <div className="flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
                                     <button
                                         onClick={() => handleViewChange('grid')}
@@ -179,7 +214,7 @@ const Header = () => {
                             </div>
                         )}
 
-                        {/* Wishlist (Desktop) - Only show if feature enabled */}
+                        {/* Wishlist (Desktop) */}
                         {wishlistEnabled && (
                             <Link to="/wishlist" className="relative p-2 text-gray-600 hover:text-gray-900 hidden md:flex">
                                 <Heart size={24} />
@@ -191,12 +226,13 @@ const Header = () => {
                             </Link>
                         )}
 
-                        {/* Mobile Search Button - Only show if search feature enabled */}
+                        {/* Mobile Search Button */}
                         {searchEnabled && (
                             <button onClick={() => setShowMobileSearch(!showMobileSearch)} className="md:hidden p-2 text-gray-600 hover:text-gray-900">
                                 <Search size={22} />
                             </button>
                         )}
+
                         {/* Cart */}
                         <Link to="/cart" className="relative p-2 text-gray-600 hover:text-gray-900">
                             <ShoppingCart size={22} className="md:w-6 md:h-6" />
@@ -221,7 +257,6 @@ const Header = () => {
                                     <>
                                         <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
                                         <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border z-50 py-2">
-                                            {/* User Info */}
                                             <div className="px-4 py-3 border-b">
                                                 <p className="font-semibold text-gray-900 truncate">
                                                     {user?.profile?.firstName || 'User'}
@@ -229,7 +264,6 @@ const Header = () => {
                                                 <p className="text-sm text-gray-500 truncate">{user?.email}</p>
                                             </div>
 
-                                            {/* Menu Items */}
                                             <Link to="/account" className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50" onClick={() => setUserMenuOpen(false)}>
                                                 <User size={18} />
                                                 My Account
@@ -277,7 +311,7 @@ const Header = () => {
                     </div>
                 </div>
 
-                {/* Mobile Search Bar (Expandable) - Only show if search feature enabled */}
+                {/* Mobile Search Bar */}
                 {searchEnabled && showMobileSearch && (
                     <div className="md:hidden pb-3">
                         <form onSubmit={handleSearch}>
@@ -317,23 +351,6 @@ const Header = () => {
                         </select>
                     </div>
                 )}
-
-                {/* Mobile Categories Bar - REMOVED per user request */}
-                {/* 
-                {!isProductsPage && (
-                    <div className="md:hidden flex items-center gap-2 pb-3 overflow-x-auto scrollbar-hide">
-                        {categories.slice(0, 6).map(cat => (
-                            <Link
-                                key={cat._id}
-                                to={`/products?category=${cat._id}`}
-                                className="flex-shrink-0 px-4 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 whitespace-nowrap"
-                            >
-                                {cat.name}
-                            </Link>
-                        ))}
-                    </div>
-                )} 
-                */}
             </div>
         </header>
     );

@@ -1,7 +1,35 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { authAPI } from '../services/api';
 
 const AuthContext = createContext(null);
+
+const USER_CACHE_KEY = 'app_user_cache';
+
+// Get cached user from localStorage (instant)
+const getCachedUser = () => {
+    try {
+        const cached = localStorage.getItem(USER_CACHE_KEY);
+        if (cached) {
+            return JSON.parse(cached);
+        }
+    } catch (e) {
+        console.error('User cache read error:', e);
+    }
+    return null;
+};
+
+// Save user to cache
+const setCachedUser = (user) => {
+    try {
+        if (user) {
+            localStorage.setItem(USER_CACHE_KEY, JSON.stringify(user));
+        } else {
+            localStorage.removeItem(USER_CACHE_KEY);
+        }
+    } catch (e) {
+        console.error('User cache write error:', e);
+    }
+};
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
@@ -12,54 +40,76 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    // Check token synchronously - instant auth state
+    const hasToken = !!localStorage.getItem('token');
+    const cachedUser = hasToken ? getCachedUser() : null;
 
-    // Check if user is logged in on mount
+    const [user, setUser] = useState(cachedUser);
+    const [loading, setLoading] = useState(hasToken && !cachedUser); // Only loading if token exists but no cache
+    const [error, setError] = useState(null);
+    const isValidating = useRef(false);
+
+    // Validate user with API in background (non-blocking)
     useEffect(() => {
         const token = localStorage.getItem('token');
-        if (token) {
-            fetchUser();
-        } else {
+        if (!token) {
             setLoading(false);
+            return;
         }
+
+        // Skip if already validating
+        if (isValidating.current) return;
+        isValidating.current = true;
+
+        const validateUser = async () => {
+            try {
+                const response = await authAPI.getMe();
+                const freshUser = response.data.data.user;
+                setUser(freshUser);
+                setCachedUser(freshUser);
+            } catch (err) {
+                console.error('User validation failed:', err);
+                // Only logout on auth errors (401/403)
+                if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+                    await handleTokenRefresh();
+                }
+            } finally {
+                setLoading(false);
+                isValidating.current = false;
+            }
+        };
+
+        validateUser();
     }, []);
 
-    const fetchUser = async () => {
+    const handleTokenRefresh = async () => {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) {
+            clearAuthState();
+            return;
+        }
+
         try {
-            const response = await authAPI.getMe();
-            setUser(response.data.data.user);
-        } catch (err) {
-            console.error('Fetch user failed:', err);
-            // Only logout if it's an authentication error (401/403)
-            // Do NOT logout on network errors or 500s
-            if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-                // Try to refresh the token before logging out
-                const refreshToken = localStorage.getItem('refreshToken');
-                if (refreshToken) {
-                    try {
-                        const refreshResponse = await authAPI.refresh(refreshToken);
-                        if (refreshResponse.data?.data?.accessToken) {
-                            localStorage.setItem('token', refreshResponse.data.data.accessToken);
-                            // Retry fetching user with new token
-                            const retryResponse = await authAPI.getMe();
-                            setUser(retryResponse.data.data.user);
-                            return;
-                        }
-                    } catch (refreshErr) {
-                        console.error('Token refresh failed:', refreshErr);
-                    }
-                }
-                // If refresh failed or no refresh token, logout
-                localStorage.removeItem('token');
-                localStorage.removeItem('refreshToken');
-                setUser(null);
+            const refreshResponse = await authAPI.refresh(refreshToken);
+            if (refreshResponse.data?.data?.accessToken) {
+                localStorage.setItem('token', refreshResponse.data.data.accessToken);
+                const retryResponse = await authAPI.getMe();
+                const freshUser = retryResponse.data.data.user;
+                setUser(freshUser);
+                setCachedUser(freshUser);
             }
-        } finally {
-            setLoading(false);
+        } catch (refreshErr) {
+            console.error('Token refresh failed:', refreshErr);
+            clearAuthState();
         }
     };
+
+    const clearAuthState = useCallback(() => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        setCachedUser(null);
+        setUser(null);
+    }, []);
 
     const login = async (email, password) => {
         try {
@@ -72,6 +122,7 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('refreshToken', refreshToken);
             }
             setUser(user);
+            setCachedUser(user);
 
             return { success: true, user };
         } catch (err) {
@@ -92,6 +143,7 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('refreshToken', refreshToken);
             }
             setUser(user);
+            setCachedUser(user);
 
             return { success: true, user, requiresVerification };
         } catch (err) {
@@ -112,6 +164,7 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('refreshToken', refreshToken);
             }
             setUser(user);
+            setCachedUser(user);
 
             return { success: true, user, isNewUser: response.data.data.isNewUser };
         } catch (err) {
@@ -132,6 +185,7 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('refreshToken', refreshToken);
             }
             setUser(user);
+            setCachedUser(user);
 
             return { success: true, user, isNewUser: response.data.data.isNewUser };
         } catch (err) {
@@ -147,16 +201,16 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
             console.error('Logout error:', err);
         } finally {
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-            setUser(null);
+            clearAuthState();
         }
     };
 
     const updateProfile = async (data) => {
         try {
             const response = await authAPI.updateProfile(data);
-            setUser(response.data.data.user);
+            const updatedUser = response.data.data.user;
+            setUser(updatedUser);
+            setCachedUser(updatedUser);
             return { success: true };
         } catch (err) {
             const message = err.response?.data?.message || 'Update failed';
@@ -182,7 +236,16 @@ export const AuthProvider = ({ children }) => {
         logout,
         updateProfile,
         setUser,
-        refetchUser: fetchUser,
+        refetchUser: async () => {
+            try {
+                const response = await authAPI.getMe();
+                const freshUser = response.data.data.user;
+                setUser(freshUser);
+                setCachedUser(freshUser);
+            } catch (err) {
+                console.error('Refetch user failed:', err);
+            }
+        },
     };
 
     return (

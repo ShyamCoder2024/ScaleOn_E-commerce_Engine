@@ -6,19 +6,17 @@ import ErrorBoundary from './components/ErrorBoundary'
 import OfflineIndicator from './components/OfflineIndicator'
 import { PageLoader } from './components/LoadingSpinner'
 
-// Layouts
+// Layouts (keep eager for shell)
 import MainLayout from './layouts/MainLayout'
 import AdminLayout from './layouts/AdminLayout'
 
-// Core pages (loaded immediately)
-import Home from './pages/Home'
-import Products from './pages/Products'
-import ProductDetail from './pages/ProductDetail'
-import Cart from './pages/Cart'
-import Wishlist from './pages/Wishlist'
-import NotFound from './pages/NotFound'
-
-// Lazy-loaded pages for better performance
+// ALL pages lazy-loaded for optimal bundle splitting
+const Home = lazy(() => import('./pages/Home'))
+const Products = lazy(() => import('./pages/Products'))
+const ProductDetail = lazy(() => import('./pages/ProductDetail'))
+const Cart = lazy(() => import('./pages/Cart'))
+const Wishlist = lazy(() => import('./pages/Wishlist'))
+const NotFound = lazy(() => import('./pages/NotFound'))
 const Checkout = lazy(() => import('./pages/Checkout'))
 const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
@@ -53,11 +51,7 @@ import ScrollToTop from './components/ScrollToTop'
 function App() {
     return (
         <ErrorBoundary>
-            {/* Toast notifications disabled */}
-
             <OfflineIndicator />
-
-            {/* Scroll to top on every route change */}
             <ScrollToTop />
 
             <Suspense fallback={<PageLoader />}>
@@ -87,7 +81,7 @@ function App() {
                         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                         <Route path="/terms" element={<TermsConditions />} />
 
-                        {/* 404 - must be last in MainLayout */}
+                        {/* 404 */}
                         <Route path="*" element={<NotFound />} />
                     </Route>
 
