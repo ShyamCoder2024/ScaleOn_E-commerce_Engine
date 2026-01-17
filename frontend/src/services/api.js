@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import { getFriendlyErrorMessage } from '../utils/errorUtils';
+
 // ===========================================
 // REQUEST DEDUPLICATION & RETRY SYSTEM
 // ===========================================
@@ -57,53 +59,6 @@ const api = axios.create({
     },
     withCredentials: true,
 });
-
-// Helper to get user-friendly error messages
-const getErrorMessage = (error) => {
-    // Network errors
-    if (!error.response) {
-        if (error.code === 'ECONNABORTED') {
-            return 'Request timed out. Please try again.';
-        }
-        if (!navigator.onLine) {
-            return 'You are offline. Please check your internet connection.';
-        }
-        return 'Unable to connect to server. Please try again later.';
-    }
-
-    const { status, data } = error.response;
-
-    // Server-provided message
-    if (data?.message) {
-        return data.message;
-    }
-
-    // Default messages by status code
-    switch (status) {
-        case 400:
-            return 'Invalid request. Please check your input.';
-        case 401:
-            return 'Please log in to continue.';
-        case 403:
-            return 'You do not have permission to perform this action.';
-        case 404:
-            return 'The requested resource was not found.';
-        case 409:
-            return 'This resource already exists.';
-        case 422:
-            return 'Validation failed. Please check your input.';
-        case 429:
-            return 'Too many requests. Please wait a moment and try again.';
-        case 500:
-            return 'Server error. Please try again later.';
-        case 502:
-        case 503:
-        case 504:
-            return 'Service temporarily unavailable. Please try again later.';
-        default:
-            return 'An unexpected error occurred. Please try again.';
-    }
-};
 
 // Request interceptor for adding auth token and deduplication
 api.interceptors.request.use(
@@ -184,7 +139,7 @@ api.interceptors.response.use(
         }
 
         // Enhance error with user-friendly message for components to use if needed
-        error.userMessage = getErrorMessage(error);
+        error.userMessage = getFriendlyErrorMessage(error);
         return Promise.reject(error);
     }
 );

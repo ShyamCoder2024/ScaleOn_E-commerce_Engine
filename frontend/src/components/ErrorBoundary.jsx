@@ -26,25 +26,25 @@ class ErrorBoundary extends Component {
         if (this.state.hasError) {
             return (
                 <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-                    <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
-                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <AlertTriangle className="w-8 h-8 text-red-600" />
+                    <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border border-gray-100">
+                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <AlertTriangle className="w-8 h-8 text-red-500" />
                         </div>
 
-                        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                            Something went wrong
+                        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                            Oops! Something went wrong
                         </h1>
 
-                        <p className="text-gray-500 mb-6">
-                            We apologize for the inconvenience. Please try refreshing the page or go back to the homepage.
+                        <p className="text-gray-500 mb-8 text-sm sm:text-base leading-relaxed">
+                            We're having trouble loading this page. It's not you, it's us. Please try refreshing the page.
                         </p>
 
                         {import.meta.env.MODE === 'development' && this.state.error && (
-                            <details className="mb-6 text-left">
-                                <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
-                                    Error details (dev only)
+                            <details className="mb-6 text-left border rounded-lg p-2 bg-gray-50">
+                                <summary className="cursor-pointer text-xs font-mono text-gray-500 hover:text-gray-700 select-none">
+                                    Technical Details (Dev Only)
                                 </summary>
-                                <pre className="mt-2 p-3 bg-gray-100 rounded-lg text-xs overflow-auto max-h-40">
+                                <pre className="mt-2 p-3 bg-gray-900 text-green-400 rounded-lg text-xs overflow-auto max-h-40 whitespace-pre-wrap break-all">
                                     {this.state.error.toString()}
                                     {this.state.errorInfo?.componentStack}
                                 </pre>
@@ -54,16 +54,16 @@ class ErrorBoundary extends Component {
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                             <button
                                 onClick={() => window.location.reload()}
-                                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors shadow-sm hover:shadow active:scale-95 transform duration-100"
                             >
                                 <RefreshCw className="w-4 h-4" />
-                                Refresh Page
+                                Try Again
                             </button>
 
                             <Link
                                 to="/"
                                 onClick={this.handleReset}
-                                className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-white text-gray-700 border border-gray-200 rounded-full font-medium hover:bg-gray-50 transition-colors hover:border-gray-300 active:scale-95 transform duration-100"
                             >
                                 <Home className="w-4 h-4" />
                                 Go Home
