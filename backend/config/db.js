@@ -60,79 +60,21 @@ async function resolveTXTviaGoogle(hostname) {
 }
 
 const connectDB = async () => {
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/scaleon_commerce';
+    try {
+        const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/scaleon_commerce';
 
-    console.log('🔄 Attempting MongoDB connection...');
+        console.log(`🔄 Connecting to MongoDB...`);
 
-    // If using SRV, try manual resolution FIRST since Render has DNS issues
-    if (mongoUri.startsWith('mongodb+srv://')) {
-        try {
-            // Parse the SRV URI
-            const srvUrl = new URL(mongoUri.replace('mongodb+srv://', 'https://'));
-            const hostname = srvUrl.hostname;
-            const username = srvUrl.username;
-            const password = srvUrl.password;
-            const dbName = srvUrl.pathname.slice(1).split('?')[0] || 'scaleon_commerce';
+        const conn = await mongoose.connect(mongoUri, {
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+        });
 
-            console.log(`📡 Resolving SRV for: ${hostname}`);
-
-            // Resolve SRV records via Google DNS
-            const srvRecords = await resolveSRVviaGoogle(hostname);
-            console.log(`✅ Found ${srvRecords.length} MongoDB hosts`);
-
-            // Build hosts string
-            const hosts = srvRecords.map(r => `${r.name}:${r.port}`).join(',');
-
-            // Get authSource from TXT record
-            const authSource = await resolveTXTviaGoogle(hostname);
-
-            // Build standard connection string
-            const standardUri = `mongodb://${username}:${password}@${hosts}/${dbName}?ssl=true&authSource=${authSource}&retryWrites=true&w=majority`;
-
-            console.log('🔗 Connecting with resolved hosts...');
-
-            const conn = await mongoose.connect(standardUri, {
-                serverSelectionTimeoutMS: 30000,
-                socketTimeoutMS: 45000,
-                family: 4,
-            });
-
-            console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-            setupConnectionHandlers();
-            return;
-
-        } catch (srvError) {
-            console.error('❌ SRV resolution failed:', srvError.message);
-
-            // Try direct connection as last resort
-            console.log('🔄 Trying direct connection...');
-            try {
-                const conn = await mongoose.connect(mongoUri, {
-                    serverSelectionTimeoutMS: 30000,
-                    socketTimeoutMS: 45000,
-                    family: 4,
-                });
-                console.log(`✅ MongoDB Connected (direct): ${conn.connection.host}`);
-                setupConnectionHandlers();
-                return;
-            } catch (directError) {
-                console.error('❌ Direct connection also failed:', directError.message);
-                process.exit(1);
-            }
-        }
-    } else {
-        // Standard connection (non-SRV)
-        try {
-            const conn = await mongoose.connect(mongoUri, {
-                serverSelectionTimeoutMS: 30000,
-                socketTimeoutMS: 45000,
-            });
-            console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-            setupConnectionHandlers();
-        } catch (error) {
-            console.error(`❌ MongoDB Connection Error: ${error.message}`);
-            process.exit(1);
-        }
+        console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+        setupConnectionHandlers();
+    } catch (error) {
+        console.error(`❌ MongoDB Connection Error: ${error.message}`);
+        process.exit(1);
     }
 };
 

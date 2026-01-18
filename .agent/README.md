@@ -11,6 +11,7 @@ This folder contains comprehensive documentation for AI agents working on this c
 3. [API_REFERENCE.md](./API_REFERENCE.md) - Backend API endpoints
 4. [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md) - React component structure
 5. [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) - MongoDB models and relationships
+6. [EMAIL_SETUP.md](./EMAIL_SETUP.md) - Email notification configuration
 
 ## Critical Architecture Rules
 

@@ -38,7 +38,34 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 ---
 
-### 3. Environment Configuration for Client
+### 3. Email Notifications Setup (IMPORTANT)
+Order confirmation and admin notification emails are **fully implemented** but require SMTP configuration.
+
+**See:** [EMAIL_SETUP.md](./EMAIL_SETUP.md) for detailed setup instructions.
+
+**Quick Setup (Gmail):**
+1. Enable 2FA on Gmail account
+2. Create App Password at https://myaccount.google.com/apppasswords
+3. Add to `.env`:
+```bash
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=client-email@gmail.com
+SMTP_PASS=xxxx-xxxx-xxxx-xxxx  # App password
+EMAIL_FROM_NAME=Store Name
+DEFAULT_ADMIN_EMAIL=admin@store.com
+```
+
+**Email Features Included:**
+- ✅ Order confirmation to customer
+- ✅ New order notification to admin
+- ✅ Shipping/delivery notifications
+- ✅ Cancellation/refund notifications
+- ✅ Low stock alerts to admin
+
+---
+
+### 4. Environment Configuration for Client
 Create a `.env.production.template` with all required variables:
 - Database (MongoDB Atlas)
 - Payment gateway (Razorpay)
