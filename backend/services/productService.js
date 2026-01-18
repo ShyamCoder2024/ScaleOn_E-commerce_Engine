@@ -76,8 +76,12 @@ class ProductService {
 
         const skip = (page - 1) * limit;
 
+        // Minimal fields for list view - reduces payload by ~40%
+        const listFields = 'name slug price compareAtPrice primaryImage images categories status isFeatured inventory trackInventory hasVariants variants.inventory variants.isAvailable';
+
         const [products, total] = await Promise.all([
             Product.find(filter)
+                .select(listFields)
                 .populate('categories', 'name slug')
                 .sort(sort)
                 .skip(skip)

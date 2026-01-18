@@ -1,19 +1,26 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { ImageOff } from 'lucide-react';
 
 /**
- * SafeImage - Image component with automatic fallback on load error
- * Prevents broken image icons by showing a styled placeholder
+ * SafeImage - Optimized image component with automatic fallback
+ * 
+ * Performance features:
+ * - Native lazy loading (loading="lazy")
+ * - Async decoding (decoding="async") for non-blocking
+ * - Fetch priority support for above-fold images
+ * - Loading skeleton with smooth fade-in
+ * - React.memo to prevent unnecessary re-renders
  * 
  * @param {string} src - Image source URL
  * @param {string} alt - Alt text for accessibility
- * @param {string} fallbackText - Text to show in placeholder (default: alt text)
- * @param {string} className - Tailwind/CSS classes for the image
- * @param {string} fallbackSrc - Custom fallback image URL (optional)
+ * @param {string} fallbackText - Text to show in placeholder
+ * @param {string} className - Tailwind/CSS classes
+ * @param {string} fallbackSrc - Custom fallback image URL
  * @param {boolean} showIcon - Show placeholder icon (default: true)
- * @param {string} iconSize - Size of the placeholder icon (default: 24)
+ * @param {number} iconSize - Size of placeholder icon (default: 24)
+ * @param {boolean} priority - High priority image (above fold)
  */
-const SafeImage = ({
+const SafeImage = memo(({
     src,
     alt = 'Image',
     fallbackText,
@@ -21,6 +28,7 @@ const SafeImage = ({
     fallbackSrc,
     showIcon = true,
     iconSize = 24,
+    priority = false,
     ...props
 }) => {
     const [hasError, setHasError] = useState(false);
@@ -47,7 +55,9 @@ const SafeImage = ({
                 src={fallbackSrc}
                 alt={alt}
                 className={className}
-                onError={() => setHasError(true)} // Will trigger placeholder if fallback also fails
+                loading="lazy"
+                decoding="async"
+                onError={() => setHasError(true)}
                 {...props}
             />
         );
@@ -81,11 +91,17 @@ const SafeImage = ({
                 className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
                 onError={handleError}
                 onLoad={handleLoad}
-                loading="lazy"
+                // Performance attributes
+                loading={priority ? 'eager' : 'lazy'}
+                decoding="async"
+                fetchpriority={priority ? 'high' : 'auto'}
                 {...props}
             />
         </>
     );
-};
+});
+
+SafeImage.displayName = 'SafeImage';
 
 export default SafeImage;
+

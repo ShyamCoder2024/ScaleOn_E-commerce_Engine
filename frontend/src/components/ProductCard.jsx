@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Plus, Minus } from 'lucide-react';
 import { useConfig } from '../context/ConfigContext';
@@ -18,7 +18,7 @@ function debounce(func, wait) {
     };
 }
 
-const ProductCard = ({ product, viewMode = 'grid' }) => {
+const ProductCard = memo(({ product, viewMode = 'grid' }) => {
     const { formatPrice, isFeatureEnabled } = useConfig();
     const { cart, addToCart, updateQuantity } = useCart();
     const { isInWishlist, toggleWishlist } = useWishlist();
@@ -365,6 +365,8 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
             </div>
         </Link>
     );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;
