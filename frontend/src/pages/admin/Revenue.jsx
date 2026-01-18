@@ -255,6 +255,14 @@ const AdminRevenue = () => {
         try {
             const res = await orderAPI.getAdminOrders({ limit: 10000 });
             const orders = res.data.data?.orders || [];
+
+            // Debug logging
+            console.log('📊 Revenue Debug:', {
+                totalOrdersInDB: orders.length,
+                apiResponse: res.data,
+                dateRange: { start: activeRange.start, end: activeRange.end }
+            });
+
             setAllOrders(orders);
 
             // Calculate current period stats
@@ -690,6 +698,15 @@ const AdminRevenue = () => {
                         {loading ? (
                             <div className="h-48 sm:h-56 lg:h-64 flex items-center justify-center">
                                 <div className="w-6 h-6 sm:w-8 sm:h-8 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
+                            </div>
+                        ) : allOrders.length === 0 ? (
+                            <div className="h-48 sm:h-56 lg:h-64 flex flex-col items-center justify-center text-center px-4">
+                                <ShoppingCart size={40} className="text-gray-300 mb-3" />
+                                <h4 className="text-gray-900 font-semibold mb-1">No Orders Yet</h4>
+                                <p className="text-gray-500 text-sm max-w-sm">
+                                    Revenue data will appear here once customers start placing orders.
+                                    Try placing a test order from the store to see the data.
+                                </p>
                             </div>
                         ) : (
                             <CleanChart data={stats.chartData} height={250} />
