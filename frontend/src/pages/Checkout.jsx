@@ -26,6 +26,9 @@ const Checkout = () => {
     const [paymentMethods, setPaymentMethods] = useState([]);
     const [validation, setValidation] = useState({ valid: true, errors: [] });
 
+    // Inline field validation errors
+    const [fieldErrors, setFieldErrors] = useState({});
+
     const [shippingAddress, setShippingAddress] = useState({
         firstName: user?.profile?.firstName || '',
         lastName: user?.profile?.lastName || '',
@@ -92,30 +95,92 @@ const Checkout = () => {
             ...prev,
             [field]: value
         }));
+        // Clear error when user starts typing
+        if (fieldErrors[field]) {
+            setFieldErrors(prev => ({ ...prev, [field]: null }));
+        }
+    };
+
+    // Validate a single field on blur
+    const validateField = (field, value) => {
+        let error = null;
+        const trimmed = value?.trim() || '';
+
+        switch (field) {
+            case 'firstName':
+            case 'lastName':
+                if (!trimmed) error = 'This field is required';
+                else if (trimmed.length < 2) error = 'Minimum 2 characters';
+                break;
+            case 'email':
+                if (!trimmed) error = 'Email is required';
+                else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) error = 'Enter a valid email address';
+                break;
+            case 'street':
+                if (!trimmed) error = 'Address is required';
+                else if (trimmed.length < 5) error = 'Enter a complete address';
+                break;
+            case 'city':
+            case 'state':
+                if (!trimmed) error = 'This field is required';
+                break;
+            case 'postalCode':
+                if (!trimmed) error = 'PIN code is required';
+                else if (!/^\d{6}$/.test(trimmed)) error = 'Enter a valid 6-digit PIN';
+                break;
+            case 'phone':
+                if (!trimmed) error = 'Phone is required';
+                else if (!/^\d{10}$/.test(trimmed.replace(/\s/g, ''))) error = 'Enter a valid 10-digit phone';
+                break;
+        }
+
+        setFieldErrors(prev => ({ ...prev, [field]: error }));
+        return !error;
+    };
+
+    // Handle blur event for inline validation
+    const handleFieldBlur = (field) => {
+        validateField(field, shippingAddress[field]);
     };
 
     const validateAddress = () => {
-        const required = ['firstName', 'lastName', 'email', 'street', 'city', 'state', 'postalCode', 'phone'];
-        const missing = required.filter(field => !shippingAddress[field]?.trim());
+        const fields = ['firstName', 'lastName', 'email', 'street', 'city', 'state', 'postalCode', 'phone'];
+        let allValid = true;
+        const errors = {};
 
-        if (missing.length > 0) {
-            toast.error(`Please fill in all required fields: ${missing.join(', ')}`);
-            return false;
+        fields.forEach(field => {
+            const value = shippingAddress[field]?.trim() || '';
+            let error = null;
+
+            if (!value) {
+                error = 'This field is required';
+            } else {
+                switch (field) {
+                    case 'email':
+                        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = 'Enter a valid email address';
+                        break;
+                    case 'postalCode':
+                        if (!/^\d{6}$/.test(value)) error = 'Enter a valid 6-digit PIN';
+                        break;
+                    case 'phone':
+                        if (!/^\d{10}$/.test(value.replace(/\s/g, ''))) error = 'Enter a valid 10-digit phone';
+                        break;
+                }
+            }
+
+            if (error) {
+                errors[field] = error;
+                allValid = false;
+            }
+        });
+
+        setFieldErrors(errors);
+
+        if (!allValid) {
+            toast.error('Please fix the errors above');
         }
 
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(shippingAddress.email)) {
-            toast.error('Please enter a valid email address');
-            return false;
-        }
-
-        if (!/^\d{6}$/.test(shippingAddress.postalCode)) {
-            toast.error('Please enter a valid 6-digit PIN code');
-            return false;
-        }
-
-        return true;
+        return allValid;
     };
 
     const handleContinue = () => {
@@ -410,10 +475,11 @@ const Checkout = () => {
                                             type="text"
                                             value={shippingAddress.firstName}
                                             onChange={(e) => handleAddressChange('firstName', e.target.value)}
-                                            className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm"
+                                            onBlur={() => handleFieldBlur('firstName')}
+                                            className={`w-full px-3.5 py-2.5 bg-gray-50 border rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm ${fieldErrors.firstName ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
                                             placeholder="John"
-                                            required
                                         />
+                                        {fieldErrors.firstName && <p className="text-red-500 text-xs font-medium mt-1">{fieldErrors.firstName}</p>}
                                     </div>
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-0.5">Last Name</label>
@@ -421,10 +487,11 @@ const Checkout = () => {
                                             type="text"
                                             value={shippingAddress.lastName}
                                             onChange={(e) => handleAddressChange('lastName', e.target.value)}
-                                            className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm"
+                                            onBlur={() => handleFieldBlur('lastName')}
+                                            className={`w-full px-3.5 py-2.5 bg-gray-50 border rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm ${fieldErrors.lastName ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
                                             placeholder="Doe"
-                                            required
                                         />
+                                        {fieldErrors.lastName && <p className="text-red-500 text-xs font-medium mt-1">{fieldErrors.lastName}</p>}
                                     </div>
 
                                     <div className="col-span-2 space-y-1">
@@ -433,10 +500,11 @@ const Checkout = () => {
                                             type="email"
                                             value={shippingAddress.email}
                                             onChange={(e) => handleAddressChange('email', e.target.value)}
-                                            className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm"
+                                            onBlur={() => handleFieldBlur('email')}
+                                            className={`w-full px-3.5 py-2.5 bg-gray-50 border rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm ${fieldErrors.email ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
                                             placeholder="john.doe@example.com"
-                                            required
                                         />
+                                        {fieldErrors.email && <p className="text-red-500 text-xs font-medium mt-1">{fieldErrors.email}</p>}
                                     </div>
 
                                     <div className="col-span-2 space-y-1">
@@ -445,10 +513,11 @@ const Checkout = () => {
                                             type="text"
                                             value={shippingAddress.street}
                                             onChange={(e) => handleAddressChange('street', e.target.value)}
-                                            className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm"
+                                            onBlur={() => handleFieldBlur('street')}
+                                            className={`w-full px-3.5 py-2.5 bg-gray-50 border rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm ${fieldErrors.street ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
                                             placeholder="House no., Building, Area"
-                                            required
                                         />
+                                        {fieldErrors.street && <p className="text-red-500 text-xs font-medium mt-1">{fieldErrors.street}</p>}
                                     </div>
 
                                     <div className="space-y-1">
@@ -457,10 +526,11 @@ const Checkout = () => {
                                             type="text"
                                             value={shippingAddress.city}
                                             onChange={(e) => handleAddressChange('city', e.target.value)}
-                                            className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm"
+                                            onBlur={() => handleFieldBlur('city')}
+                                            className={`w-full px-3.5 py-2.5 bg-gray-50 border rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm ${fieldErrors.city ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
                                             placeholder="City"
-                                            required
                                         />
+                                        {fieldErrors.city && <p className="text-red-500 text-xs font-medium mt-1">{fieldErrors.city}</p>}
                                     </div>
 
                                     <div className="space-y-1">
@@ -469,10 +539,11 @@ const Checkout = () => {
                                             type="text"
                                             value={shippingAddress.state}
                                             onChange={(e) => handleAddressChange('state', e.target.value)}
-                                            className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm"
+                                            onBlur={() => handleFieldBlur('state')}
+                                            className={`w-full px-3.5 py-2.5 bg-gray-50 border rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm ${fieldErrors.state ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
                                             placeholder="State"
-                                            required
                                         />
+                                        {fieldErrors.state && <p className="text-red-500 text-xs font-medium mt-1">{fieldErrors.state}</p>}
                                     </div>
 
                                     <div className="space-y-1">
@@ -481,13 +552,14 @@ const Checkout = () => {
                                             type="text"
                                             value={shippingAddress.postalCode}
                                             onChange={(e) => handleAddressChange('postalCode', e.target.value)}
-                                            className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm"
+                                            onBlur={() => handleFieldBlur('postalCode')}
+                                            className={`w-full px-3.5 py-2.5 bg-gray-50 border rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm ${fieldErrors.postalCode ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
                                             placeholder="000000"
                                             maxLength={6}
                                             inputMode="numeric"
                                             pattern="[0-9]*"
-                                            required
                                         />
+                                        {fieldErrors.postalCode && <p className="text-red-500 text-xs font-medium mt-1">{fieldErrors.postalCode}</p>}
                                     </div>
 
                                     <div className="space-y-1">
@@ -498,11 +570,13 @@ const Checkout = () => {
                                                 type="tel"
                                                 value={shippingAddress.phone}
                                                 onChange={(e) => handleAddressChange('phone', e.target.value)}
-                                                className="w-full pl-10 pr-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm"
+                                                onBlur={() => handleFieldBlur('phone')}
+                                                className={`w-full pl-10 pr-3.5 py-2.5 bg-gray-50 border rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:shadow-sm ${fieldErrors.phone ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
                                                 placeholder="98765 43210"
-                                                required
+                                                maxLength={10}
                                             />
                                         </div>
+                                        {fieldErrors.phone && <p className="text-red-500 text-xs font-medium mt-1">{fieldErrors.phone}</p>}
                                     </div>
 
                                     <div className="col-span-2 pt-4">

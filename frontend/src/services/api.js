@@ -1,4 +1,5 @@
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 import { getFriendlyErrorMessage } from '../utils/errorUtils';
 
@@ -117,6 +118,9 @@ api.interceptors.response.use(
                 // Refresh failed, clear tokens and redirect to login
                 localStorage.removeItem('token');
                 localStorage.removeItem('refreshToken');
+
+                // Show session expired toast
+                toast.error('Session expired. Please login again.', { duration: 4000 });
 
                 // Only redirect if not already on login page
                 if (!window.location.pathname.includes('/login')) {
