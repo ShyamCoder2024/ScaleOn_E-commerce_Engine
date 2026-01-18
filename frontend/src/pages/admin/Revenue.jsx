@@ -204,7 +204,7 @@ const AdminRevenue = () => {
     const storeName = config?.store?.name || 'Store';
 
     const [loading, setLoading] = useState(true);
-    const [dateRangeStr, setDateRangeStr] = useState('30D');
+    const [dateRangeStr, setDateRangeStr] = useState('1M');
     const [customRange, setCustomRange] = useState({ start: null, end: null });
     const [showCustomPicker, setShowCustomPicker] = useState(false);
     const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -226,18 +226,22 @@ const AdminRevenue = () => {
         start.setHours(0, 0, 0, 0);
 
         switch (dateRangeStr) {
-            case '7D': start.setDate(end.getDate() - 7); break;
-            case '30D': start.setDate(end.getDate() - 30); break;
-            case '90D': start.setDate(end.getDate() - 90); break;
+            case 'TODAY': break; // start is already today
+            case '3D': start.setDate(end.getDate() - 3); break;
+            case '1W': start.setDate(end.getDate() - 7); break;
+            case '2W': start.setDate(end.getDate() - 14); break;
+            case '1M': start.setMonth(end.getMonth() - 1); break;
+            case '3M': start.setMonth(end.getMonth() - 3); break;
+            case '6M': start.setMonth(end.getMonth() - 6); break;
             case '1Y': start.setFullYear(end.getFullYear() - 1); break;
             case 'ALL': start.setFullYear(2020); break;
             case 'CUSTOM':
                 if (customRange.start && customRange.end) {
                     return { start: customRange.start, end: customRange.end };
                 }
-                start.setDate(end.getDate() - 30);
+                start.setMonth(end.getMonth() - 1);
                 break;
-            default: start.setDate(end.getDate() - 30);
+            default: start.setMonth(end.getMonth() - 1);
         }
         return { start, end };
     }, [dateRangeStr, customRange]);
@@ -523,7 +527,18 @@ const AdminRevenue = () => {
         }
     };
 
-    const rangeOptions = ['7D', '30D', '90D', '1Y', 'ALL'];
+    // Range options with labels for display
+    const rangeOptions = [
+        { value: 'TODAY', label: 'Today' },
+        { value: '3D', label: '3 Days' },
+        { value: '1W', label: '1 Week' },
+        { value: '2W', label: '2 Weeks' },
+        { value: '1M', label: '1 Month' },
+        { value: '3M', label: '3 Months' },
+        { value: '6M', label: '6 Months' },
+        { value: '1Y', label: '1 Year' },
+        { value: 'ALL', label: 'All' }
+    ];
     const totalAllOrders = stats.statusBreakdown.completed + stats.statusBreakdown.processing + stats.statusBreakdown.cancelled + stats.statusBreakdown.refunded + stats.statusBreakdown.pending;
 
     return (
@@ -541,17 +556,16 @@ const AdminRevenue = () => {
 
                     {/* Desktop Controls */}
                     <div className="hidden sm:flex items-center gap-2 lg:gap-3 flex-wrap">
-                        <div className="flex items-center bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
+                        <div className="flex items-center bg-white border border-gray-200 rounded-lg p-1 shadow-sm flex-wrap gap-0.5">
                             {rangeOptions.map(range => (
                                 <button
-                                    key={range}
-                                    onClick={() => { setDateRangeStr(range); setShowCustomPicker(false); }}
-                                    className={`px-2 lg:px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-colors ${dateRangeStr === range ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
+                                    key={range.value}
+                                    onClick={() => { setDateRangeStr(range.value); setShowCustomPicker(false); }}
+                                    className={`px-2 lg:px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-colors ${dateRangeStr === range.value ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
                                 >
-                                    {range}
+                                    {range.label}
                                 </button>
                             ))}
-                            <div className="w-px h-4 bg-gray-200 mx-1" />
                             <button
                                 onClick={() => setShowCustomPicker(!showCustomPicker)}
                                 className={`px-2 lg:px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap flex items-center gap-1 transition-colors ${dateRangeStr === 'CUSTOM' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
@@ -710,17 +724,17 @@ const AdminRevenue = () => {
                             <div className="grid grid-cols-3 gap-2 mb-5">
                                 {rangeOptions.map(range => (
                                     <button
-                                        key={range}
+                                        key={range.value}
                                         onClick={() => {
-                                            setDateRangeStr(range);
+                                            setDateRangeStr(range.value);
                                             setShowMobileFilters(false);
                                         }}
-                                        className={`py-2.5 rounded-xl text-sm font-semibold transition-colors ${dateRangeStr === range
+                                        className={`py-2.5 rounded-xl text-xs font-semibold transition-colors ${dateRangeStr === range.value
                                             ? 'bg-gray-900 text-white'
                                             : 'bg-gray-100 text-gray-700'
                                             }`}
                                     >
-                                        {range}
+                                        {range.label}
                                     </button>
                                 ))}
                             </div>
