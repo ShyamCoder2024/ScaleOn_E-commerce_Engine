@@ -2,7 +2,8 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
-export default defineConfig({
+// Using function form to access 'mode' parameter (production/development)
+export default defineConfig(({ mode }) => ({
     plugins: [react()],
     server: {
         port: 5173,
@@ -93,9 +94,9 @@ export default defineConfig({
         // Exclude heavy admin-only deps from initial bundle
         exclude: ['jspdf', 'jspdf-autotable']
     },
-    // Performance optimizations
+    // Performance optimizations - use mode parameter correctly
     esbuild: {
-        // Remove console.log in production (use import.meta.env.MODE for Vite)
-        drop: import.meta.env?.MODE === 'production' ? ['console', 'debugger'] : []
+        // Remove console.log in production
+        drop: mode === 'production' ? ['console', 'debugger'] : []
     }
-})
+}))
