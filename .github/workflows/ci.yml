@@ -10,8 +10,8 @@ env:
   NODE_VERSION: '20.x'
 
 jobs:
-  test:
-    name: Lint & Test
+  build:
+    name: Build & Deploy
     runs-on: ubuntu-latest
     
     services:
@@ -28,18 +28,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          # Use package-lock.json hash for cache key
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm ci
 
-      - name: Lint frontend
+      - name: Install frontend dependencies
         working-directory: ./frontend
-        run: npm run lint --if-present
-        # Continue even if lint warnings exist (but fail on errors)
-        continue-on-error: false
+        run: npm ci
+
+      - name: Install backend dependencies  
+        working-directory: ./backend
+        run: npm ci
 
       - name: Build frontend
         working-directory: ./frontend
