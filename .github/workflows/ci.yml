@@ -29,24 +29,15 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install root dependencies
-        run: npm ci
-
-      - name: Install frontend dependencies
-        working-directory: ./frontend
-        run: npm ci
-
-      - name: Install backend dependencies  
-        working-directory: ./backend
+      # npm workspaces: single install at root handles all workspaces
+      - name: Install all dependencies
         run: npm ci
 
       - name: Build frontend
-        working-directory: ./frontend
-        run: npm run build
+        run: npm run build --workspace=frontend
 
       - name: Run backend tests
-        working-directory: ./backend
-        run: npm test --if-present
+        run: npm run test --workspace=backend --if-present
         env:
           NODE_ENV: test
           MONGODB_URI: mongodb://localhost:27017/test
