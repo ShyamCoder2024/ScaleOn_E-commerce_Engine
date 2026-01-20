@@ -277,6 +277,12 @@ const Checkout = () => {
 
         const { gatewayData, paymentId, orderId } = paymentData;
 
+        // Lock body scroll for mobile
+        document.body.classList.add('razorpay-open');
+
+        // Store scroll position to restore later
+        const scrollY = window.scrollY;
+
         const options = {
             key: gatewayData.razorpayKeyId,
             amount: gatewayData.amount,
@@ -289,6 +295,10 @@ const Checkout = () => {
                 color: '#2563eb'
             },
             handler: async function (response) {
+                // Unlock body scroll
+                document.body.classList.remove('razorpay-open');
+                window.scrollTo(0, scrollY);
+
                 // Payment successful - verify with backend
                 try {
                     setLoading(true);
@@ -314,44 +324,88 @@ const Checkout = () => {
             },
             modal: {
                 ondismiss: function () {
+                    // Unlock body scroll on dismiss
+                    document.body.classList.remove('razorpay-open');
+                    window.scrollTo(0, scrollY);
                     toast.error('Payment cancelled');
                     setLoading(false);
+                },
+                // Mobile-optimized modal settings
+                escape: true,
+                confirm_close: false,
+                animation: true
+            },
+            // Mobile-specific configuration
+            config: {
+                display: {
+                    blocks: {
+                        banks: {
+                            name: "Pay via Bank",
+                            instruments: [
+                                { method: "upi" },
+                                { method: "netbanking" }
+                            ]
+                        }
+                    },
+                    sequence: ["block.banks"],
+                    preferences: {
+                        show_default_blocks: true
+                    }
                 }
             }
         };
 
         const razorpay = new window.Razorpay(options);
+
         razorpay.on('payment.failed', function (response) {
+            // Unlock body scroll on failure
+            document.body.classList.remove('razorpay-open');
+            window.scrollTo(0, scrollY);
             toast.error(`Payment failed: ${response.error.description}`);
             setLoading(false);
         });
+
         razorpay.open();
 
         // Optimizing Razorpay Overlay for Mobile
         // Strategy: Use MutationObserver to detect when Razorpay appends its container to the body.
-        // This is robust against network delays or library quirks.
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
                     if (node.nodeType === 1) {
-                        // Check if the node itself is the container or contains it
-                        const container = node.classList.contains('razorpay-container') ? node : node.querySelector('.razorpay-container');
+                        // Check for any Razorpay-related elements
+                        const isRazorpayElement =
+                            node.classList?.contains('razorpay-container') ||
+                            node.classList?.contains('razorpay-checkout-frame') ||
+                            node.classList?.contains('razorpay-backdrop') ||
+                            node.id?.includes('razorpay') ||
+                            node.querySelector?.('.razorpay-container, .razorpay-checkout-frame, [class*="razorpay"]');
 
-                        if (container) {
-                            // Force immediate styling
-                            container.classList.add('razorpay-mobile-fix');
+                        if (isRazorpayElement) {
+                            // Force immediate styling for mobile
+                            const containers = document.querySelectorAll('.razorpay-container, .razorpay-checkout-frame, [class*="razorpay-container"]');
+                            containers.forEach(container => {
+                                container.style.setProperty('position', 'fixed', 'important');
+                                container.style.setProperty('top', '0', 'important');
+                                container.style.setProperty('left', '0', 'important');
+                                container.style.setProperty('right', '0', 'important');
+                                container.style.setProperty('bottom', '0', 'important');
+                                container.style.setProperty('width', '100vw', 'important');
+                                container.style.setProperty('height', '100vh', 'important');
+                                container.style.setProperty('height', '100dvh', 'important');
+                                container.style.setProperty('z-index', '2147483647', 'important');
+                                container.style.setProperty('overflow', 'hidden', 'important');
+                            });
 
-                            // Also force style properties directly to be safe against inline rewrites
-                            container.style.setProperty('position', 'fixed', 'important');
-                            container.style.setProperty('top', '0', 'important');
-                            container.style.setProperty('left', '0', 'important');
-                            container.style.setProperty('width', '100vw', 'important');
-                            container.style.setProperty('height', '100dvh', 'important');
-                            container.style.setProperty('z-index', '2147483647', 'important');
-                            container.style.setProperty('display', 'block', 'important');
+                            // Style iframes too
+                            const iframes = document.querySelectorAll('.razorpay-container iframe, .razorpay-checkout-frame iframe');
+                            iframes.forEach(iframe => {
+                                iframe.style.setProperty('width', '100%', 'important');
+                                iframe.style.setProperty('height', '100%', 'important');
+                                iframe.style.setProperty('min-height', '100vh', 'important');
+                            });
 
-                            // Disconnect observer once found to save resources
-                            // But wait a bit to ensure it doesn't get overwritten immediately
+                            // Disconnect observer after a delay
                             setTimeout(() => observer.disconnect(), 2000);
                         }
                     }
@@ -362,13 +416,19 @@ const Checkout = () => {
         // Start observing the document body for added nodes
         observer.observe(document.body, { childList: true, subtree: true });
 
-        // Backup constraint: Check manually after a delay just in case
-        setTimeout(() => {
-            const container = document.querySelector('.razorpay-container');
-            if (container) {
-                container.classList.add('razorpay-mobile-fix');
-            }
-        }, 1000);
+        // Backup: Check manually after delays just in case
+        [500, 1000, 1500].forEach(delay => {
+            setTimeout(() => {
+                const containers = document.querySelectorAll('.razorpay-container, .razorpay-checkout-frame');
+                if (containers.length > 0) {
+                    containers.forEach(container => {
+                        container.style.setProperty('position', 'fixed', 'important');
+                        container.style.setProperty('width', '100vw', 'important');
+                        container.style.setProperty('height', '100dvh', 'important');
+                    });
+                }
+            }, delay);
+        });
     };
 
     if (!cart.items || cart.items.length === 0) {
