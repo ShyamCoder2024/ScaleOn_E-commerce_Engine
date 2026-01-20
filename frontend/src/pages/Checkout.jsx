@@ -277,11 +277,19 @@ const Checkout = () => {
 
         const { gatewayData, paymentId, orderId } = paymentData;
 
-        // Lock body scroll for mobile
+        // Lock body and html scroll for mobile - CRITICAL for full-screen overlay
+        document.documentElement.classList.add('razorpay-active');
         document.body.classList.add('razorpay-open');
 
         // Store scroll position to restore later
         const scrollY = window.scrollY;
+
+        // Helper function to cleanup classes
+        const cleanupRazorpay = () => {
+            document.documentElement.classList.remove('razorpay-active');
+            document.body.classList.remove('razorpay-open');
+            window.scrollTo(0, scrollY);
+        };
 
         const options = {
             key: gatewayData.razorpayKeyId,
@@ -295,9 +303,8 @@ const Checkout = () => {
                 color: '#2563eb'
             },
             handler: async function (response) {
-                // Unlock body scroll
-                document.body.classList.remove('razorpay-open');
-                window.scrollTo(0, scrollY);
+                // Cleanup: remove overlay classes
+                cleanupRazorpay();
 
                 // Payment successful - verify with backend
                 try {
@@ -324,9 +331,8 @@ const Checkout = () => {
             },
             modal: {
                 ondismiss: function () {
-                    // Unlock body scroll on dismiss
-                    document.body.classList.remove('razorpay-open');
-                    window.scrollTo(0, scrollY);
+                    // Cleanup: remove overlay classes on dismiss
+                    cleanupRazorpay();
                     toast.error('Payment cancelled');
                     setLoading(false);
                 },
@@ -358,9 +364,8 @@ const Checkout = () => {
         const razorpay = new window.Razorpay(options);
 
         razorpay.on('payment.failed', function (response) {
-            // Unlock body scroll on failure
-            document.body.classList.remove('razorpay-open');
-            window.scrollTo(0, scrollY);
+            // Cleanup: remove overlay classes on failure
+            cleanupRazorpay();
             toast.error(`Payment failed: ${response.error.description}`);
             setLoading(false);
         });
