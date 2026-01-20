@@ -94,7 +94,7 @@ const SafeImage = memo(({
                 // Performance attributes
                 loading={priority ? 'eager' : 'lazy'}
                 decoding="async"
-                fetchpriority={priority ? 'high' : 'auto'}
+                fetchPriority={priority ? 'high' : 'auto'}
                 {...props}
             />
         </>

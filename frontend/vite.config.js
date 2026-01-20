@@ -95,7 +95,7 @@ export default defineConfig({
     },
     // Performance optimizations
     esbuild: {
-        // Remove console.log in production
-        drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : []
+        // Remove console.log in production (use import.meta.env.MODE for Vite)
+        drop: import.meta.env?.MODE === 'production' ? ['console', 'debugger'] : []
     }
 })
