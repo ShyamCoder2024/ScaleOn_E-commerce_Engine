@@ -74,6 +74,9 @@ export const CartProvider = ({ children }) => {
     const [totals, setTotals] = useState(cachedData?.totals || EMPTY_TOTALS);
     const [loading, setLoading] = useState(false); // Start as false - we have cache/defaults
 
+    // Operation lock to prevent concurrent cart operations (fixes mobile race conditions)
+    const isOperatingRef = useRef(false);
+
     // Enterprise-grade fetch state management
     const fetchStateRef = useRef({
         isFetching: false,
@@ -199,6 +202,12 @@ export const CartProvider = ({ children }) => {
 
 
     const addToCart = async (productId, quantity = 1, variant = null) => {
+        // Prevent concurrent operations
+        if (isOperatingRef.current) {
+            return { success: false, error: 'Operation in progress' };
+        }
+        isOperatingRef.current = true;
+
         try {
             const response = await cartAPI.addItem(productId, quantity, variant);
             const data = response.data.data;
@@ -212,6 +221,8 @@ export const CartProvider = ({ children }) => {
             const message = err.response?.data?.message || 'Failed to add item';
             toast.error(message);
             return { success: false, error: message };
+        } finally {
+            isOperatingRef.current = false;
         }
     };
 

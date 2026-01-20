@@ -67,14 +67,9 @@ const Wishlist = () => {
         );
     }
 
-    const handleAddToCart = (item) => {
-        addToCart({
-            _id: item._id,
-            name: item.name,
-            slug: item.slug,
-            price: item.price,
-            primaryImage: item.primaryImage
-        }, 1);
+    const handleAddToCart = async (item) => {
+        // Fix: addToCart expects (productId, quantity, variant) - pass item._id directly
+        await addToCart(item._id, 1);
     };
 
     return (

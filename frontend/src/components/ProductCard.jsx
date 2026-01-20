@@ -65,31 +65,35 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
     };
 
     // Create the debounced function ONCE using useRef
+    // Reduced debounce from 500ms to 250ms for better mobile responsiveness
     const debouncedUpdateQuantity = useRef(
         debounce(async (itemId, newQty) => {
             try {
                 if (newQty > 0) {
                     await updateQuantity(itemId, newQty);
                 } else {
+                    // When quantity is 0, remove the item from cart
                     await updateQuantity(itemId, 0);
                 }
             } finally {
                 isDebouncingRef.current = false;
+                setIsUpdating(false);
             }
-        }, 500) // 500ms debounce
+        }, 250) // Reduced from 500ms for better mobile UX
     ).current;
 
     const changeQuantity = (e, change) => {
         e.preventDefault();
         e.stopPropagation();
 
-        if (!cartItem) return;
+        if (!cartItem || isUpdating) return; // Prevent rapid clicks during update
 
         const newQty = localQuantity + change;
         if (newQty < 0) return; // Prevent negative locally
 
         // 1. Update UI Immediately
         setLocalQuantity(newQty);
+        setIsUpdating(true); // Lock UI during API call
 
         // 2. Mark as debouncing so useEffect doesn't overwrite us with stale data
         isDebouncingRef.current = true;
