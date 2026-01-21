@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
     Plus, Edit2, Trash2,
@@ -18,16 +18,62 @@ const ProductList = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(null);
     const [deleting, setDeleting] = useState(false);
 
+    // Abort controller for canceling stale requests
+    const abortControllerRef = useRef(null);
+
     // Filters from URL
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
     const status = searchParams.get('status') || '';
     const page = parseInt(searchParams.get('page')) || 1;
 
+    const fetchProducts = useCallback(async () => {
+        // Cancel any previous request
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        abortControllerRef.current = new AbortController();
+
+        setLoading(true);
+        try {
+            const response = await adminAPI.getProducts({
+                search,
+                category,
+                status,
+                page,
+                limit: 10
+            });
+
+            // Check if request was aborted
+            if (abortControllerRef.current?.signal.aborted) {
+                return;
+            }
+
+            setProducts(response.data.data.products || []);
+            setPagination(response.data.data.pagination || { page: 1, pages: 1, total: 0 });
+        } catch (err) {
+            // Ignore abort errors
+            if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') {
+                return;
+            }
+            console.error('Failed to fetch products:', err);
+            toast.error('Failed to load products');
+        } finally {
+            setLoading(false);
+        }
+    }, [search, category, status, page]);
+
     useEffect(() => {
         fetchProducts();
         fetchCategories();
-    }, [searchParams]);
+
+        // Cleanup on unmount or when params change
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, [fetchProducts]);
 
     // Body scroll lock when modal is open
     useEffect(() => {
@@ -40,26 +86,6 @@ const ProductList = () => {
             document.body.style.overflow = 'unset';
         };
     }, [showDeleteModal]);
-
-    const fetchProducts = async () => {
-        setLoading(true);
-        try {
-            const response = await adminAPI.getProducts({
-                search,
-                category,
-                status,
-                page,
-                limit: 10
-            });
-            setProducts(response.data.data.products || []);
-            setPagination(response.data.data.pagination || { page: 1, pages: 1, total: 0 });
-        } catch (err) {
-            console.error('Failed to fetch products:', err);
-            toast.error('Failed to load products');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const fetchCategories = async () => {
         try {

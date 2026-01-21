@@ -67,8 +67,9 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }) => {
-    const { isAuthenticated, user } = useAuth();
-    const cachedData = getCachedCart();
+    // CRITICAL: Get isInitialized to wait for auth check to complete
+    const { isAuthenticated, isInitialized, user } = useAuth();
+    const cachedData = isAuthenticated ? getCachedCart() : null; // Only use cache if authenticated
 
     const [cart, setCart] = useState(cachedData?.cart || EMPTY_CART);
     const [totals, setTotals] = useState(cachedData?.totals || EMPTY_TOTALS);
@@ -102,6 +103,13 @@ export const CartProvider = ({ children }) => {
 
     // Fetch cart with race condition protection
     const fetchCart = useCallback(async (forceRefresh = false) => {
+        // CRITICAL: Skip API call for unauthenticated users
+        // This prevents 401 error cascades for guests
+        if (!isAuthenticated) {
+            setLoading(false);
+            return;
+        }
+
         const fetchState = fetchStateRef.current;
 
         // Skip if already fetching (prevents duplicate calls on rapid refresh)
@@ -169,6 +177,12 @@ export const CartProvider = ({ children }) => {
 
     // Handle user changes (login/logout)
     useEffect(() => {
+        // CRITICAL: Wait for auth to initialize before doing anything
+        // This prevents premature cart API calls that trigger 401 errors
+        if (!isInitialized) {
+            return;
+        }
+
         const currentUserId = user?._id;
         const prevUserId = fetchStateRef.current.lastUserId;
 
@@ -188,7 +202,8 @@ export const CartProvider = ({ children }) => {
         }
 
         // On login or initial load with user - fetch cart
-        if (currentUserId && (userChanged || !currentCachedData)) {
+        // ONLY fetch if user is authenticated
+        if (currentUserId && isAuthenticated && (userChanged || !currentCachedData)) {
             fetchCart();
         }
 
@@ -198,7 +213,7 @@ export const CartProvider = ({ children }) => {
                 fetchStateRef.current.abortController.abort();
             }
         };
-    }, [user?._id, fetchCart]);
+    }, [user?._id, isInitialized, isAuthenticated, fetchCart]);
 
 
     const addToCart = async (productId, quantity = 1, variant = null) => {

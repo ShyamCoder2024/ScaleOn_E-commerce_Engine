@@ -15,12 +15,16 @@ const getRequestKey = (config) => {
     return `${config.method}:${config.url}:${JSON.stringify(config.params || {})}`;
 };
 
-// Retry configuration
+// Retry configuration - ENTERPRISE GRADE
 const RETRY_CONFIG = {
-    maxRetries: 3,
-    baseDelay: 1000, // 1 second
-    maxDelay: 10000, // 10 seconds
+    maxRetries: 2, // Reduced from 3 to prevent long delays
+    baseDelay: 500, // Reduced from 1000ms for faster recovery
+    maxDelay: 5000, // Reduced from 10000ms
 };
+
+// Request throttle to prevent API storms
+const requestThrottle = new Map();
+const THROTTLE_WINDOW = 100; // 100ms window for same-endpoint calls
 
 // Sleep utility for retry delay
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -32,23 +36,46 @@ const getRetryDelay = (retryCount) => {
         RETRY_CONFIG.maxDelay
     );
     // Add jitter to prevent thundering herd
-    return delay + Math.random() * 1000;
+    return delay + Math.random() * 500;
 };
 
-// Check if request should be retried
-const shouldRetry = (error, retryCount) => {
+// Check if request should be retried - ONLY for GET requests and specific errors
+const shouldRetry = (error, retryCount, config) => {
     if (retryCount >= RETRY_CONFIG.maxRetries) return false;
 
-    // Don't retry on client errors (4xx) except 429 (rate limit)
+    // CRITICAL: Only retry GET requests - never retry POST/PUT/DELETE
+    if (config?.method && config.method.toLowerCase() !== 'get') {
+        return false;
+    }
+
+    // CRITICAL: Never retry auth errors (401, 403) - they won't magically fix themselves
     if (error.response) {
         const status = error.response.status;
+        // Skip retry on ALL client errors except 429 (rate limit)
         if (status >= 400 && status < 500 && status !== 429) {
             return false;
         }
     }
 
-    // Retry on network errors, timeouts, and server errors
+    // Only retry on network errors, timeouts, and server errors (5xx)
     return !error.response || error.response.status >= 500 || error.code === 'ECONNABORTED';
+};
+
+// Throttle check - prevents same endpoint being hit multiple times within window
+const isThrottled = (key) => {
+    const lastCall = requestThrottle.get(key);
+    if (lastCall && Date.now() - lastCall < THROTTLE_WINDOW) {
+        return true;
+    }
+    requestThrottle.set(key, Date.now());
+    // Clean up old entries periodically
+    if (requestThrottle.size > 100) {
+        const now = Date.now();
+        for (const [k, v] of requestThrottle.entries()) {
+            if (now - v > 5000) requestThrottle.delete(k);
+        }
+    }
+    return false;
 };
 
 // Create axios instance with base configuration
@@ -130,13 +157,13 @@ api.interceptors.response.use(
             }
         }
 
-        // Retry logic for failed requests
+        // Retry logic for failed requests - ONLY for GET requests
         const retryCount = originalRequest?._retryCount || 0;
-        if (originalRequest && shouldRetry(error, retryCount)) {
+        if (originalRequest && shouldRetry(error, retryCount, originalRequest)) {
             originalRequest._retryCount = retryCount + 1;
             const delay = getRetryDelay(retryCount);
 
-            console.log(`Retrying request (${retryCount + 1}/${RETRY_CONFIG.maxRetries}): ${originalRequest.url}`);
+            console.log(`Retrying GET request (${retryCount + 1}/${RETRY_CONFIG.maxRetries}): ${originalRequest.url}`);
 
             await sleep(delay);
             return api(originalRequest);

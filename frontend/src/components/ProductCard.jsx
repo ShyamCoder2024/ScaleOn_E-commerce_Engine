@@ -4,6 +4,8 @@ import { ShoppingCart, Heart, Plus, Minus } from 'lucide-react';
 import { useConfig } from '../context/ConfigContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
+import AuthPromptModal from './AuthPromptModal';
 
 // Utility for debounce
 function debounce(func, wait) {
@@ -22,6 +24,10 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
     const { formatPrice, isFeatureEnabled } = useConfig();
     const { cart, addToCart, updateQuantity } = useCart();
     const { isInWishlist, toggleWishlist } = useWishlist();
+    const { isAuthenticated } = useAuth();
+
+    // State for auth prompt modal
+    const [showAuthModal, setShowAuthModal] = useState(false);
 
     // Find if item is in cart
     const cartItem = cart.items?.find(item =>
@@ -46,6 +52,12 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
     const handleAddToCart = async (e) => {
         e.preventDefault();
         e.stopPropagation();
+
+        // GUEST CHECK: Show auth modal instead of adding to cart
+        if (!isAuthenticated) {
+            setShowAuthModal(true);
+            return;
+        }
 
         // Instant UI update
         setIsUpdating(true); // Locks the UI state temporarily if needed (optional)
@@ -367,6 +379,15 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
                     </div>
                 )}
             </div>
+
+            {/* Auth Prompt Modal for Guests */}
+            <AuthPromptModal
+                isOpen={showAuthModal}
+                onClose={() => setShowAuthModal(false)}
+                product={product}
+                action="purchase"
+                redirectAfterAuth={`/products/${product.slug}`}
+            />
         </Link>
     );
 });

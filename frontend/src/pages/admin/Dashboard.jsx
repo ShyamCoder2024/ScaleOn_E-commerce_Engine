@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
     Package, ShoppingCart, Users, DollarSign,
@@ -77,17 +77,39 @@ const Dashboard = () => {
     const [lowStockProducts, setLowStockProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchDashboardData();
-    }, []);
+    // Fetch state management to prevent duplicate calls
+    const fetchStateRef = useRef({
+        isFetching: false,
+        abortController: null,
+    });
 
-    const fetchDashboardData = async () => {
+    const fetchDashboardData = useCallback(async () => {
+        const fetchState = fetchStateRef.current;
+
+        // Prevent duplicate fetches (multi-device/tab scenario)
+        if (fetchState.isFetching) {
+            return;
+        }
+
+        // Cancel any previous request
+        if (fetchState.abortController) {
+            fetchState.abortController.abort();
+        }
+
+        fetchState.isFetching = true;
+        fetchState.abortController = new AbortController();
+
         try {
             const [dashboardRes, ordersRes, productsRes] = await Promise.all([
                 adminAPI.getDashboard(),
                 orderAPI.getAdminOrders({ limit: 5 }),
                 productAPI.getProducts({ limit: 10, sort: 'inventory' })
             ]);
+
+            // Check if component is still mounted
+            if (fetchState.abortController?.signal.aborted) {
+                return;
+            }
 
             const dashboard = dashboardRes.data.data;
             setStats({
@@ -103,11 +125,27 @@ const Dashboard = () => {
                 productsRes.data.data.products?.filter(p => p.inventory <= 10) || []
             );
         } catch (err) {
+            // Ignore abort errors
+            if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') {
+                return;
+            }
             console.error('Failed to fetch dashboard data:', err);
         } finally {
+            fetchState.isFetching = false;
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchDashboardData();
+
+        // Cleanup on unmount
+        return () => {
+            if (fetchStateRef.current.abortController) {
+                fetchStateRef.current.abortController.abort();
+            }
+        };
+    }, [fetchDashboardData]);
 
     if (loading) {
         return (

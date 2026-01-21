@@ -37,6 +37,9 @@ const Login = () => {
 
         if (result.success) {
             toast.success('Welcome back!');
+            // Small delay to let contexts settle before navigation
+            // This prevents race conditions that cause crashes/refreshes
+            await new Promise(resolve => setTimeout(resolve, 100));
             navigate(from, { replace: true });
         } else {
             toast.error(result.error);
@@ -51,6 +54,7 @@ const Login = () => {
 
         if (result.success) {
             toast.success(result.isNewUser ? 'Account created successfully!' : 'Welcome back!');
+            await new Promise(resolve => setTimeout(resolve, 100));
             navigate(from, { replace: true });
         } else {
             toast.error(result.error);
@@ -64,6 +68,7 @@ const Login = () => {
 
         if (result.success) {
             toast.success(result.isNewUser ? 'Account created successfully!' : 'Welcome back!');
+            await new Promise(resolve => setTimeout(resolve, 100));
             navigate(from, { replace: true });
         } else {
             toast.error(result.error);

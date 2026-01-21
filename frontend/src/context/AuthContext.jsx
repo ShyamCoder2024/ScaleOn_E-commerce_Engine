@@ -52,6 +52,10 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(hasToken && !cachedUser); // Only loading if token exists but no cache
     const [error, setError] = useState(null);
 
+    // CRITICAL: Track if auth has completed initial check
+    // This allows downstream contexts (CartContext) to wait before making API calls
+    const [isInitialized, setIsInitialized] = useState(!hasToken || !!cachedUser);
+
     // Enterprise-grade fetch state management
     const fetchStateRef = useRef({
         isValidating: false,
@@ -164,6 +168,7 @@ export const AuthProvider = ({ children }) => {
             if (currentCount === fetchStateRef.current.validationCount) {
                 fetchState.isValidating = false;
                 setLoading(false);
+                setIsInitialized(true); // Auth check complete
             }
         }
     }, [handleTokenRefresh, clearAuthState]);
@@ -304,6 +309,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated,
         isAdmin,
         isSuperAdmin,
+        isInitialized, // CRITICAL: Downstream contexts wait for this
         login,
         register,
         loginWithGoogle,
