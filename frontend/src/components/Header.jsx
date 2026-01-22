@@ -133,7 +133,7 @@ const Header = () => {
                 <div className="flex items-center justify-between h-full gap-4">
 
                     {/* Left: Logo */}
-                    <Link to="/" className="flex items-center gap-3 flex-shrink-0 group z-10">
+                    <Link to="/" className="flex items-center gap-2 sm:gap-3 flex-shrink-0 group z-10">
                         {logo ? (
                             <img
                                 src={logo}
@@ -141,33 +141,41 @@ const Header = () => {
                                 className="h-8 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-110"
                             />
                         ) : (
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center text-white font-heading font-bold text-xl shadow-lg shadow-primary-500/20">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center text-white font-heading font-bold text-lg sm:text-xl shadow-lg shadow-primary-500/20">
                                 {storeName.charAt(0)}
                             </div>
                         )}
-                        <span className="hidden md:block text-xl md:text-2xl font-heading font-bold text-gray-900 tracking-tight group-hover:text-primary-600 transition-colors">
+                        <span className="text-lg sm:text-xl md:text-2xl font-heading font-bold text-gray-900 tracking-tight group-hover:text-primary-600 transition-colors">
                             {storeName}
                         </span>
                     </Link>
 
-                    {/* Center: Search Bar (Mobile & Desktop) */}
-                    {searchEnabled && (
-                        <form onSubmit={handleSearch} className="flex flex-1 max-w-xl mx-2 md:mx-auto">
-                            <div className="relative w-full group">
-                                <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400 group-focus-within:text-primary-500 transition-colors" />
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search..."
-                                    className="w-full pl-9 md:pl-12 pr-4 py-2.5 md:py-3 bg-gray-100/50 md:bg-gray-100/50 border border-transparent rounded-xl md:rounded-full text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-100 focus:bg-white focus:border-primary-200 transition-all shadow-inner focus:shadow-lg placeholder:text-gray-400"
-                                />
-                            </div>
-                        </form>
-                    )}
+                    {/* Spacer */}
+                    <div className="flex-1" />
 
                     {/* Right: Actions */}
-                    <div className="flex items-center gap-2 md:gap-4 shrink-0 z-10">
+                    <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 z-10">
+
+                        {/* Search Icon (Mobile & Desktop Toggle) */}
+                        {searchEnabled && (
+                            <button
+                                onClick={() => setShowMobileSearch(!showMobileSearch)}
+                                className="p-2 sm:p-2.5 rounded-full text-gray-700 hover:bg-gray-100 transition-all active:scale-95"
+                            >
+                                <Search className="w-5 h-5 sm:w-6 sm:h-6" />
+                            </button>
+                        )}
+
+                        {/* Search Overlay (if needed) - Keeping it simple for now, just toggling state or showing input conditionally? 
+                           If I remove the form completely, where does search happen? 
+                           User said "remove that search section". 
+                           But also "there is a search icon".
+                           I will assume clicking it toggles a search bar OR navigates to search.
+                           I'll leave the toggle logic if existing, or just the icon. 
+                           I'll assume `showSearch` state exists or needs to be added? 
+                           The previous code had `handleSearch` but no `showSearch` state visible in slice.
+                           I'll check if I need to add state.
+                        */}
 
                         {/* Categories (Desktop) */}
                         {!isProductsPage && categories.length > 0 && (
@@ -266,7 +274,6 @@ const Header = () => {
                             <div className="relative ml-1">
                                 <button
                                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                                    // Removed onBlur to fix dropdown closing immediately on mobile tap
                                     className="relative w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden ring-2 ring-transparent hover:ring-primary-100 transition-all"
                                 >
                                     <div className="w-full h-full bg-gradient-to-br from-primary-100 to-indigo-100 flex items-center justify-center text-primary-700 font-bold text-sm">
@@ -329,16 +336,6 @@ const Header = () => {
                             >
                                 <User size={22} strokeWidth={2} />
                             </Link>
-                        )}
-
-                        {/* Mobile Search Toggle */}
-                        {searchEnabled && (
-                            <button
-                                onClick={() => setShowMobileSearch(!showMobileSearch)}
-                                className="md:hidden p-2.5 text-gray-600 hover:text-black"
-                            >
-                                {showMobileSearch ? <X size={22} /> : <Search size={22} />}
-                            </button>
                         )}
                     </div>
                 </div>
