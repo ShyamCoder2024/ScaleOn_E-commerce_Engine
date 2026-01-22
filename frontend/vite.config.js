@@ -21,14 +21,8 @@ export default defineConfig(({ mode }) => ({
         sourcemap: false,
         // Target modern browsers for smaller bundle
         target: 'es2020',
-        // Minification options
-        minify: 'terser',
-        terserOptions: {
-            compress: {
-                drop_console: true,
-                drop_debugger: true
-            }
-        },
+        // Minification options - use esbuild (built into Vite, no extra deps)
+        minify: 'esbuild',
         // Chunk optimization
         chunkSizeWarningLimit: 500,
         rollupOptions: {
