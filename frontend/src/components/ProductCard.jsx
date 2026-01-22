@@ -26,6 +26,10 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
     const { isInWishlist, toggleWishlist } = useWishlist();
     const { isAuthenticated } = useAuth();
 
+    // Critical Safety Check: If product is null/undefined, do not render ANYTHING.
+    // This prevents the "Oops" crash boundary from triggering.
+    if (!product) return null;
+
     // Mock Rating Logic (Visual Polish)
     const rating = product.rating || 4.5;
     const reviewCount = product.reviewCount || Math.floor(Math.random() * 50) + 10;

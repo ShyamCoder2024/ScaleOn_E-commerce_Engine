@@ -312,13 +312,15 @@ const Products = () => {
                         ) : Array.isArray(products) && products.length > 0 ? (
                             <>
                                 <div className={`grid gap-3 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
-                                    {products.map(product => (
-                                        <ProductCard
-                                            key={product._id || Math.random()}
-                                            product={product}
-                                            viewMode={viewMode}
-                                        />
-                                    ))}
+                                    {products
+                                        .filter(p => p && p._id) // Strict Filtering
+                                        .map(product => (
+                                            <ProductCard
+                                                key={product._id}
+                                                product={product}
+                                                viewMode={viewMode}
+                                            />
+                                        ))}
                                 </div>
 
                                 {/* Pagination */}
