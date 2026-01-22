@@ -136,14 +136,20 @@ const Products = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Category Renderer
+    // Category Renderer Safe-Guard
     const renderCategoryOptions = (cats, depth = 0) => {
-        return cats.flatMap(cat => [
-            <option key={cat._id} value={cat._id}>
-                {'— '.repeat(depth)}{cat.name}
-            </option>,
-            ...(cat.children ? renderCategoryOptions(cat.children, depth + 1) : [])
-        ]);
+        // Prevent infinite recursion or non-array access
+        if (!Array.isArray(cats) || depth > 5) return [];
+
+        return cats.flatMap(cat => {
+            if (!cat || !cat._id) return [];
+            return [
+                <option key={cat._id} value={cat._id}>
+                    {'— '.repeat(depth)}{cat.name}
+                </option>,
+                ...(cat.children ? renderCategoryOptions(cat.children, depth + 1) : [])
+            ];
+        });
     };
 
     const sortOptions = [
