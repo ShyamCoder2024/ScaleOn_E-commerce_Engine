@@ -15,11 +15,11 @@ const getRequestKey = (config) => {
     return `${config.method}:${config.url}:${JSON.stringify(config.params || {})}`;
 };
 
-// Retry configuration - ENTERPRISE GRADE
+// Retry configuration - Optimized to prevent long delays
 const RETRY_CONFIG = {
-    maxRetries: 2, // Reduced from 3 to prevent long delays
-    baseDelay: 500, // Reduced from 1000ms for faster recovery
-    maxDelay: 5000, // Reduced from 10000ms
+    maxRetries: 1, // Reduced to 1 to prevent stacking delays
+    baseDelay: 300, // Reduced for faster recovery
+    maxDelay: 2000, // Reduced for better UX
 };
 
 // Request throttle to prevent API storms
@@ -81,7 +81,7 @@ const isThrottled = (key) => {
 // Create axios instance with base configuration
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || '/api',
-    timeout: 30000, // Increased to 30 seconds for slow connections
+    timeout: 15000, // 15 seconds - faster failure detection
     headers: {
         'Content-Type': 'application/json',
     },
@@ -180,6 +180,7 @@ api.interceptors.response.use(
 // ===========================================
 
 // Wrapper for GET requests with deduplication
+// CRITICAL FIX: Don't cache error responses - only cache successful in-flight requests
 const deduplicatedGet = (url, config = {}) => {
     const fullConfig = { ...config, method: 'get', url };
     const key = getRequestKey(fullConfig);
@@ -189,10 +190,19 @@ const deduplicatedGet = (url, config = {}) => {
         return pendingRequests.get(key);
     }
 
-    // Create new request and cache it
-    const promise = api.get(url, config).finally(() => {
-        pendingRequests.delete(key);
-    });
+    // Create new request
+    const promise = api.get(url, config)
+        .then((response) => {
+            // Success - clear from pending after small delay to batch requests
+            setTimeout(() => pendingRequests.delete(key), 50);
+            return response;
+        })
+        .catch((error) => {
+            // CRITICAL: Clear immediately on error so next request is fresh
+            // This prevents cascading failures where one error affects all components
+            pendingRequests.delete(key);
+            throw error;
+        });
 
     pendingRequests.set(key, promise);
     return promise;
