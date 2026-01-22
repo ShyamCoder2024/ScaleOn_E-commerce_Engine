@@ -156,7 +156,7 @@ const Products = () => {
             <div className="container-custom py-8">
 
                 {/* Mobile Toolbar - Sticky Top under Header */}
-                <div className="lg:hidden sticky top-[60px] z-30 bg-white/80 backdrop-blur-md -mx-4 px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-3 mb-6 transition-all duration-300">
+                <div className="lg:hidden sticky top-16 z-30 bg-white/80 backdrop-blur-md -mx-4 px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-3 mb-6 transition-all duration-300 shadow-sm">
                     <button
                         onClick={() => setShowFilters(true)}
                         className="flex-1 flex items-center justify-center gap-2 h-10 bg-gray-100/80 rounded-xl text-sm font-semibold text-gray-700 active:scale-95 transition-transform"
@@ -341,13 +341,23 @@ const Products = () => {
                                 )}
                             </>
                         ) : (
-                            <div className="bg-white rounded-3xl p-8 sm:p-16 text-center border-2 border-dashed border-gray-100">
-                                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
-                                    <Search size={32} />
+                            <div className="col-span-full py-20 text-center">
+                                <div className="bg-white rounded-3xl p-8 sm:p-12 border border-dashed border-gray-200 shadow-sm max-w-lg mx-auto">
+                                    <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-400">
+                                        <Search size={32} />
+                                    </div>
+                                    <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">No products found</h3>
+                                    <p className="text-gray-500 mb-8 mx-auto leading-relaxed">
+                                        We couldn't find any products matching your filters. <br className="hidden sm:block" />
+                                        Try adjusting your search or category.
+                                    </p>
+                                    <button
+                                        onClick={clearFilters}
+                                        className="btn-primary py-3 px-8 rounded-xl shadow-lg shadow-primary-500/20 hover:-translate-y-0.5 transition-all"
+                                    >
+                                        Clear Valid Filters
+                                    </button>
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">No products found</h3>
-                                <p className="text-gray-500 mb-8 max-w-sm mx-auto">Try adjusting your filters or search criteria to find what you're looking for.</p>
-                                <button onClick={clearFilters} className="btn-secondary">Clear all filters</button>
                             </div>
                         )}
                     </div>

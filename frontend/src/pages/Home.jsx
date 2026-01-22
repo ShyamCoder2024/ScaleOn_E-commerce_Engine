@@ -63,24 +63,24 @@ const AdminHeroCarousel = ({ cards }) => {
                                 </span>
                             )}
 
-                            <h1 className="text-4xl sm:text-5xl md:text-7xl font-heading font-bold text-white mb-6 md:mb-8 leading-tight tracking-tight drop-shadow-xl">
+                            <h1 className="text-3xl sm:text-5xl md:text-7xl font-heading font-bold text-white mb-6 md:mb-8 leading-tight tracking-tight drop-shadow-xl">
                                 {card.title || 'Elevate Your Lifestyle'}
                             </h1>
 
-                            <p className="text-lg sm:text-xl md:text-2xl text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-md hidden sm:block">
+                            <p className="text-lg sm:text-xl md:text-2xl text-gray-200 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-md hidden sm:block">
                                 {card.description || 'Discover our curated collection of premium products designed to enhance your everyday life.'}
                             </p>
 
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center w-full sm:w-auto px-4 sm:px-0">
                                 <Link
                                     to={card.link || '/products'}
-                                    className="btn-primary h-14 px-10 rounded-full text-base sm:text-lg font-bold shadow-xl hover:shadow-primary-500/30 hover:-translate-y-1 transition-all w-full sm:w-auto flex items-center justify-center gap-2"
+                                    className="btn-primary h-12 sm:h-14 px-8 sm:px-10 rounded-full text-base sm:text-lg font-bold shadow-xl hover:shadow-primary-500/30 hover:-translate-y-1 transition-all w-full sm:w-auto flex items-center justify-center gap-2"
                                 >
                                     Shop Collection <ArrowRight size={20} />
                                 </Link>
                                 <Link
                                     to="/products?sort=-salesCount"
-                                    className="h-14 px-10 rounded-full bg-white/10 backdrop-blur-md border border-white/30 text-white text-base sm:text-lg font-bold hover:bg-white/20 transition-all w-full sm:w-auto flex items-center justify-center"
+                                    className="h-12 sm:h-14 px-8 sm:px-10 rounded-full bg-white/10 backdrop-blur-md border border-white/30 text-white text-base sm:text-lg font-bold hover:bg-white/20 transition-all w-full sm:w-auto flex items-center justify-center"
                                 >
                                     Best Sellers
                                 </Link>
@@ -121,10 +121,10 @@ const FeatureStrip = () => {
     ];
 
     return (
-        <div className="relative z-20 -mt-10 sm:-mt-16 container-custom">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-8">
+        <div className="relative z-20 mt-6 sm:-mt-16 container-custom">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-8">
                 {features.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-4 group">
+                    <div key={idx} className="flex items-center gap-4 group p-2 rounded-xl hover:bg-gray-50 transition-colors">
                         <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 shadow-sm shrink-0">
                             <item.icon size={24} strokeWidth={1.5} />
                         </div>

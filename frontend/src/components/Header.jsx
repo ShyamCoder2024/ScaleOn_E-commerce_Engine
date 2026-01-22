@@ -277,7 +277,7 @@ const Header = () => {
                                 {userMenuOpen && (
                                     <>
                                         <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                                        <div className="absolute right-0 top-full mt-3 w-64 animate-scale-in glass rounded-2xl shadow-xl border border-white/20 z-50 py-2 overflow-hidden">
+                                        <div className="fixed inset-x-4 top-20 md:absolute md:inset-auto md:right-0 md:top-full md:mt-3 md:w-64 animate-scale-in bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 py-2 overflow-hidden ring-1 ring-black/5">
                                             <div className="px-5 py-4 bg-gray-50/50 border-b border-gray-100">
                                                 <p className="font-heading font-bold text-gray-900 truncate">
                                                     {user?.profile?.firstName || 'Valued Customer'}
@@ -363,18 +363,7 @@ const Header = () => {
                         )}
 
                         {isProductsPage && (
-                            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-                                <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-xs font-medium whitespace-nowrap">
-                                    <Filter size={14} /> Filters
-                                </button>
-                                <select
-                                    value={currentSort}
-                                    onChange={handleSortChange}
-                                    className="px-4 py-2 bg-gray-100 rounded-lg text-xs font-medium appearance-none"
-                                >
-                                    {sortOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                                </select>
-                            </div>
+                            <div className="hidden"></div>
                         )}
                     </div>
                 )}
