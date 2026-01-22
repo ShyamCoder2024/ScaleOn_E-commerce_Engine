@@ -80,7 +80,7 @@ const Products = () => {
                 };
 
                 const response = await productAPI.getProducts(params);
-                const data = response.data.data;
+                const data = response?.data?.data || {};
                 setProducts(data.products || data.items || []);
                 setPagination(data.pagination || { page: 1, pages: 1, total: 0 });
             } catch (err) {

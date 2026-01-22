@@ -520,15 +520,15 @@ const ProductDetail = () => {
                             <button
                                 onClick={handleAddToCart}
                                 disabled={addingToCart}
-                                className="flex-1 btn-secondary py-3 text-sm font-bold border-gray-200 active:scale-95 transition-transform"
+                                className="flex-1 btn-secondary h-12 text-sm font-bold border-gray-200 active:scale-95 transition-transform whitespace-nowrap flex items-center justify-center gap-2 px-2"
                             >
-                                <ShoppingCart size={18} className="mr-2 inline" />
-                                Add
+                                <ShoppingCart size={18} className="shrink-0" />
+                                Add to Cart
                             </button>
                             <button
                                 onClick={handleBuyNow}
                                 disabled={addingToCart}
-                                className="flex-[2] btn-primary py-3 text-base font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-transform"
+                                className="flex-1 btn-primary h-12 text-sm font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-transform whitespace-nowrap px-2"
                             >
                                 Buy Now
                             </button>

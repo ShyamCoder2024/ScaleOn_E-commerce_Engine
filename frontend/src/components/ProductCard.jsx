@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef, memo } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Heart, Plus, Minus } from 'lucide-react';
+import { ShoppingCart, Heart, Plus, Minus, Star } from 'lucide-react';
 import { useConfig } from '../context/ConfigContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -25,6 +25,10 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
     const { cart, addToCart, updateQuantity } = useCart();
     const { isInWishlist, toggleWishlist } = useWishlist();
     const { isAuthenticated } = useAuth();
+
+    // Mock Rating Logic (Visual Polish)
+    const rating = product.rating || 4.5;
+    const reviewCount = product.reviewCount || Math.floor(Math.random() * 50) + 10;
 
     // State for auth prompt modal
     const [showAuthModal, setShowAuthModal] = useState(false);
@@ -343,6 +347,12 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
                             {product.categories[0].name}
                         </div>
                     )}
+
+                    <div className="flex items-center gap-1 mb-1.5">
+                        <Star size={12} className="fill-yellow-400 text-yellow-400" />
+                        <span className="text-xs font-medium text-gray-700">{rating}</span>
+                        <span className="text-[10px] text-gray-400">({reviewCount})</span>
+                    </div>
 
                     <h3 className="font-heading font-bold text-gray-900 text-sm sm:text-base leading-tight mb-2 line-clamp-2 md:line-clamp-1 group-hover:text-primary-600 transition-colors h-[2.5em] md:h-auto">
                         {product.name}

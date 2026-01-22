@@ -122,15 +122,15 @@ const FeatureStrip = () => {
 
     return (
         <div className="relative z-20 mt-6 sm:-mt-16 container-custom">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6 md:p-8">
                 {features.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-4 group p-2 rounded-xl hover:bg-gray-50 transition-colors">
-                        <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 shadow-sm shrink-0">
-                            <item.icon size={24} strokeWidth={1.5} />
+                    <div key={idx} className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3 sm:gap-4 group p-2 rounded-xl hover:bg-gray-50 transition-colors">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 shadow-sm shrink-0">
+                            <item.icon size={20} className="sm:w-6 sm:h-6" strokeWidth={1.5} />
                         </div>
                         <div>
-                            <h4 className="font-bold text-gray-900 text-sm md:text-base">{item.title}</h4>
-                            <p className="text-gray-500 text-xs md:text-sm">{item.desc}</p>
+                            <h4 className="font-bold text-gray-900 text-xs sm:text-base mb-0.5">{item.title}</h4>
+                            <p className="text-gray-500 text-[10px] sm:text-sm leading-tight">{item.desc}</p>
                         </div>
                     </div>
                 ))}
