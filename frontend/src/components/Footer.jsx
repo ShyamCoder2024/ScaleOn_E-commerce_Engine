@@ -34,7 +34,7 @@ const Footer = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="bg-slate-950 text-gray-400 pt-10 md:pt-24 pb-12 border-t border-gray-900">
+        <footer className="bg-primary-950 text-gray-400 pt-10 md:pt-24 pb-12 border-t border-primary-900/50">
             <div className="container-custom">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12 mb-16">
 

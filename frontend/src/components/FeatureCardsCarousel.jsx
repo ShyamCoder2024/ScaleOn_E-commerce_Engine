@@ -16,7 +16,7 @@ const FeatureCardsCarousel = () => {
     const allFeatures = [...features, ...features, ...features, ...features];
 
     return (
-        <section className="bg-gray-900 overflow-hidden py-2.5">
+        <section className="bg-primary-950 overflow-hidden py-2.5">
             <div
                 className="flex whitespace-nowrap"
                 style={{

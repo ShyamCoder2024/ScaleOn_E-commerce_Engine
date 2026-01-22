@@ -13,19 +13,19 @@ export default {
                 background: "hsl(var(--background))",
                 foreground: "hsl(var(--foreground))",
                 primary: {
-                    50: '#eef2ff',
-                    100: '#e0e7ff',
-                    200: '#c7d2fe',
-                    300: '#a5b4fc',
-                    400: '#818cf8',
-                    500: '#6366f1', // Indigo-500 (Vibrant)
-                    600: '#4f46e5', // Indigo-600 (Primary Brand)
-                    700: '#4338ca',
-                    800: '#3730a3',
-                    900: '#312e81',
-                    950: '#1e1b4b',
-                    DEFAULT: "hsl(var(--primary))",
-                    foreground: "hsl(var(--primary-foreground))",
+                    50: '#F0F7FC',
+                    100: '#D6E6F3', // ICE BLUE
+                    200: '#A6C5D7', // POWDER BLUE
+                    300: '#6495ED',
+                    400: '#2E74DE',
+                    500: '#0F52BA', // SAPPHIRE (Main Action)
+                    600: '#0A4299', // Hover
+                    700: '#073278',
+                    800: '#042257',
+                    900: '#021233',
+                    950: '#000926', // DEEP NAVY (Footer/Dark)
+                    DEFAULT: '#0F52BA',
+                    foreground: '#ffffff',
                 },
                 secondary: {
                     DEFAULT: "hsl(var(--secondary))",

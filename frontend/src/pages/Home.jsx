@@ -124,8 +124,8 @@ const FeatureStrip = () => {
         <div className="relative z-20 mt-6 sm:-mt-16 container-custom">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6 md:p-8">
                 {features.map((item, idx) => (
-                    <div key={idx} className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3 sm:gap-4 group p-2 rounded-xl hover:bg-gray-50 transition-colors">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 shadow-sm shrink-0">
+                    <div key={idx} className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3 sm:gap-4 group p-2 rounded-xl hover:bg-primary-50 transition-colors">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary-100/50 text-primary-600 flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 shadow-sm shrink-0">
                             <item.icon size={20} className="sm:w-6 sm:h-6" strokeWidth={1.5} />
                         </div>
                         <div>
