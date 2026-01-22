@@ -322,7 +322,7 @@ const Home = () => {
             </section>
 
             {/* New Arrivals Section */}
-            <section className="pb-32">
+            <section className="pb-10 md:pb-16">
                 <div className="container-custom">
                     <div className="flex items-center justify-between mb-12">
                         <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 tracking-tight">

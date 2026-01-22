@@ -80,14 +80,20 @@ const Products = () => {
                 };
 
                 const response = await productAPI.getProducts(params);
+                // Ultra-safe data extraction
                 const data = response?.data?.data || {};
-                setProducts(data.products || data.items || []);
+
+                // Ensure products is ALWAYS an array
+                const productsList = Array.isArray(data.products) ? data.products : (Array.isArray(data.items) ? data.items : []);
+                setProducts(productsList);
+
+                // Ensure pagination is valid object
                 setPagination(data.pagination || { page: 1, pages: 1, total: 0 });
             } catch (err) {
                 console.error('Failed to fetch products', err);
-                if (products.length === 0) {
-                    // Keep empty / error state
-                }
+                // Fallback to prevent crash
+                setProducts([]);
+                setPagination({ page: 1, pages: 1, total: 0 });
             } finally {
                 setLoading(false);
             }
