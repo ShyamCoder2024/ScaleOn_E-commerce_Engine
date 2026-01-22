@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
-import { X, ChevronDown, Filter, Search, SlidersHorizontal, ArrowUpDown, Check } from "lucide-react";
+import { X, ChevronDown, ChevronLeft, ChevronRight, Filter, Search, SlidersHorizontal, ArrowUpDown, Check } from "lucide-react";
 import { productAPI, categoryAPI } from '../services/api';
 import ProductCard from '../components/ProductCard';
 
