@@ -270,13 +270,16 @@ const Home = () => {
                                 <div key={idx} className="card h-[400px] animate-pulse bg-white border-0 shadow-sm" />
                             ))}
                         </div>
-                    ) : featuredProducts.length > 0 ? (
+                    ) : Array.isArray(featuredProducts) && featuredProducts.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-                            {featuredProducts.slice(0, 4).map(product => (
-                                <div key={product._id} className="animate-fade-in">
-                                    <ProductCard product={product} />
-                                </div>
-                            ))}
+                            {featuredProducts
+                                .filter(p => p && p._id) // Filter out invalid products
+                                .slice(0, 4)
+                                .map(product => (
+                                    <div key={product._id} className="animate-fade-in">
+                                        <ProductCard product={product} />
+                                    </div>
+                                ))}
                         </div>
                     ) : (
                         <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">

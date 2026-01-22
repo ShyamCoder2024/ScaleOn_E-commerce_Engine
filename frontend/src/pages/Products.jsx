@@ -303,12 +303,12 @@ const Products = () => {
                                     <div key={idx} className="bg-white rounded-2xl h-[350px] animate-pulse bg-gray-100" />
                                 ))}
                             </div>
-                        ) : products.length > 0 ? (
+                        ) : Array.isArray(products) && products.length > 0 ? (
                             <>
                                 <div className={`grid gap-3 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
                                     {products.map(product => (
                                         <ProductCard
-                                            key={product._id}
+                                            key={product._id || Math.random()}
                                             product={product}
                                             viewMode={viewMode}
                                         />
