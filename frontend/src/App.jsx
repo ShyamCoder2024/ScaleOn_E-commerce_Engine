@@ -47,6 +47,7 @@ const TermsConditions = lazy(() => import('./pages/policies/TermsConditions'))
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminRoute from './components/AdminRoute'
 import ScrollToTop from './components/ScrollToTop'
+import ServerWarmup from './components/ServerWarmup'
 
 function App() {
     return (
@@ -54,55 +55,57 @@ function App() {
             <OfflineIndicator />
             <ScrollToTop />
 
-            <Suspense fallback={<PageLoader />}>
-                <Routes>
-                    {/* Public Routes */}
-                    <Route element={<MainLayout />}>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/products" element={<Products />} />
-                        <Route path="/products/:slug" element={<ProductDetail />} />
-                        <Route path="/cart" element={<Cart />} />
-                        <Route path="/wishlist" element={<Wishlist />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
-                        <Route path="/forgot-password" element={<ForgotPassword />} />
+            <ServerWarmup>
+                <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                        {/* Public Routes */}
+                        <Route element={<MainLayout />}>
+                            <Route path="/" element={<Home />} />
+                            <Route path="/products" element={<Products />} />
+                            <Route path="/products/:slug" element={<ProductDetail />} />
+                            <Route path="/cart" element={<Cart />} />
+                            <Route path="/wishlist" element={<Wishlist />} />
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/register" element={<Register />} />
+                            <Route path="/forgot-password" element={<ForgotPassword />} />
 
-                        {/* Protected Routes */}
-                        <Route element={<ProtectedRoute />}>
-                            <Route path="/checkout" element={<Checkout />} />
-                            <Route path="/account" element={<Account />} />
-                            <Route path="/orders" element={<Orders />} />
-                            <Route path="/orders/:id" element={<OrderDetail />} />
+                            {/* Protected Routes */}
+                            <Route element={<ProtectedRoute />}>
+                                <Route path="/checkout" element={<Checkout />} />
+                                <Route path="/account" element={<Account />} />
+                                <Route path="/orders" element={<Orders />} />
+                                <Route path="/orders/:id" element={<OrderDetail />} />
+                            </Route>
+
+                            {/* Policy Routes */}
+                            <Route path="/shipping-policy" element={<ShippingPolicy />} />
+                            <Route path="/return-policy" element={<ReturnPolicy />} />
+                            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                            <Route path="/terms" element={<TermsConditions />} />
+
+                            {/* 404 */}
+                            <Route path="*" element={<NotFound />} />
                         </Route>
 
-                        {/* Policy Routes */}
-                        <Route path="/shipping-policy" element={<ShippingPolicy />} />
-                        <Route path="/return-policy" element={<ReturnPolicy />} />
-                        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                        <Route path="/terms" element={<TermsConditions />} />
-
-                        {/* 404 */}
-                        <Route path="*" element={<NotFound />} />
-                    </Route>
-
-                    {/* Admin Routes */}
-                    <Route path="/admin" element={<AdminRoute />}>
-                        <Route element={<AdminLayout />}>
-                            <Route index element={<AdminDashboard />} />
-                            <Route path="products" element={<AdminProducts />} />
-                            <Route path="products/new" element={<AdminProductForm />} />
-                            <Route path="products/:id/edit" element={<AdminProductForm />} />
-                            <Route path="orders" element={<AdminOrders />} />
-                            <Route path="orders/:id" element={<AdminOrderDetail />} />
-                            <Route path="customers" element={<AdminCustomers />} />
-                            <Route path="customers/:id" element={<AdminCustomerDetail />} />
-                            <Route path="feature-cards" element={<AdminFeatureCards />} />
-                            <Route path="settings" element={<AdminSettings />} />
-                            <Route path="revenue" element={<AdminRevenue />} />
+                        {/* Admin Routes */}
+                        <Route path="/admin" element={<AdminRoute />}>
+                            <Route element={<AdminLayout />}>
+                                <Route index element={<AdminDashboard />} />
+                                <Route path="products" element={<AdminProducts />} />
+                                <Route path="products/new" element={<AdminProductForm />} />
+                                <Route path="products/:id/edit" element={<AdminProductForm />} />
+                                <Route path="orders" element={<AdminOrders />} />
+                                <Route path="orders/:id" element={<AdminOrderDetail />} />
+                                <Route path="customers" element={<AdminCustomers />} />
+                                <Route path="customers/:id" element={<AdminCustomerDetail />} />
+                                <Route path="feature-cards" element={<AdminFeatureCards />} />
+                                <Route path="settings" element={<AdminSettings />} />
+                                <Route path="revenue" element={<AdminRevenue />} />
+                            </Route>
                         </Route>
-                    </Route>
-                </Routes>
-            </Suspense>
+                    </Routes>
+                </Suspense>
+            </ServerWarmup>
         </ErrorBoundary>
     )
 }
