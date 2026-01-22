@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { ShoppingCart, User, Heart, ChevronDown, Package, Settings, LogOut, Grid, List, Search, Filter } from "lucide-react";
+import { ShoppingCart, User, Heart, ChevronDown, Package, Settings, LogOut, Grid, List, Search, Filter, Menu, X } from "lucide-react";
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -50,6 +50,7 @@ const Header = () => {
     const [categories, setCategories] = useState(() => getCachedCategories() || []);
     const [showMobileSearch, setShowMobileSearch] = useState(false);
     const hasFetchedCategories = useRef(!!getCachedCategories());
+    const [scrolled, setScrolled] = useState(false);
 
     // Feature flags
     const wishlistEnabled = isFeatureEnabled('wishlist');
@@ -105,6 +106,15 @@ const Header = () => {
         fetchCategories();
     }, []);
 
+    // Scroll effect for glass header
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 10);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     const handleSearch = (e) => {
         e.preventDefault();
         if (searchQuery.trim()) {
@@ -115,62 +125,74 @@ const Header = () => {
     };
 
     return (
-        <header className="bg-white shadow-sm sticky top-0 z-50">
-            <div className="container-custom">
-                {/* Main Header Row */}
-                <div className="flex items-center justify-between h-14 md:h-16">
+        <header
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'glass h-16 md:h-20' : 'bg-white/80 backdrop-blur-md h-16 md:h-20 border-b border-gray-100'
+                }`}
+        >
+            <div className="container-custom h-full">
+                <div className="flex items-center justify-between h-full gap-4">
 
-                    {/* Left: Logo + Name */}
-                    <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-                        {logo && (
+                    {/* Left: Logo */}
+                    <Link to="/" className="flex items-center gap-3 flex-shrink-0 group">
+                        {logo ? (
                             <img
                                 src={logo}
                                 alt={storeName}
-                                className="h-7 md:h-8 w-auto object-contain transition-transform group-hover:scale-105"
+                                className="h-8 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-110"
                             />
+                        ) : (
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center text-white font-heading font-bold text-xl shadow-lg shadow-primary-500/20">
+                                {storeName.charAt(0)}
+                            </div>
                         )}
-                        <span className="text-lg md:text-xl font-bold text-gray-900 tracking-tight">{storeName}</span>
+                        <span className="text-xl md:text-2xl font-heading font-bold text-gray-900 tracking-tight group-hover:text-primary-600 transition-colors">
+                            {storeName}
+                        </span>
                     </Link>
 
-                    {/* Center: Search Bar (Desktop Only) */}
+                    {/* Center: Search Bar (Desktop) */}
                     {searchEnabled && (
-                        <form onSubmit={handleSearch} className="hidden md:flex flex-1 mx-10 max-w-2xl">
-                            <div className="relative w-full">
-                                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-auto">
+                            <div className="relative w-full group">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-500 transition-colors" />
                                 <input
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search products..."
-                                    className="w-full pl-14 pr-6 py-2.5 border-none bg-gray-50 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all shadow-sm"
+                                    placeholder="Search essentials..."
+                                    className="w-full pl-12 pr-4 py-3 bg-gray-100/50 border border-transparent rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-100 focus:bg-white focus:border-primary-200 transition-all shadow-inner focus:shadow-lg"
                                 />
                             </div>
                         </form>
                     )}
 
                     {/* Right: Actions */}
-                    <div className="flex items-center gap-3 md:gap-5">
+                    <div className="flex items-center gap-2 md:gap-4">
 
-                        {/* Categories Dropdown (Desktop) */}
+                        {/* Categories (Desktop) */}
                         {!isProductsPage && categories.length > 0 && (
-                            <div className="relative hidden md:block">
+                            <div className="relative hidden lg:block">
                                 <button
                                     onClick={() => setCategoryMenuOpen(!categoryMenuOpen)}
-                                    onBlur={() => setTimeout(() => setCategoryMenuOpen(false), 200)}
-                                    className="flex items-center gap-1.5 text-gray-700 hover:text-gray-900 font-medium"
+                                    onBlur={() => setTimeout(() => setCategoryMenuOpen(false), 200)} // Delay for click
+                                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
                                 >
                                     Categories
-                                    <ChevronDown size={16} className={`transition-transform ${categoryMenuOpen ? 'rotate-180' : ''}`} />
+                                    <ChevronDown size={14} className={`transition-transform duration-200 ${categoryMenuOpen ? 'rotate-180' : ''}`} />
                                 </button>
 
                                 {categoryMenuOpen && (
-                                    <div className="absolute right-0 mt-3 w-52 bg-white rounded-xl shadow-lg border z-50 py-2">
-                                        <Link to="/products" className="block px-4 py-2.5 text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setCategoryMenuOpen(false)}>
+                                    <div className="absolute top-full right-0 mt-2 w-56 animate-scale-in glass rounded-2xl shadow-xl overflow-hidden py-2 border border-white/20">
+                                        <Link to="/products" className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
                                             All Products
                                         </Link>
-                                        <div className="border-t my-1" />
+                                        <div className="h-px bg-gray-100 my-1" />
                                         {categories.slice(0, 8).map(cat => (
-                                            <Link key={cat._id} to={`/products?category=${cat._id}`} className="block px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900" onClick={() => setCategoryMenuOpen(false)}>
+                                            <Link
+                                                key={cat._id}
+                                                to={`/products?category=${cat._id}`}
+                                                className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                                            >
                                                 {cat.name}
                                             </Link>
                                         ))}
@@ -179,34 +201,32 @@ const Header = () => {
                             </div>
                         )}
 
-                        {/* Product Controls (Only on Products Page) */}
+                        {/* Product View Controls (Desktop) */}
                         {isProductsPage && (
-                            <div className="hidden md:flex items-center gap-3">
+                            <div className="hidden lg:flex items-center gap-3 bg-gray-100/50 p-1.5 rounded-xl border border-gray-200/50">
                                 <div className="relative">
                                     <select
                                         value={currentSort}
                                         onChange={handleSortChange}
-                                        className="appearance-none pl-3 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
+                                        className="appearance-none pl-3 pr-8 py-1.5 bg-transparent text-sm font-medium text-gray-700 focus:outline-none cursor-pointer hover:text-primary-600"
                                     >
                                         {sortOptions.map(opt => (
                                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                                         ))}
                                     </select>
-                                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={14} />
+                                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={12} />
                                 </div>
-
-                                <div className="flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
+                                <div className="h-4 w-px bg-gray-300" />
+                                <div className="flex gap-1">
                                     <button
                                         onClick={() => handleViewChange('grid')}
-                                        className={`p-1.5 rounded-md transition-all ${currentView === 'grid' ? 'bg-white shadow-sm text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
-                                        title="Grid View"
+                                        className={`p-1.5 rounded-lg transition-all duration-200 ${currentView === 'grid' ? 'bg-white shadow text-primary-600' : 'text-gray-400 hover:text-gray-600'}`}
                                     >
                                         <Grid size={16} />
                                     </button>
                                     <button
                                         onClick={() => handleViewChange('list')}
-                                        className={`p-1.5 rounded-md transition-all ${currentView === 'list' ? 'bg-white shadow-sm text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
-                                        title="List View"
+                                        className={`p-1.5 rounded-lg transition-all duration-200 ${currentView === 'list' ? 'bg-white shadow text-primary-600' : 'text-gray-400 hover:text-gray-600'}`}
                                     >
                                         <List size={16} />
                                     </button>
@@ -214,141 +234,148 @@ const Header = () => {
                             </div>
                         )}
 
-                        {/* Wishlist (Desktop) */}
+                        {/* Wishlist */}
                         {wishlistEnabled && (
-                            <Link to="/wishlist" className="relative p-2 text-gray-600 hover:text-gray-900 hidden md:flex">
-                                <Heart size={24} />
+                            <Link
+                                to="/wishlist"
+                                className="relative p-2.5 rounded-full text-gray-600 hover:bg-gray-100 hover:text-red-500 transition-all hidden md:flex"
+                                title="Wishlist"
+                            >
+                                <Heart size={22} strokeWidth={2} />
                                 {wishlistCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                                        {wishlistCount}
-                                    </span>
+                                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white" />
                                 )}
                             </Link>
                         )}
 
-                        {/* Mobile Search Button */}
-                        {searchEnabled && (
-                            <button onClick={() => setShowMobileSearch(!showMobileSearch)} className="md:hidden p-2 text-gray-600 hover:text-gray-900">
-                                <Search size={22} />
-                            </button>
-                        )}
-
-                        {/* Cart */}
-                        <Link to="/cart" className="relative p-2 text-gray-600 hover:text-gray-900">
-                            <ShoppingCart size={22} className="md:w-6 md:h-6" />
+                        {/* Cart Button */}
+                        <Link
+                            to="/cart"
+                            className="relative p-2.5 rounded-full text-gray-600 hover:bg-gray-100 hover:text-primary-600 transition-all group"
+                        >
+                            <ShoppingCart size={22} strokeWidth={2} className="group-hover:scale-110 transition-transform" />
                             {totals.itemCount > 0 && (
-                                <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                                <span className="absolute top-1 -right-0.5 min-w-[18px] h-[18px] bg-primary-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 ring-2 ring-white animate-scale-in">
                                     {totals.itemCount}
                                 </span>
                             )}
                         </Link>
 
-                        {/* Account */}
+                        {/* User Menu */}
                         {isAuthenticated ? (
-                            <div className="relative">
+                            <div className="relative ml-1">
                                 <button
                                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                                    className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-semibold text-sm hover:bg-primary-200 transition-colors"
+                                    // Removed onBlur to fix dropdown closing immediately on mobile tap
+                                    className="relative w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden ring-2 ring-transparent hover:ring-primary-100 transition-all"
                                 >
-                                    {user?.profile?.firstName?.[0] || user?.email?.[0]?.toUpperCase()}
+                                    <div className="w-full h-full bg-gradient-to-br from-primary-100 to-indigo-100 flex items-center justify-center text-primary-700 font-bold text-sm">
+                                        {user?.profile?.firstName?.[0] || user?.email?.[0]?.toUpperCase()}
+                                    </div>
                                 </button>
 
                                 {userMenuOpen && (
                                     <>
                                         <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                                        <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border z-50 py-2">
-                                            <div className="px-4 py-3 border-b">
-                                                <p className="font-semibold text-gray-900 truncate">
-                                                    {user?.profile?.firstName || 'User'}
+                                        <div className="absolute right-0 top-full mt-3 w-64 animate-scale-in glass rounded-2xl shadow-xl border border-white/20 z-50 py-2 overflow-hidden">
+                                            <div className="px-5 py-4 bg-gray-50/50 border-b border-gray-100">
+                                                <p className="font-heading font-bold text-gray-900 truncate">
+                                                    {user?.profile?.firstName || 'Valued Customer'}
                                                 </p>
-                                                <p className="text-sm text-gray-500 truncate">{user?.email}</p>
+                                                <p className="text-xs text-gray-500 truncate mt-0.5">{user?.email}</p>
                                             </div>
 
-                                            <Link to="/account" className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50" onClick={() => setUserMenuOpen(false)}>
-                                                <User size={18} />
-                                                My Account
-                                            </Link>
-                                            <Link to="/orders" className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50" onClick={() => setUserMenuOpen(false)}>
-                                                <Package size={18} />
-                                                My Orders
-                                            </Link>
-                                            {wishlistEnabled && (
-                                                <Link to="/wishlist" className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50" onClick={() => setUserMenuOpen(false)}>
-                                                    <Heart size={18} />
-                                                    Wishlist
-                                                    {wishlistCount > 0 && (
-                                                        <span className="ml-auto bg-red-100 text-red-600 text-xs font-medium px-2 py-0.5 rounded-full">
-                                                            {wishlistCount}
-                                                        </span>
-                                                    )}
+                                            <div className="p-2">
+                                                <Link to="/account" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
+                                                    <User size={18} />
+                                                    My Profile
                                                 </Link>
-                                            )}
+                                                <Link to="/orders" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
+                                                    <Package size={18} />
+                                                    My Orders
+                                                </Link>
 
-                                            {isAdmin && (
-                                                <>
-                                                    <div className="border-t my-1" />
-                                                    <Link to="/admin" className="flex items-center gap-3 px-4 py-2.5 text-primary-600 hover:bg-gray-50 font-medium" onClick={() => setUserMenuOpen(false)}>
-                                                        <Settings size={18} />
-                                                        Admin Panel
+                                                {wishlistEnabled && (
+                                                    <Link to="/wishlist" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
+                                                        <Heart size={18} />
+                                                        Wishlist
                                                     </Link>
-                                                </>
-                                            )}
+                                                )}
 
-                                            <div className="border-t my-1" />
-                                            <button onClick={() => { logout(); setUserMenuOpen(false); }} className="flex items-center gap-3 w-full text-left px-4 py-2.5 text-red-600 hover:bg-gray-50">
-                                                <LogOut size={18} />
-                                                Logout
-                                            </button>
+                                                {isAdmin && (
+                                                    <Link to="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-primary-600 bg-primary-50/50 hover:bg-primary-100 transition-colors mt-2 mb-2" onClick={() => setUserMenuOpen(false)}>
+                                                        <Settings size={18} />
+                                                        Admin Dashboard
+                                                    </Link>
+                                                )}
+
+                                                <button
+                                                    onClick={() => { logout(); setUserMenuOpen(false); }}
+                                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors mt-1"
+                                                >
+                                                    <LogOut size={18} />
+                                                    Logout
+                                                </button>
+                                            </div>
                                         </div>
                                     </>
                                 )}
                             </div>
                         ) : (
-                            <Link to="/login" className="p-2 text-gray-600 hover:text-gray-900">
-                                <User size={22} className="md:w-6 md:h-6" />
+                            <Link
+                                to="/login"
+                                className="p-2.5 rounded-full text-gray-600 hover:bg-gray-100 hover:text-primary-600 transition-all"
+                                title="Login"
+                            >
+                                <User size={22} strokeWidth={2} />
                             </Link>
+                        )}
+
+                        {/* Mobile Search Toggle */}
+                        {searchEnabled && (
+                            <button
+                                onClick={() => setShowMobileSearch(!showMobileSearch)}
+                                className="md:hidden p-2.5 text-gray-600 hover:text-black"
+                            >
+                                {showMobileSearch ? <X size={22} /> : <Search size={22} />}
+                            </button>
                         )}
                     </div>
                 </div>
 
-                {/* Mobile Search Bar */}
-                {searchEnabled && showMobileSearch && (
-                    <div className="md:hidden pb-3">
-                        <form onSubmit={handleSearch}>
-                            <div className="relative">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search products..."
-                                    autoFocus
-                                    className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50"
-                                />
-                            </div>
-                        </form>
-                    </div>
-                )}
+                {/* Mobile Search & Controls Panel */}
+                {(showMobileSearch || isProductsPage) && (
+                    <div className="md:hidden py-3 animate-slide-up border-t border-gray-100">
+                        {searchEnabled && showMobileSearch && (
+                            <form onSubmit={handleSearch} className="mb-3">
+                                <div className="relative">
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Search products..."
+                                        autoFocus
+                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    />
+                                </div>
+                            </form>
+                        )}
 
-                {/* Mobile Filter & Sort Bar (Only on Products Page) */}
-                {isProductsPage && (
-                    <div className="md:hidden flex items-center gap-3 pb-3">
-                        <button
-                            onClick={() => window.location.hash = 'filters'}
-                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-200"
-                        >
-                            <Filter size={18} />
-                            Filters
-                        </button>
-                        <select
-                            value={currentSort}
-                            onChange={handleSortChange}
-                            className="flex-1 appearance-none px-4 py-2 bg-gray-100 border-none rounded-lg text-sm font-medium text-gray-700 text-center focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        >
-                            {sortOptions.map(opt => (
-                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                            ))}
-                        </select>
+                        {isProductsPage && (
+                            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                                <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-xs font-medium whitespace-nowrap">
+                                    <Filter size={14} /> Filters
+                                </button>
+                                <select
+                                    value={currentSort}
+                                    onChange={handleSortChange}
+                                    className="px-4 py-2 bg-gray-100 rounded-lg text-xs font-medium appearance-none"
+                                >
+                                    {sortOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                                </select>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

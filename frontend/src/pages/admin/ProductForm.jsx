@@ -232,7 +232,7 @@ const ProductForm = () => {
     return (
         <form onSubmit={handleSubmit} className="min-h-screen bg-slate-50/50 pb-20">
             {/* Sticky Header */}
-            <div className="sticky top-16 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 py-4 mb-8 transition-all">
+            <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 py-4 mb-8 transition-all">
                 <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                         <button

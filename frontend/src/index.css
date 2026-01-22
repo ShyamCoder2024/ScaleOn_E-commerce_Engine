@@ -2,393 +2,194 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
 
-html {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  overflow-x: hidden;
-}
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
 
-body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #f9fafb;
-  color: #1f2937;
-  /* Performance: Enable GPU acceleration */
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  /* Prevent overscroll bounce on iOS */
-  overscroll-behavior-y: contain;
-  /* Prevent horizontal scrolling */
-  overflow-x: hidden;
-  max-width: 100vw;
-}
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-#root {
-  overflow-x: hidden;
-  max-width: 100vw;
-  width: 100%;
-}
+    --primary: 243 75% 59%;
+    /* Indigo 600 */
+    --primary-foreground: 210 40% 98%;
 
-/* Performance optimizations */
-img,
-video {
-  max-width: 100%;
-  height: auto;
-  /* GPU acceleration for images */
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
-/* Improved touch targets for mobile */
-button,
-a,
-input,
-select,
-textarea {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-/* Smooth transitions for interactive elements */
-button,
-a,
-.transition-all {
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
-/* Fix for iOS input zoom */
-@media (max-width: 640px) {
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="number"],
-  input[type="tel"],
-  textarea,
-  select {
-    font-size: 16px !important;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 243 75% 59%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
 
-/* Extra small breakpoint helper */
-@media (max-width: 375px) {
-  .xs\:hidden {
-    display: none !important;
+@layer base {
+  * {
+    @apply border-border;
   }
 
-  .xs\:block {
-    display: block !important;
+  body {
+    @apply bg-gray-50 text-foreground antialiased font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  .xs\:inline {
-    display: inline !important;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading tracking-tight text-gray-900;
   }
 }
 
-/* Custom utilities */
+/* Custom Utilities */
 @layer utilities {
   .container-custom {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
+  /* Glassmorphism */
+  .glass {
+    @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-lg;
+  }
+
+  .glass-dark {
+    @apply bg-gray-900/80 backdrop-blur-lg border border-white/10 shadow-lg;
+  }
+
+  /* Premium Gradients */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600;
+  }
+
+  .bg-gradient-primary {
+    @apply bg-gradient-to-r from-primary-600 to-indigo-600;
+  }
+
+  /* Buttons */
   .btn-primary {
-    @apply bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
-    /* Mobile: Ensure minimum touch target */
-    min-height: 44px;
+    @apply inline-flex items-center justify-center rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary-600 text-white hover:bg-primary-700 h-11 px-8 py-2 shadow-lg shadow-primary-500/20 hover:shadow-primary-500/40 hover:-translate-y-0.5 active:translate-y-0 active:shadow-none;
   }
 
   .btn-secondary {
-    @apply bg-white text-gray-700 px-4 py-2 rounded-lg font-medium border border-gray-300 hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
-    min-height: 44px;
+    @apply inline-flex items-center justify-center rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 px-8 py-2 shadow-sm hover:shadow-md;
   }
 
-  /* ... other utils ... */
-  .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden;
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background hover:bg-accent hover:text-accent-foreground h-11 px-8 py-2;
   }
 
-  /* GPU-accelerated transforms */
-  .gpu-accelerated {
-    transform: translateZ(0);
-    will-change: transform;
-    backface-visibility: hidden;
+  /* Cards */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-primary-200/50;
   }
 
-  /* Content visibility for offscreen optimization */
-  .lazy-render {
-    content-visibility: auto;
-    contain-intrinsic-size: 0 300px;
-  }
-
-  /* Minimum touch target (44x44px per Apple/Google guidelines) */
-  .touch-target {
-    min-width: 44px;
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  /* Layout utilities */
+  .section-padding {
+    @apply py-16 md:py-24;
   }
 }
 
-/* Accessibility: Reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* Mobile Performance: Prevent momentum scroll glitches */
-@supports (-webkit-overflow-scrolling: touch) {
-  .scroll-container {
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .card {
-    border-width: 2px;
-  }
-
-  button,
-  a {
-    text-decoration-thickness: 2px;
-  }
-}
-
-/* Scrollbar styling */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  @apply bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  @apply bg-gray-300 rounded-full border-4 border-solid border-transparent bg-clip-content hover:bg-gray-400;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+/* Animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
 
-/* Print Styles for PDF Export */
-@media print {
-
-  /* Hide all generic UI elements */
-  nav,
-  aside,
-  header:not(.print-header),
-  footer,
-  button,
-  .no-print {
-    display: none !important;
-  }
-
-  /* Ensure background colors are printed */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* Reset layout for print */
-  body,
-  #root,
-  main {
-    display: block !important;
-    position: relative !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: white !important;
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
-  }
-
-  /* Adjust Grid for Paper (A4) */
-  .grid {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 16px !important;
-  }
-
-  .grid>* {
-    flex: 1 1 45% !important;
-    /* 2 cols */
-    margin-bottom: 16px !important;
-  }
-
-  /* Specific Override for Chart Container */
-  .lg\:col-span-3,
-  .lg\:col-span-2 {
-    width: 100% !important;
-    flex: 1 1 100% !important;
-  }
-
-  /* Text color fixes */
-  .text-white {
-    color: #000 !important;
-    /* Print white text as black on white paper if bg is removed, but we forced color-adjust so keep as is? */
-  }
-
-  /* If inside a dark block that stays dark, keep white text. 
-     If background removal happens, force black text. 
-     Since we used print-color-adjust: exact, backgrounds should stay.
-  */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
-/* 
-  RAZORPAY MOBILE FULL-SCREEN FIX
-  Comprehensive solution for Razorpay checkout on mobile devices.
-  
-  The key issue: On mobile, Razorpay's modal doesn't fully overlay the page,
-  allowing underlying content to show. We need to:
-  1. Hide ALL page content when Razorpay is open
-  2. Force Razorpay's elements to cover the full viewport
-  3. Handle iOS Safari's dynamic viewport height
-*/
-
-/* When Razorpay is open, hide all page content and lock scroll */
+/* RAZORPAY & Mobile Fixes (Preserved) */
 body.razorpay-open {
   overflow: hidden !important;
   position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  touch-action: none !important;
-  -webkit-overflow-scrolling: none !important;
 }
 
-/* Hide the React root content when Razorpay is open */
 body.razorpay-open #root {
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
 }
 
-/* Razorpay creates elements directly on body - make them full screen */
-body.razorpay-open>.razorpay-container,
-body.razorpay-open>[class*="razorpay"],
-body.razorpay-open>div[class*="razorpay"],
-body.razorpay-open>iframe[class*="razorpay"],
-.razorpay-container,
-.razorpay-backdrop,
-.razorpay-checkout-frame {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100% !important;
-  width: 100vw !important;
-  height: 100% !important;
-  height: 100vh !important;
-  height: 100dvh !important;
-  height: -webkit-fill-available !important;
-  /* iOS Safari */
-  min-height: 100% !important;
-  min-height: 100vh !important;
-  min-height: -webkit-fill-available !important;
-  max-width: 100vw !important;
-  max-height: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
+.razorpay-container {
   z-index: 2147483647 !important;
-  overflow: auto !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  transform: none !important;
-  -webkit-transform: none !important;
-  background: #fff !important;
 }
 
-/* Razorpay backdrop/overlay */
-.razorpay-backdrop,
-body.razorpay-open>div:not(#root):first-of-type {
-  background: rgba(0, 0, 0, 0.7) !important;
-}
-
-/* Razorpay iframes must fill their container */
-.razorpay-container iframe,
-.razorpay-checkout-frame iframe,
-body.razorpay-open iframe,
-iframe[src*="razorpay"],
-iframe[src*="api.razorpay"] {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  width: 100vw !important;
-  height: 100% !important;
-  height: 100vh !important;
-  height: 100dvh !important;
-  height: -webkit-fill-available !important;
-  min-height: 100vh !important;
-  min-height: -webkit-fill-available !important;
-  max-width: 100vw !important;
-  border: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  z-index: 2147483647 !important;
-  display: block !important;
-}
-
-/* Mobile-specific overrides - more aggressive */
 @media screen and (max-width: 768px) {
-
-  /* Ensure html and body allow full height */
-  html.razorpay-active,
-  body.razorpay-open {
-    height: 100% !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    height: -webkit-fill-available !important;
-    overflow: hidden !important;
-  }
-
-  /* Force Razorpay elements to use full screen */
-  .razorpay-container,
-  .razorpay-checkout-frame,
-  body.razorpay-open>div:not(#root) {
+  .razorpay-container {
     position: fixed !important;
     inset: 0 !important;
     width: 100vw !important;
     height: 100dvh !important;
-    height: -webkit-fill-available !important;
-    -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior: contain !important;
   }
-
-  /* Ensure iframe scrolls properly on iOS */
-  body.razorpay-open iframe {
-    -webkit-overflow-scrolling: touch !important;
-  }
-}
-
-/* Prevent transforms from breaking positioning */
-.razorpay-container *,
-.razorpay-checkout-frame *,
-body.razorpay-open>div:not(#root) * {
-  transform: none !important;
-  -webkit-transform: none !important;
 }

@@ -283,12 +283,12 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
 
                 <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-30 flex flex-col gap-1.5 pointer-events-none">
                     {product.isFeatured && (
-                        <span className="bg-white/90 backdrop-blur-sm text-gray-900 text-[10px] font-bold px-2 py-0.5 rounded shadow-sm tracking-wide uppercase">
+                        <span className="bg-white/95 backdrop-blur-sm text-gray-900 text-[10px] font-bold px-2 py-1 rounded shadow-sm tracking-wide uppercase animate-fade-in">
                             Featured
                         </span>
                     )}
                     {hasDiscount && (
-                        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm tracking-wide uppercase">
+                        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm tracking-wide uppercase animate-fade-in">
                             -{discountPercent}%
                         </span>
                     )}
@@ -297,14 +297,14 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
                 {wishlistEnabled && (
                     <button
                         onClick={handleWishlistToggle}
-                        className={`absolute top-2 right-2 sm:top-3 sm:right-3 z-30 p-2 rounded-full shadow-sm transition-all duration-300 ${inWishlist
-                            ? 'bg-white text-red-500 opacity-100'
+                        className={`absolute top-2 right-2 sm:top-3 sm:right-3 z-30 p-2.5 rounded-full shadow-sm transition-all duration-300 ${inWishlist
+                            ? 'bg-white text-red-500 opacity-100 scale-100'
                             : 'bg-white/90 backdrop-blur-sm text-gray-600 md:opacity-0 md:translate-x-2'
                             } md:group-hover:opacity-100 md:group-hover:translate-x-0 hover:bg-white hover:text-red-500 active:scale-95`}
                         aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
                     >
                         <Heart
-                            size={16}
+                            size={18}
                             className={`transition-transform duration-200 ${inWishlist ? 'fill-current scale-110' : ''}`}
                         />
                     </button>
@@ -336,15 +336,15 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
                 )}
             </div>
 
-            <div className="p-3 sm:p-4 bg-white relative z-20 flex-1 flex flex-col justify-between">
+            <div className="p-3 sm:p-5 bg-white relative z-20 flex-1 flex flex-col justify-between">
                 <div>
                     {product.categories?.[0] && (
-                        <div className="text-[10px] font-bold text-primary-600 uppercase tracking-wider mb-1 opacity-80 truncate">
+                        <div className="text-[10px] font-bold text-primary-600 uppercase tracking-wider mb-1.5 opacity-80 truncate">
                             {product.categories[0].name}
                         </div>
                     )}
 
-                    <h3 className="font-semibold text-gray-900 text-sm sm:text-base leading-tight mb-2 line-clamp-2 md:line-clamp-1 group-hover:text-primary-600 transition-colors h-[2.5em] md:h-auto">
+                    <h3 className="font-heading font-bold text-gray-900 text-sm sm:text-base leading-tight mb-2 line-clamp-2 md:line-clamp-1 group-hover:text-primary-600 transition-colors h-[2.5em] md:h-auto">
                         {product.name}
                     </h3>
 
@@ -362,18 +362,18 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
 
                 {/* Mobile: Action Area */}
                 {inStock && (
-                    <div className="md:hidden mt-auto pt-2">
+                    <div className="md:hidden mt-auto pt-3">
                         {localQuantity > 0 ? (
-                            <div className="h-9">
+                            <div className="h-10">
                                 <QuantityCounter />
                             </div>
                         ) : (
                             <button
                                 onClick={handleAddToCart}
-                                className="w-full bg-primary-600 text-white h-9 rounded-lg font-medium text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform hover:bg-primary-700 whitespace-nowrap shadow-sm"
+                                className="w-full bg-primary-600 text-white h-10 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform hover:bg-primary-700 whitespace-nowrap shadow-md shadow-primary-500/20"
                             >
-                                <ShoppingCart size={14} className="shrink-0" />
-                                Add
+                                <ShoppingCart size={16} className="shrink-0" />
+                                Add to Cart
                             </button>
                         )}
                     </div>

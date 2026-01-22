@@ -244,7 +244,7 @@ const ProductDetail = () => {
                             )}
 
                             {/* Title */}
-                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3">
+                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight mb-3">
                                 {product.name}
                             </h1>
 
@@ -400,7 +400,7 @@ const ProductDetail = () => {
                             </div>
 
                             {/* Actions - Vertical on Mobile, Row on Desktop */}
-                            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                            <div className="hidden md:flex flex-row gap-3 pt-4">
                                 {isInStock() ? (
                                     <>
                                         <button
@@ -511,6 +511,38 @@ const ProductDetail = () => {
                     </div>
                 )}
             </div>
+
+            {/* Mobile Sticky Footer Action Bar */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.05)] animate-slide-up">
+                <div className="flex gap-3">
+                    {isInStock() ? (
+                        <>
+                            <button
+                                onClick={handleAddToCart}
+                                disabled={addingToCart}
+                                className="flex-1 btn-secondary py-3 text-sm font-bold border-gray-200 active:scale-95 transition-transform"
+                            >
+                                <ShoppingCart size={18} className="mr-2 inline" />
+                                Add
+                            </button>
+                            <button
+                                onClick={handleBuyNow}
+                                disabled={addingToCart}
+                                className="flex-[2] btn-primary py-3 text-base font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-transform"
+                            >
+                                Buy Now
+                            </button>
+                        </>
+                    ) : (
+                        <button disabled className="w-full bg-gray-100 text-gray-400 font-bold py-3.5 rounded-xl border border-gray-200 cursor-not-allowed">
+                            Out of Stock
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* Pading for sticky footer */}
+            <div className="h-24 md:hidden" />
 
             {/* Image Lightbox */}
             <ImageLightbox
