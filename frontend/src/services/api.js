@@ -129,7 +129,21 @@ api.interceptors.response.use(
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
+            // Prevent multiple simultaneous refresh attempts
+            if (window.__isRefreshingToken) {
+                // Wait for the ongoing refresh to complete
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                // Retry with potentially new token
+                const newToken = localStorage.getItem('token');
+                if (newToken) {
+                    originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                    return api(originalRequest);
+                }
+                return Promise.reject(error);
+            }
+
             // Try to refresh token
+            window.__isRefreshingToken = true;
             try {
                 const refreshToken = localStorage.getItem('refreshToken');
                 if (refreshToken) {
@@ -138,16 +152,28 @@ api.interceptors.response.use(
 
                     localStorage.setItem('token', accessToken);
                     originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+                    window.__isRefreshingToken = false;
 
                     return api(originalRequest);
                 }
             } catch (refreshError) {
-                // Refresh failed, clear tokens and redirect to login
+                window.__isRefreshingToken = false;
+
+                // Clear all pending requests to prevent stale data
+                pendingRequests.clear();
+
+                // Refresh failed, clear tokens
                 localStorage.removeItem('token');
                 localStorage.removeItem('refreshToken');
 
-                // Show session expired toast
-                toast.error('Session expired. Please login again.', { duration: 4000 });
+                // Show session expired toast - only once
+                if (!window.__sessionExpiredShown) {
+                    window.__sessionExpiredShown = true;
+                    toast.error('Session expired. Please login again.', { duration: 4000 });
+
+                    // Reset flag after toast duration
+                    setTimeout(() => { window.__sessionExpiredShown = false; }, 5000);
+                }
 
                 // Only redirect if not already on login page
                 if (!window.location.pathname.includes('/login')) {
@@ -155,6 +181,7 @@ api.interceptors.response.use(
                 }
                 return Promise.reject(refreshError);
             }
+            window.__isRefreshingToken = false;
         }
 
         // Retry logic for failed requests - ONLY for GET requests
