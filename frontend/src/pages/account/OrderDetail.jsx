@@ -20,16 +20,25 @@ import {
 } from 'lucide-react';
 import { orderAPI, reviewAPI } from '../../services/api';
 import { useConfig } from '../../context/ConfigContext';
+import OrderSuccessOverlay from '../../components/OrderSuccessOverlay';
 import toast from 'react-hot-toast';
 
 const OrderDetail = () => {
     const { id } = useParams();
     const location = useLocation();
     const { formatPrice, isFeatureEnabled } = useConfig();
+    const [showSuccessAnimation, setShowSuccessAnimation] = useState(!!location.state?.orderSuccess);
 
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [cancelling, setCancelling] = useState(false);
+
+    // Disable animation after it plays once
+    const handleAnimationComplete = () => {
+        setShowSuccessAnimation(false);
+        // Clean up location state history so it doesn't replay on refresh
+        window.history.replaceState({}, document.title);
+    };
 
     // Review states
     const reviewsEnabled = isFeatureEnabled('reviews');
@@ -219,6 +228,8 @@ const OrderDetail = () => {
 
     return (
         <div className="bg-gray-50/50 min-h-screen py-6 md:py-10">
+            {showSuccessAnimation && <OrderSuccessOverlay onComplete={handleAnimationComplete} />}
+
             <div className="container-custom max-w-6xl">
                 {/* Navigation Breadcrumb */}
                 <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
