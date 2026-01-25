@@ -157,9 +157,9 @@ const ImageUpload = ({
                 onDrop={handleDrop}
                 onClick={handleClick}
                 className={`
-                    relative w-full min-h-[160px] rounded-xl border-2 border-dashed 
+                    relative w-full min-h-[120px] sm:min-h-[160px] rounded-xl border-2 border-dashed 
                     transition-all duration-200 cursor-pointer
-                    flex flex-col items-center justify-center p-4
+                    flex flex-col items-center justify-center p-3 sm:p-4
                     ${isDragging
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100'
@@ -183,7 +183,7 @@ const ImageUpload = ({
                         <img
                             src={value}
                             alt="Preview"
-                            className="max-h-40 max-w-full object-contain rounded-lg"
+                            className="max-h-32 sm:max-h-40 max-w-full object-contain rounded-lg"
                             onError={(e) => {
                                 e.target.style.display = 'none';
                             }}
@@ -200,24 +200,24 @@ const ImageUpload = ({
                         </button>
                     </div>
                 ) : isUploading ? (
-                    <div className="flex flex-col items-center gap-3 text-gray-500">
-                        <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
-                        <span className="text-sm font-medium">Uploading...</span>
+                    <div className="flex flex-col items-center gap-2 sm:gap-3 text-gray-500">
+                        <Loader2 className="w-8 h-8 sm:w-10 sm:h-10 animate-spin text-blue-500" />
+                        <span className="text-xs sm:text-sm font-medium">Uploading...</span>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center gap-3 text-gray-500">
+                    <div className="flex flex-col items-center gap-2 sm:gap-3 text-gray-500 text-center">
                         {isDragging ? (
                             <>
-                                <Upload className="w-10 h-10 text-blue-500" />
+                                <Upload className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500" />
                                 <span className="text-sm font-medium text-blue-600">Drop image here</span>
                             </>
                         ) : (
                             <>
-                                <ImageIcon className="w-10 h-10 text-gray-400" />
-                                <div className="text-center">
-                                    <span className="text-sm text-gray-500 block">{placeholder}</span>
-                                    <span className="text-xs text-gray-400 mt-1 block">
-                                        Max size: {maxSize}MB • JPEG, PNG, GIF, WebP, SVG
+                                <ImageIcon className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
+                                <div>
+                                    <span className="text-xs sm:text-sm text-gray-500 block">{placeholder}</span>
+                                    <span className="text-[10px] sm:text-xs text-gray-400 mt-0.5 sm:mt-1 block">
+                                        Max {maxSize}MB • Images only
                                     </span>
                                 </div>
                             </>

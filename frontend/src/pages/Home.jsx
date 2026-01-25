@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, TrendingUp, ShieldCheck, Truck, Clock } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
-import { productAPI, featureCardsAPI } from '../services/api';
+import { productAPI, featureCardsAPI, categoryAPI } from '../services/api';
 import { useConfig } from '../context/ConfigContext';
 import ProductCard from '../components/ProductCard';
 
@@ -139,9 +139,54 @@ const FeatureStrip = () => {
     );
 };
 
+// Category Grid Component - Mobile First (Story Style)
+const CategoryGrid = ({ categories }) => {
+    if (!categories || categories.length === 0) return null;
+
+    return (
+        <section className="py-8 bg-white border-b border-gray-100">
+            <div className="container-custom">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg md:text-xl font-heading font-bold text-gray-900">Shop by Category</h3>
+                    {/* <Link to="/products" className="text-sm font-medium text-primary-600 hover:text-primary-700">View All</Link> */}
+                </div>
+
+                {/* Horizontal Scroll Container */}
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
+                    {categories.map((cat, idx) => (
+                        <Link
+                            key={cat._id || idx}
+                            to={`/products?category=${cat._id}`}
+                            className="flex flex-col items-center gap-3 shrink-0 w-20 md:w-24 group snap-start"
+                        >
+                            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-50 border border-gray-100 p-1 group-hover:border-primary-200 transition-colors overflow-hidden">
+                                {cat.image ? (
+                                    <img
+                                        src={cat.image}
+                                        alt={cat.name}
+                                        className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-500"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-400 group-hover:text-primary-500 transition-colors">
+                                        <Grid size={24} />
+                                    </div>
+                                )}
+                            </div>
+                            <span className="text-xs md:text-sm font-medium text-gray-700 text-center line-clamp-2 max-w-[80px] group-hover:text-primary-700 transition-colors">
+                                {cat.name}
+                            </span>
+                        </Link>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
 const Home = () => {
     const { isFeatureEnabled } = useConfig();
     const [featuredProducts, setFeaturedProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [featureCards, setFeatureCards] = useState([]);
@@ -160,9 +205,14 @@ const Home = () => {
 
         const fetchAllData = async () => {
             try {
+                // Fetch Products, Feature Cards, AND Categories
                 const fetchPromises = [
                     productAPI.getFeatured(8).catch(err => {
                         console.error('Failed to fetch featured products:', err);
+                        return null;
+                    }),
+                    categoryAPI.getCategories().catch(err => {
+                        console.error('Failed to fetch categories:', err);
                         return null;
                     })
                 ];
@@ -187,8 +237,13 @@ const Home = () => {
                     setError(null);
                 }
 
-                if (featureCardsEnabled && results[1]?.data?.data?.cards) {
-                    setFeatureCards(results[1].data.data.cards);
+                const catsResult = results[1];
+                if (catsResult?.data?.data?.categories) {
+                    setCategories(catsResult.data.data.categories);
+                }
+
+                if (featureCardsEnabled && results[2]?.data?.data?.cards) {
+                    setFeatureCards(results[2].data.data.cards);
                 }
 
             } catch (err) {
@@ -241,12 +296,13 @@ const Home = () => {
                 </section>
             )}
 
-            <FeatureStrip />
+            {/* Replaced 'Ugly' Feature Strip with Category Grid */}
+            <CategoryGrid categories={categories} />
 
             {/* Featured Section */}
-            <section className="py-20 md:py-32">
+            <section className="py-12 md:py-20">
                 <div className="container-custom">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4 text-center md:text-left">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-12 gap-4 text-center md:text-left">
                         <div>
                             <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-3 tracking-tight">
                                 Featured Collection

@@ -156,17 +156,14 @@ const ProductDetail = () => {
 
             <div className="container-custom py-6 sm:py-8">
                 <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-                    {/* Image Gallery */}
+                    {/* Gallery Section */}
                     <div className="space-y-4 w-full">
-                        {/* Main Image */}
-                        <div
-                            className="aspect-square bg-white rounded-2xl overflow-hidden relative shadow-sm border border-gray-200 cursor-zoom-in group"
-                            onClick={() => setLightboxOpen(true)}
-                        >
+                        {/* Main Image - Mobile Full Bleed Fix: -mx-4 removes container padding */}
+                        <div className="aspect-[4/3] sm:aspect-square relative bg-white -mx-4 sm:mx-0 sm:rounded-2xl overflow-hidden sm:shadow-sm sm:border sm:border-gray-100 group">
                             <img
                                 src={images[selectedImage]?.url}
                                 alt={images[selectedImage]?.alt || product.name}
-                                className="w-full h-full object-contain transform group-hover:scale-105 transition-transform duration-500"
+                                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                             />
 
                             {/* Zoom Indicator */}
@@ -222,7 +219,7 @@ const ProductDetail = () => {
                                         <img
                                             src={img.url}
                                             alt={img.alt}
-                                            className="w-full h-full object-contain bg-white"
+                                            className="w-full h-full object-cover bg-white"
                                         />
                                     </button>
                                 ))}
@@ -514,13 +511,13 @@ const ProductDetail = () => {
 
             {/* Mobile Sticky Footer Action Bar */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.05)] animate-slide-up">
-                <div className="flex gap-3">
+                <div className="grid grid-cols-2 gap-3">
                     {isInStock() ? (
                         <>
                             <button
                                 onClick={handleAddToCart}
                                 disabled={addingToCart}
-                                className="flex-1 btn-secondary h-12 text-sm font-bold border-gray-200 active:scale-95 transition-transform whitespace-nowrap flex items-center justify-center gap-2 px-2"
+                                className="btn-secondary h-12 text-sm font-bold border-gray-200 active:scale-95 transition-transform whitespace-nowrap flex items-center justify-center gap-2 px-2 w-full"
                             >
                                 <ShoppingCart size={18} className="shrink-0" />
                                 Add to Cart
@@ -528,13 +525,13 @@ const ProductDetail = () => {
                             <button
                                 onClick={handleBuyNow}
                                 disabled={addingToCart}
-                                className="flex-1 btn-primary h-12 text-sm font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-transform whitespace-nowrap px-2"
+                                className="btn-primary h-12 text-sm font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-transform whitespace-nowrap px-2 w-full"
                             >
                                 Buy Now
                             </button>
                         </>
                     ) : (
-                        <button disabled className="w-full bg-gray-100 text-gray-400 font-bold py-3.5 rounded-xl border border-gray-200 cursor-not-allowed">
+                        <button disabled className="col-span-2 w-full bg-gray-100 text-gray-400 font-bold py-3.5 rounded-xl border border-gray-200 cursor-not-allowed">
                             Out of Stock
                         </button>
                     )}

@@ -274,7 +274,7 @@ const Header = () => {
                             <div className="relative ml-1">
                                 <button
                                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                                    className="relative w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden ring-2 ring-transparent hover:ring-primary-100 transition-all"
+                                    className="relative w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden ring-2 ring-transparent hover:ring-primary-100 transition-all shrink-0"
                                 >
                                     <div className="w-full h-full bg-gradient-to-br from-primary-100 to-indigo-100 flex items-center justify-center text-primary-700 font-bold text-sm">
                                         {user?.profile?.firstName?.[0] || user?.email?.[0]?.toUpperCase()}
@@ -283,34 +283,37 @@ const Header = () => {
 
                                 {userMenuOpen && (
                                     <>
-                                        <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                                        <div className="fixed inset-x-4 top-20 md:absolute md:inset-auto md:right-0 md:top-full md:mt-3 md:w-64 animate-scale-in bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 py-2 overflow-hidden ring-1 ring-black/5">
-                                            <div className="px-5 py-4 bg-gray-50/50 border-b border-gray-100">
+                                        <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none" onClick={() => setUserMenuOpen(false)} />
+                                        <div className="fixed inset-x-0 bottom-0 top-auto z-50 w-full bg-white rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.1)] p-4 md:absolute md:inset-auto md:right-0 md:top-full md:mt-3 md:w-64 md:rounded-2xl md:shadow-2xl md:p-0 md:overflow-hidden md:ring-1 md:ring-black/5 animate-slide-up md:animate-scale-in">
+                                            {/* Drag Handle for Mobile */}
+                                            <div className="md:hidden w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-4" />
+
+                                            <div className="px-5 py-4 bg-gray-50/50 md:border-b md:border-gray-100 rounded-xl md:rounded-none mb-2 md:mb-0">
                                                 <p className="font-heading font-bold text-gray-900 truncate">
                                                     {user?.profile?.firstName || 'Valued Customer'}
                                                 </p>
                                                 <p className="text-xs text-gray-500 truncate mt-0.5">{user?.email}</p>
                                             </div>
 
-                                            <div className="p-2">
-                                                <Link to="/account" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
+                                            <div className="p-2 space-y-1">
+                                                <Link to="/account" className="flex items-center gap-3 px-3 py-3 md:py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
                                                     <User size={18} />
                                                     My Profile
                                                 </Link>
-                                                <Link to="/orders" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
+                                                <Link to="/orders" className="flex items-center gap-3 px-3 py-3 md:py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
                                                     <Package size={18} />
                                                     My Orders
                                                 </Link>
 
                                                 {wishlistEnabled && (
-                                                    <Link to="/wishlist" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
+                                                    <Link to="/wishlist" className="flex items-center gap-3 px-3 py-3 md:py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
                                                         <Heart size={18} />
                                                         Wishlist
                                                     </Link>
                                                 )}
 
                                                 {isAdmin && (
-                                                    <Link to="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-primary-600 bg-primary-50/50 hover:bg-primary-100 transition-colors mt-2 mb-2" onClick={() => setUserMenuOpen(false)}>
+                                                    <Link to="/admin" className="flex items-center gap-3 px-3 py-3 md:py-2.5 rounded-xl text-sm font-medium text-primary-600 bg-primary-50/50 hover:bg-primary-100 transition-colors mt-2 mb-2" onClick={() => setUserMenuOpen(false)}>
                                                         <Settings size={18} />
                                                         Admin Dashboard
                                                     </Link>
@@ -318,12 +321,14 @@ const Header = () => {
 
                                                 <button
                                                     onClick={() => { logout(); setUserMenuOpen(false); }}
-                                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors mt-1"
+                                                    className="w-full flex items-center gap-3 px-3 py-3 md:py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors mt-1"
                                                 >
                                                     <LogOut size={18} />
                                                     Logout
                                                 </button>
                                             </div>
+                                            {/* Padding for Mobile Bottom Safe Area */}
+                                            <div className="h-6 md:hidden"></div>
                                         </div>
                                     </>
                                 )}
@@ -331,7 +336,7 @@ const Header = () => {
                         ) : (
                             <Link
                                 to="/login"
-                                className="p-2.5 rounded-full text-gray-600 hover:bg-gray-100 hover:text-primary-600 transition-all"
+                                className="p-2.5 rounded-full text-gray-600 hover:bg-gray-100 hover:text-primary-600 transition-all shrink-0"
                                 title="Login"
                             >
                                 <User size={22} strokeWidth={2} />

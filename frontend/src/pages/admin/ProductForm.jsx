@@ -231,10 +231,10 @@ const ProductForm = () => {
 
     return (
         <form onSubmit={handleSubmit} className="min-h-screen bg-slate-50/50 pb-20">
-            {/* Sticky Header */}
-            <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 py-4 mb-8 transition-all">
-                <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
+            {/* Header - Static on Mobile, Sticky on Desktop */}
+            <div className="relative md:sticky md:top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 py-4 mb-6 md:mb-8 transition-all">
+                <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
                         <button
                             type="button"
                             onClick={() => navigate('/admin/products')}
@@ -243,7 +243,7 @@ const ProductForm = () => {
                             <ArrowLeft className="w-5 h-5" />
                         </button>
                         <div>
-                            <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+                            <h1 className="text-lg sm:text-x font-bold text-slate-900 tracking-tight">
                                 {isEditing ? 'Edit Product' : 'New Product'}
                             </h1>
                             <p className="text-xs text-slate-500 hidden sm:block">
@@ -251,18 +251,18 @@ const ProductForm = () => {
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="w-full sm:w-auto flex items-center gap-3">
                         <button
                             type="button"
                             onClick={() => navigate('/admin/products')}
-                            className="hidden sm:px-4 sm:py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors sm:block"
+                            className="flex-1 sm:flex-none py-2.5 sm:px-4 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors text-center"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={saving}
-                            className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20 font-semibold transition-all active:scale-95"
+                            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20 font-semibold transition-all active:scale-95 text-sm"
                         >
                             <Save className="w-4 h-4" />
                             {saving ? 'Saving...' : 'Save Product'}
@@ -271,9 +271,9 @@ const ProductForm = () => {
                 </div>
             </div>
 
-            <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="max-w-6xl mx-auto px-2 sm:px-4 grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
                 {/* Main Content Column */}
-                <div className="lg:col-span-2 space-y-8">
+                <div className="lg:col-span-2 space-y-4 sm:space-y-8">
 
                     {/* Basic Info */}
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">

@@ -579,50 +579,52 @@ const SettingsPage = () => {
                                         </button>
                                     </div>
 
-                                    <div className="flex items-center justify-between p-5 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-200 transition-colors opacity-90">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-[#0c243b] rounded-xl flex items-center justify-center shadow-inner">
+                                    <div className="flex items-start justify-between p-4 sm:p-5 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-200 transition-colors opacity-90">
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-12 h-12 bg-[#0c243b] rounded-xl flex items-center justify-center shadow-inner shrink-0">
                                                 <span className="text-lg font-bold text-blue-400">R</span>
                                             </div>
                                             <div>
-                                                <p className="font-bold text-slate-900 flex items-center gap-2">
-                                                    Razorpay
-                                                    <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] uppercase font-bold rounded-full">Setup Required</span>
-                                                </p>
-                                                <p className="text-sm text-slate-500">Cards, UPI, Netbanking</p>
+                                                <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                                                    <p className="font-bold text-slate-900">Razorpay</p>
+                                                    <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] uppercase font-bold rounded-full whitespace-nowrap">Setup Required</span>
+                                                </div>
+                                                <p className="text-sm text-slate-500 leading-snug">Cards, UPI, Netbanking</p>
                                             </div>
                                         </div>
                                         <button
                                             onClick={() => handleNestedChange('payment', 'providers', 'razorpay', { enabled: !config.payment?.providers?.razorpay?.enabled })}
+                                            className="ml-2 shrink-0"
                                         >
                                             {config.payment?.providers?.razorpay?.enabled ? (
-                                                <ToggleRight className="w-12 h-12 text-blue-600" />
+                                                <ToggleRight className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600" />
                                             ) : (
-                                                <ToggleLeft className="w-12 h-12 text-slate-300" />
+                                                <ToggleLeft className="w-10 h-10 sm:w-12 sm:h-12 text-slate-300" />
                                             )}
                                         </button>
                                     </div>
 
-                                    <div className="flex items-center justify-between p-5 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-200 transition-colors opacity-90">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-[#635BFF] rounded-xl flex items-center justify-center shadow-inner">
+                                    <div className="flex items-start justify-between p-4 sm:p-5 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-200 transition-colors opacity-90">
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-12 h-12 bg-[#635BFF] rounded-xl flex items-center justify-center shadow-inner shrink-0">
                                                 <span className="text-lg font-bold text-white">S</span>
                                             </div>
                                             <div>
-                                                <p className="font-bold text-slate-900 flex items-center gap-2">
-                                                    Stripe
-                                                    <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] uppercase font-bold rounded-full">Setup Required</span>
-                                                </p>
-                                                <p className="text-sm text-slate-500">International Payments</p>
+                                                <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                                                    <p className="font-bold text-slate-900">Stripe</p>
+                                                    <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] uppercase font-bold rounded-full whitespace-nowrap">Setup Required</span>
+                                                </div>
+                                                <p className="text-sm text-slate-500 leading-snug">International Payments</p>
                                             </div>
                                         </div>
                                         <button
                                             onClick={() => handleNestedChange('payment', 'providers', 'stripe', { enabled: !config.payment?.providers?.stripe?.enabled })}
+                                            className="ml-2 shrink-0"
                                         >
                                             {config.payment?.providers?.stripe?.enabled ? (
-                                                <ToggleRight className="w-12 h-12 text-blue-600" />
+                                                <ToggleRight className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600" />
                                             ) : (
-                                                <ToggleLeft className="w-12 h-12 text-slate-300" />
+                                                <ToggleLeft className="w-10 h-10 sm:w-12 sm:h-12 text-slate-300" />
                                             )}
                                         </button>
                                     </div>
