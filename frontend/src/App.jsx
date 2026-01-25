@@ -25,6 +25,7 @@ const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'))
 const Account = lazy(() => import('./pages/account/Account'))
 const Orders = lazy(() => import('./pages/account/Orders'))
 const OrderDetail = lazy(() => import('./pages/account/OrderDetail'))
+const Categories = lazy(() => import('./pages/Categories'))
 
 // Admin pages (lazy loaded)
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'))
@@ -75,6 +76,7 @@ function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/products" element={<Products />} />
                         <Route path="/products/:slug" element={<ProductDetail />} />
+                        <Route path="/categories" element={<Categories />} />
                         <Route path="/cart" element={<Cart />} />
                         <Route path="/wishlist" element={<Wishlist />} />
                         <Route path="/login" element={<Login />} />
