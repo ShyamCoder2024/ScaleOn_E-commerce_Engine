@@ -26,7 +26,7 @@ if (cloudinaryConfigured) {
 
 // Local upload directory
 const UPLOAD_DIR = process.env.UPLOAD_DIR || 'uploads';
-const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE) || 20 * 1024 * 1024; // 20MB default (matches frontend)
+const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE) || 50 * 1024 * 1024; // 50MB default for high-res mobile photos
 
 // Ensure upload directory exists
 if (!fs.existsSync(UPLOAD_DIR)) {
