@@ -64,9 +64,11 @@ app.use(cors({
 }));
 
 // Rate limiting - more lenient in development
+// Rate limiting - more lenient in development
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || (process.env.NODE_ENV === 'production' ? 100 : 1000), // 1000 in dev, 100 in prod
+  // Increased limit to prevent blocking legitimate users during heavy browsing
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 2000,
   message: {
     success: false,
     message: 'Too many requests, please try again later.'

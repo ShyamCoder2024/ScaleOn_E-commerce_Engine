@@ -209,6 +209,7 @@ const Home = () => {
                 const fetchPromises = [
                     productAPI.getFeatured(8).catch(err => {
                         console.error('Failed to fetch featured products:', err);
+                        if (isMountedRef.current) setError(err.response?.data?.message || 'Failed to load products');
                         return null;
                     }),
                     categoryAPI.getCategories().catch(err => {
@@ -248,6 +249,9 @@ const Home = () => {
 
             } catch (err) {
                 console.error('Unexpected error in fetchAllData:', err);
+                if (isMountedRef.current) {
+                    setError('Something went wrong. Please try refreshing the page.');
+                }
             } finally {
                 if (isMountedRef.current) {
                     setLoading(false);
