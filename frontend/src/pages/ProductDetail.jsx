@@ -159,7 +159,11 @@ const ProductDetail = () => {
                     {/* Gallery Section */}
                     <div className="space-y-4 w-full">
                         {/* Main Image - Mobile Full Bleed Fix: -mx-4 removes container padding */}
-                        <div className="aspect-[4/3] sm:aspect-square relative bg-white -mx-4 sm:mx-0 sm:rounded-2xl overflow-hidden sm:shadow-sm sm:border sm:border-gray-100 group">
+                        {/* Main Image - Mobile Full Bleed Fix: -mx-4 removes container padding */}
+                        <div
+                            className="aspect-square relative bg-white -mx-4 sm:mx-0 sm:rounded-2xl overflow-hidden sm:shadow-sm sm:border sm:border-gray-100 group cursor-zoom-in"
+                            onClick={() => setLightboxOpen(true)}
+                        >
                             <img
                                 src={images[selectedImage]?.url}
                                 alt={images[selectedImage]?.alt || product.name}
@@ -172,10 +176,13 @@ const ProductDetail = () => {
                                 Click to zoom
                             </div>
 
-                            {/* Wishlist Button */}
+                            {/* Wishlist Button - Stop propagation to prevent opening lightbox */}
                             {isFeatureEnabled('wishlist') && (
                                 <button
-                                    onClick={() => toggleWishlist(product)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleWishlist(product);
+                                    }}
                                     className={`absolute top-4 right-4 p-3 rounded-full shadow-lg transition-all z-10 hover:scale-110 active:scale-95 ${isInWishlist(product._id)
                                         ? 'bg-rose-500 text-white'
                                         : 'bg-white/90 backdrop-blur-sm text-gray-600 hover:text-rose-500'
