@@ -7,6 +7,7 @@ import {
 import { useEffect, useState, useRef } from 'react';
 import { productAPI, featureCardsAPI, categoryAPI } from '../services/api';
 import { useConfig } from '../context/ConfigContext';
+import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
 
 // Helper to map category names to icons
@@ -170,6 +171,7 @@ const CategoryGrid = ({ categories }) => {
 
 const Home = () => {
     const { isFeatureEnabled } = useConfig();
+    const { isAuthenticated } = useAuth(); // Get auth state
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -258,7 +260,7 @@ const Home = () => {
     const showHeroCarousel = featureCardsEnabled && featureCards.length > 0;
 
     return (
-        <div className="bg-gray-50/50 min-h-screen pb-20">
+        <div className="bg-gray-50/50 min-h-screen pb-12 md:pb-20">
             {/* Hero Section */}
             {cardsLoading ? (
                 <div className="h-[300px] w-full bg-gray-200 animate-pulse sticky top-0" />
@@ -289,14 +291,15 @@ const Home = () => {
             <CategoryGrid categories={categories} />
 
             {/* Featured Section */}
-            <section className="py-12 md:py-20">
+            <section className="py-8 md:py-20">
                 <div className="container-custom">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-12 gap-4 text-center md:text-left">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-12 gap-4 text-center md:text-left">
                         <div>
-                            <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-3 tracking-tight">
+                            {/* Adjusted Font Size for Mobile */}
+                            <h2 className="text-2xl md:text-4xl font-heading font-bold text-gray-900 mb-2 md:mb-3 tracking-tight">
                                 Featured Collection
                             </h2>
-                            <p className="text-gray-500 text-lg max-w-xl mx-auto md:mx-0">
+                            <p className="text-gray-500 text-sm md:text-lg max-w-xl mx-auto md:mx-0">
                                 Curated hand-picked items that define style and quality.
                             </p>
                         </div>
@@ -334,43 +337,45 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Banner / CTA Break */}
-            <section className="py-16 bg-gray-900 text-white overflow-hidden relative mb-20">
-                <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')] bg-cover bg-center bg-fixed" />
-                <div className="absolute inset-0 bg-gradient-to-r from-primary-900/90 to-gray-900/90" />
+            {/* Banner / CTA Break - HIDDEN FOR LOGGED IN USERS */}
+            {!isAuthenticated && (
+                <section className="py-12 md:py-16 bg-gray-900 text-white overflow-hidden relative mb-12 md:mb-20">
+                    <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')] bg-cover bg-center bg-fixed" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary-900/90 to-gray-900/90" />
 
-                <div className="container-custom relative z-10">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-                        <div className="max-w-2xl text-center md:text-left">
-                            <h2 className="text-3xl md:text-5xl font-heading font-bold mb-6 leading-tight">
-                                Unlock Premium Members Benefits
-                            </h2>
-                            <p className="text-primary-100 text-lg mb-8 leading-relaxed opacity-90">
-                                Join our exclusive community to get early access to sales, special discounts, and personalized recommendations.
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                                <Link to="/register" className="btn-primary bg-white text-primary-600 hover:bg-gray-100 h-12 px-8 rounded-full border-0">
-                                    Become a Member
-                                </Link>
-                                <Link to="/login" className="px-8 h-12 flex items-center justify-center rounded-full border border-white/30 hover:bg-white/10 font-bold transition-all">
-                                    Sign In
-                                </Link>
+                    <div className="container-custom relative z-10">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+                            <div className="max-w-2xl text-center md:text-left">
+                                <h2 className="text-2xl md:text-5xl font-heading font-bold mb-4 md:mb-6 leading-tight">
+                                    Unlock Premium Members Benefits
+                                </h2>
+                                <p className="text-primary-100 text-base md:text-lg mb-8 leading-relaxed opacity-90">
+                                    Join our exclusive community to get early access to sales, special discounts, and personalized recommendations.
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                                    <Link to="/register" className="btn-primary bg-white text-primary-600 hover:bg-gray-100 h-12 px-8 rounded-full border-0">
+                                        Create Account
+                                    </Link>
+                                    <Link to="/login" className="px-8 h-12 flex items-center justify-center rounded-full border border-white/30 hover:bg-white/10 font-bold transition-all">
+                                        Sign In
+                                    </Link>
+                                </div>
                             </div>
-                        </div>
-                        <div className="hidden lg:block relative">
-                            <div className="w-64 h-64 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-2xl rotate-6 shadow-2xl flex items-center justify-center border border-white/20 backdrop-blur-sm">
-                                <TrendingUp size={80} className="text-white opacity-90" />
+                            <div className="hidden lg:block relative">
+                                <div className="w-64 h-64 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-2xl rotate-6 shadow-2xl flex items-center justify-center border border-white/20 backdrop-blur-sm">
+                                    <TrendingUp size={80} className="text-white opacity-90" />
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
 
-            {/* New Arrivals Section */}
-            <section className="pb-10 md:pb-16">
+            {/* New Arrivals Section - Reduced bottom padding */}
+            <section className="pb-8 md:pb-16">
                 <div className="container-custom">
-                    <div className="flex items-center justify-between mb-12">
-                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 tracking-tight">
+                    <div className="flex items-center justify-between mb-6 md:mb-12">
+                        <h2 className="text-2xl md:text-4xl font-heading font-bold text-gray-900 tracking-tight">
                             New Arrivals
                         </h2>
                     </div>
