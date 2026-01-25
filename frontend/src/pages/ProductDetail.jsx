@@ -167,7 +167,7 @@ const ProductDetail = () => {
                             <img
                                 src={images[selectedImage]?.url}
                                 alt={images[selectedImage]?.alt || product.name}
-                                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                                className="w-full h-full object-contain transform group-hover:scale-105 transition-transform duration-500"
                             />
 
                             {/* Zoom Indicator */}
@@ -226,7 +226,7 @@ const ProductDetail = () => {
                                         <img
                                             src={img.url}
                                             alt={img.alt}
-                                            className="w-full h-full object-cover bg-white"
+                                            className="w-full h-full object-contain p-1 bg-white"
                                         />
                                     </button>
                                 ))}
