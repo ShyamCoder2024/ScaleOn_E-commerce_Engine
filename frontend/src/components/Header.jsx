@@ -1,4 +1,5 @@
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { ShoppingCart, User, Heart, ChevronDown, Package, Settings, LogOut, Grid, List, Search, Filter, Menu, X } from "lucide-react";
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -283,12 +284,63 @@ const Header = () => {
 
                                 {userMenuOpen && (
                                     <>
-                                        <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none" onClick={() => setUserMenuOpen(false)} />
-                                        <div className="fixed inset-x-0 bottom-0 top-auto z-50 w-full bg-white rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.1)] p-4 md:absolute md:inset-auto md:right-0 md:top-full md:mt-3 md:w-64 md:rounded-2xl md:shadow-2xl md:p-0 md:overflow-hidden md:ring-1 md:ring-black/5 animate-slide-up md:animate-scale-in">
-                                            {/* Drag Handle for Mobile */}
-                                            <div className="md:hidden w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-4" />
+                                        {/* Mobile Menu - Portaled to Body to avoid Z-Index/Stacking Context issues */}
+                                        {createPortal(
+                                            <>
+                                                <div className="fixed inset-0 z-[100] bg-black/20 backdrop-blur-sm md:hidden" onClick={() => setUserMenuOpen(false)} />
+                                                <div className="fixed inset-x-0 bottom-0 top-auto z-[101] w-full bg-white rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.1)] p-4 animate-slide-up md:hidden pb-safe">
+                                                    {/* Drag Handle for Mobile */}
+                                                    <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-4" />
 
-                                            <div className="px-5 py-4 bg-gray-50/50 md:border-b md:border-gray-100 rounded-xl md:rounded-none mb-2 md:mb-0">
+                                                    <div className="px-5 py-4 bg-gray-50/50 rounded-xl mb-2">
+                                                        <p className="font-heading font-bold text-gray-900 truncate">
+                                                            {user?.profile?.firstName || 'Valued Customer'}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 truncate mt-0.5">{user?.email}</p>
+                                                    </div>
+
+                                                    <div className="p-2 space-y-1">
+                                                        <Link to="/account" className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
+                                                            <User size={18} />
+                                                            My Profile
+                                                        </Link>
+                                                        <Link to="/orders" className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
+                                                            <Package size={18} />
+                                                            My Orders
+                                                        </Link>
+
+                                                        {wishlistEnabled && (
+                                                            <Link to="/wishlist" className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
+                                                                <Heart size={18} />
+                                                                Wishlist
+                                                            </Link>
+                                                        )}
+
+                                                        {isAdmin && (
+                                                            <Link to="/admin" className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-primary-600 bg-primary-50/50 hover:bg-primary-100 transition-colors mt-2 mb-2" onClick={() => setUserMenuOpen(false)}>
+                                                                <Settings size={18} />
+                                                                Admin Dashboard
+                                                            </Link>
+                                                        )}
+
+                                                        <button
+                                                            onClick={() => { logout(); setUserMenuOpen(false); }}
+                                                            className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors mt-1"
+                                                        >
+                                                            <LogOut size={18} />
+                                                            Logout
+                                                        </button>
+                                                    </div>
+                                                    {/* Padding for Mobile Bottom Safe Area */}
+                                                    <div className="h-6"></div>
+                                                </div>
+                                            </>,
+                                            document.body
+                                        )}
+
+                                        {/* Desktop Menu - Kept Inline */}
+                                        <div className="hidden md:block absolute right-0 top-full mt-3 w-64 bg-white rounded-2xl shadow-2xl p-0 overflow-hidden ring-1 ring-black/5 animate-scale-in z-50">
+                                            <div className="px-5 py-4 bg-gray-50/50 border-b border-gray-100">
                                                 <p className="font-heading font-bold text-gray-900 truncate">
                                                     {user?.profile?.firstName || 'Valued Customer'}
                                                 </p>
@@ -296,24 +348,24 @@ const Header = () => {
                                             </div>
 
                                             <div className="p-2 space-y-1">
-                                                <Link to="/account" className="flex items-center gap-3 px-3 py-3 md:py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
+                                                <Link to="/account" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
                                                     <User size={18} />
                                                     My Profile
                                                 </Link>
-                                                <Link to="/orders" className="flex items-center gap-3 px-3 py-3 md:py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
+                                                <Link to="/orders" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
                                                     <Package size={18} />
                                                     My Orders
                                                 </Link>
 
                                                 {wishlistEnabled && (
-                                                    <Link to="/wishlist" className="flex items-center gap-3 px-3 py-3 md:py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
+                                                    <Link to="/wishlist" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors" onClick={() => setUserMenuOpen(false)}>
                                                         <Heart size={18} />
                                                         Wishlist
                                                     </Link>
                                                 )}
 
                                                 {isAdmin && (
-                                                    <Link to="/admin" className="flex items-center gap-3 px-3 py-3 md:py-2.5 rounded-xl text-sm font-medium text-primary-600 bg-primary-50/50 hover:bg-primary-100 transition-colors mt-2 mb-2" onClick={() => setUserMenuOpen(false)}>
+                                                    <Link to="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-primary-600 bg-primary-50/50 hover:bg-primary-100 transition-colors mt-2 mb-2" onClick={() => setUserMenuOpen(false)}>
                                                         <Settings size={18} />
                                                         Admin Dashboard
                                                     </Link>
@@ -321,14 +373,12 @@ const Header = () => {
 
                                                 <button
                                                     onClick={() => { logout(); setUserMenuOpen(false); }}
-                                                    className="w-full flex items-center gap-3 px-3 py-3 md:py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors mt-1"
+                                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors mt-1"
                                                 >
                                                     <LogOut size={18} />
                                                     Logout
                                                 </button>
                                             </div>
-                                            {/* Padding for Mobile Bottom Safe Area */}
-                                            <div className="h-6 md:hidden"></div>
                                         </div>
                                     </>
                                 )}
