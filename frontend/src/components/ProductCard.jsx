@@ -202,7 +202,7 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
                 to={`/products/${product.slug}`}
                 className="group flex gap-6 p-4 bg-white rounded-2xl border border-gray-100 hover:shadow-xl transition-shadow duration-300"
             >
-                <div className="relative w-48 h-48 shrink-0 overflow-hidden rounded-xl bg-gray-50">
+                <div className="relative w-48 h-48 shrink-0 overflow-hidden rounded-xl bg-white">
                     <img
                         src={primaryImage}
                         alt={product.name}
@@ -288,7 +288,7 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
             to={`/products/${product.slug}`}
             className="group relative block w-full bg-white rounded-xl sm:rounded-2xl overflow-hidden transition-shadow duration-300 hover:shadow-xl transform-gpu h-full flex flex-col border border-transparent hover:border-gray-100"
         >
-            <div className="relative aspect-square bg-gray-100 overflow-hidden isolate">
+            <div className="relative aspect-square bg-white overflow-hidden isolate">
                 <img
                     src={primaryImage}
                     alt={product.name}
