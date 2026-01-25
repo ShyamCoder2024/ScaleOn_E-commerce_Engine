@@ -126,10 +126,10 @@ const Header = () => {
 
     return (
         <header
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'glass h-16 md:h-20' : 'bg-white/80 backdrop-blur-md h-16 md:h-20 border-b border-gray-100'
-                }`}
+            className={`fixed top-0 left-0 right-0 z-50 transition-[height] duration-300 ${scrolled ? 'h-16 md:h-20' : 'h-16 md:h-20'}`}
         >
-            <div className="container-custom h-full">
+            <div className={`absolute inset-0 -z-10 transition-all duration-300 ${scrolled ? 'glass' : 'bg-white/80 backdrop-blur-md border-b border-gray-100'}`} />
+            <div className="container-custom h-full relative z-10">
                 <div className="flex items-center justify-between h-full gap-4">
 
                     {/* Left: Logo */}
