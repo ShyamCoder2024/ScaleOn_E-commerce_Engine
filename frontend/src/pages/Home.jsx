@@ -30,22 +30,43 @@ const getCategoryIcon = (name) => {
 const AdminHeroCarousel = ({ cards }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    // Auto-slide
+    // Auto-slide - Resets whenever currentIndex changes (manual or auto)
     useEffect(() => {
         if (cards.length > 1) {
             const timer = setInterval(() => {
                 setCurrentIndex(prev => (prev + 1) % cards.length);
-            }, 6000);
+            }, 5000); // 5 seconds
             return () => clearInterval(timer);
         }
-    }, [cards.length]);
+    }, [cards.length, currentIndex]);
 
     const goToSlide = (index) => setCurrentIndex(index);
+    const next = () => setCurrentIndex(prev => (prev + 1) % cards.length);
+    const prev = () => setCurrentIndex(prev => (prev - 1 + cards.length) % cards.length);
 
     return (
         <section className="container-custom pt-4 pb-2 md:pt-6 md:pb-4">
             {/* 16:9 Aspect Ratio Banner Container */}
-            <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-sm bg-gray-100 ring-1 ring-gray-900/5">
+            <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-sm bg-gray-100 ring-1 ring-gray-900/5 group select-none">
+
+                {/* Touch Navigation Zones (Invisible) */}
+                {cards.length > 1 && (
+                    <>
+                        {/* Left Tap Zone (30%) */}
+                        <div
+                            className="absolute left-0 top-0 bottom-0 w-[30%] z-30 cursor-pointer active:bg-black/5 transition-colors"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); prev(); }}
+                            aria-label="Previous Slide"
+                        />
+                        {/* Right Tap Zone (30%) */}
+                        <div
+                            className="absolute right-0 top-0 bottom-0 w-[30%] z-30 cursor-pointer active:bg-black/5 transition-colors"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); next(); }}
+                            aria-label="Next Slide"
+                        />
+                    </>
+                )}
+
                 {/* Slides */}
                 {cards.map((card, index) => (
                     <div
@@ -57,19 +78,21 @@ const AdminHeroCarousel = ({ cards }) => {
                             alt={card.title || 'Banner'}
                             className="w-full h-full object-cover"
                         />
-                        {/* Overlay text - Optional, primarily reliance on the Banner Image itself for "Deals" */}
+                        {/* Overlay text */}
                         {(card.title || card.subtitle) && (
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-4 md:p-8">
-                                {card.subtitle && (
-                                    <span className="text-white/95 text-[10px] md:text-sm font-bold mb-1.5 inline-block px-2 py-0.5 bg-black/40 rounded backdrop-blur-sm w-fit uppercase tracking-wider">
-                                        {card.subtitle}
-                                    </span>
-                                )}
-                                <h2 className="text-white text-lg md:text-4xl lg:text-5xl font-heading font-bold drop-shadow-md leading-tight mb-2 md:mb-4">
-                                    {card.title}
-                                </h2>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-4 md:p-8 pointer-events-none">
+                                <div className="pointer-events-auto">
+                                    {card.subtitle && (
+                                        <span className="text-white/95 text-[10px] md:text-sm font-bold mb-1.5 inline-block px-2 py-0.5 bg-black/40 rounded backdrop-blur-sm w-fit uppercase tracking-wider">
+                                            {card.subtitle}
+                                        </span>
+                                    )}
+                                    <h2 className="text-white text-lg md:text-4xl lg:text-5xl font-heading font-bold drop-shadow-md leading-tight mb-2 md:mb-4">
+                                        {card.title}
+                                    </h2>
+                                </div>
                                 {card.link && (
-                                    <Link to={card.link} className="absolute inset-0" aria-label={`Shop ${card.title}`} />
+                                    <Link to={card.link} className="absolute inset-0 z-20" aria-label={`Shop ${card.title}`} />
                                 )}
                             </div>
                         )}
@@ -78,12 +101,12 @@ const AdminHeroCarousel = ({ cards }) => {
 
                 {/* Dots */}
                 {cards.length > 1 && (
-                    <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center gap-1.5">
+                    <div className="absolute bottom-3 left-0 right-0 z-40 flex justify-center gap-1.5 pointer-events-none">
                         {cards.map((_, index) => (
                             <button
                                 key={index}
-                                onClick={() => goToSlide(index)}
-                                className={`h-1.5 rounded-full transition-all shadow-sm ${index === currentIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/50'}`}
+                                onClick={(e) => { e.stopPropagation(); goToSlide(index); }}
+                                className={`h-1.5 rounded-full transition-all shadow-sm pointer-events-auto ${index === currentIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/50'}`}
                                 aria-label={`Go to slide ${index + 1}`}
                             />
                         ))}
