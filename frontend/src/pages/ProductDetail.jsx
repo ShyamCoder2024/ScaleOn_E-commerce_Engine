@@ -226,7 +226,7 @@ const ProductDetail = () => {
                                         <img
                                             src={img.url}
                                             alt={img.alt}
-                                            className="w-full h-full object-contain p-1 bg-white"
+                                            className="w-full h-full object-contain bg-white"
                                         />
                                     </button>
                                 ))}

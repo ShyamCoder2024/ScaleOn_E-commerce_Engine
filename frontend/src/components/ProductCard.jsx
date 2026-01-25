@@ -206,7 +206,7 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
                     <img
                         src={primaryImage}
                         alt={product.name}
-                        className="w-full h-full object-contain p-2 transition-transform duration-500 transform font-sans group-hover:scale-105"
+                        className="w-full h-full object-contain transition-transform duration-500 transform font-sans group-hover:scale-105"
                         onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
                     />
                     {hasDiscount && (
@@ -292,7 +292,7 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
                 <img
                     src={primaryImage}
                     alt={product.name}
-                    className="absolute inset-0 w-full h-full object-contain p-4 z-10 transition-opacity duration-300 group-hover:opacity-0 will-change-opacity"
+                    className="absolute inset-0 w-full h-full object-contain z-10 transition-opacity duration-300 group-hover:opacity-0 will-change-opacity"
                     loading="lazy"
                     onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
                 />
@@ -300,7 +300,7 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
                 <img
                     src={secondaryImage}
                     alt={product.name}
-                    className="absolute inset-0 w-full h-full object-contain p-4 z-0 transition-transform duration-500 scale-100 group-hover:scale-110 transform-gpu will-change-transform"
+                    className="absolute inset-0 w-full h-full object-contain z-0 transition-transform duration-500 scale-100 group-hover:scale-110 transform-gpu will-change-transform"
                     aria-hidden="true"
                     onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
                 />
