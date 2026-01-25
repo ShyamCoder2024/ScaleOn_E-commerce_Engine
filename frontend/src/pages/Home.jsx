@@ -25,110 +25,70 @@ const getCategoryIcon = (name) => {
     return <Grid size={24} />;
 };
 
-// AdminHeroCarousel Component - Redesigned for Maximum Impact & Mobile Optimization
+// AdminHeroCarousel - Strict 16:9 Ratio for Banners/Deals
 const AdminHeroCarousel = ({ cards }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const timerRef = useRef(null);
 
-    // Auto-slide every 6 seconds
+    // Auto-slide
     useEffect(() => {
         if (cards.length > 1) {
-            timerRef.current = setInterval(() => {
+            const timer = setInterval(() => {
                 setCurrentIndex(prev => (prev + 1) % cards.length);
             }, 6000);
-            return () => clearInterval(timerRef.current);
+            return () => clearInterval(timer);
         }
     }, [cards.length]);
 
-    const goToSlide = (index) => {
-        setCurrentIndex(index);
-        if (timerRef.current) {
-            clearInterval(timerRef.current);
-            timerRef.current = setInterval(() => {
-                setCurrentIndex(prev => (prev + 1) % cards.length);
-            }, 6000);
-        }
-    };
+    const goToSlide = (index) => setCurrentIndex(index);
 
     return (
-        // Mobile: 55vh, Desktop: 700px
-        <section className="relative w-full h-[55vh] min-h-[400px] md:h-[700px] lg:h-[800px] overflow-hidden">
-            {/* Background Slides */}
-            {cards.map((card, index) => (
-                <div
-                    key={card.id || index}
-                    className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-                >
-                    <img
-                        src={card.image}
-                        alt={card.title || 'Welcome'}
-                        className="w-full h-full object-cover object-center md:scale-105 animate-slow-zoom"
-                    />
-                    {/* Premium Gradient Overlay - Stronger at bottom for readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent" />
-                </div>
-            ))}
-
-            {/* Content Content */}
-            <div className="absolute inset-0 z-20 flex items-center justify-center text-center px-4 sm:px-6 pt-10 sm:pt-0">
-                <div className="max-w-4xl w-full">
-                    {cards.map((card, index) => (
-                        <div
-                            key={`content-${index}`}
-                            className={`transition-all duration-700 transform ${index === currentIndex ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 absolute inset-0 flex flex-col items-center justify-center pointer-events-none'}`}
-                        >
-                            {/* Animated Badge */}
-                            {card.subtitle && (
-                                <span className="inline-block px-3 py-1 mb-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] md:text-sm font-medium tracking-wider uppercase animate-fade-in">
-                                    {card.subtitle}
-                                </span>
-                            )}
-
-                            {/* Mobile: Smaller Text */}
-                            <h1 className="text-3xl sm:text-5xl md:text-7xl font-heading font-bold text-white mb-4 md:mb-8 leading-tight tracking-tight drop-shadow-xl">
-                                {card.title || 'Elevate Your Lifestyle'}
-                            </h1>
-
-                            <p className="text-sm sm:text-xl md:text-2xl text-gray-200 mb-6 sm:mb-10 max-w-xs sm:max-w-2xl mx-auto leading-relaxed drop-shadow-md line-clamp-2 sm:line-clamp-none">
-                                {card.description || 'Discover our curated collection of premium products.'}
-                            </p>
-
-                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center w-full px-8 sm:px-0">
-                                <Link
-                                    to={card.link || '/products'}
-                                    className="btn-primary h-10 sm:h-14 px-6 sm:px-10 rounded-full text-sm sm:text-lg font-bold shadow-xl w-full sm:w-auto flex items-center justify-center gap-2"
-                                >
-                                    Shop Now <ArrowRight size={16} className="sm:hidden" /><ArrowRight size={20} className="hidden sm:block" />
-                                </Link>
-                                <Link
-                                    to="/products?sort=-salesCount"
-                                    className="h-10 sm:h-14 px-6 sm:px-10 rounded-full bg-white/10 backdrop-blur-md border border-white/30 text-white text-sm sm:text-lg font-bold hover:bg-white/20 transition-all w-full sm:w-auto flex items-center justify-center"
-                                >
-                                    Best Sellers
-                                </Link>
+        <section className="container-custom pt-4 pb-2 md:pt-6 md:pb-4">
+            {/* 16:9 Aspect Ratio Banner Container */}
+            <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-sm bg-gray-100 ring-1 ring-gray-900/5">
+                {/* Slides */}
+                {cards.map((card, index) => (
+                    <div
+                        key={card.id || index}
+                        className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                    >
+                        <img
+                            src={card.image}
+                            alt={card.title || 'Banner'}
+                            className="w-full h-full object-cover"
+                        />
+                        {/* Overlay text - Optional, primarily reliance on the Banner Image itself for "Deals" */}
+                        {(card.title || card.subtitle) && (
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-4 md:p-8">
+                                {card.subtitle && (
+                                    <span className="text-white/95 text-[10px] md:text-sm font-bold mb-1.5 inline-block px-2 py-0.5 bg-black/40 rounded backdrop-blur-sm w-fit uppercase tracking-wider">
+                                        {card.subtitle}
+                                    </span>
+                                )}
+                                <h2 className="text-white text-lg md:text-4xl lg:text-5xl font-heading font-bold drop-shadow-md leading-tight mb-2 md:mb-4">
+                                    {card.title}
+                                </h2>
+                                {card.link && (
+                                    <Link to={card.link} className="absolute inset-0" aria-label={`Shop ${card.title}`} />
+                                )}
                             </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+                        )}
+                    </div>
+                ))}
 
-            {/* Progress Indicators */}
-            {cards.length > 1 && (
-                <div className="absolute bottom-6 md:bottom-10 left-0 right-0 z-30 flex justify-center gap-2 md:gap-3">
-                    {cards.map((_, index) => (
-                        <button
-                            key={index}
-                            onClick={() => goToSlide(index)}
-                            className="group relative h-1 md:h-1.5 w-10 md:w-16 bg-white/20 rounded-full overflow-hidden transition-all hover:bg-white/30"
-                            aria-label={`Go to slide ${index + 1}`}
-                        >
-                            <div
-                                className={`absolute left-0 top-0 bottom-0 bg-white rounded-full transition-all duration-[6000ms] ease-linear ${index === currentIndex ? 'w-full' : 'w-0'}`}
+                {/* Dots */}
+                {cards.length > 1 && (
+                    <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center gap-1.5">
+                        {cards.map((_, index) => (
+                            <button
+                                key={index}
+                                onClick={() => goToSlide(index)}
+                                className={`h-1.5 rounded-full transition-all shadow-sm ${index === currentIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/50'}`}
+                                aria-label={`Go to slide ${index + 1}`}
                             />
-                        </button>
-                    ))}
-                </div>
-            )}
+                        ))}
+                    </div>
+                )}
+            </div>
         </section>
     );
 };
@@ -161,56 +121,42 @@ const FeatureStrip = () => {
     );
 };
 
-// Category Grid Component - Mobile First (Story Style)
+// Category Grid - Clean, Logo-centric Grid (No Scroll)
 const CategoryGrid = ({ categories }) => {
     if (!categories || categories.length === 0) return null;
 
     return (
-        <section className="py-8 bg-white border-b border-gray-100">
+        <section className="py-2 md:py-6">
             <div className="container-custom">
-                <div className="flex items-center justify-between mb-8 md:mb-12">
-                    <h3 className="text-xl md:text-3xl font-heading font-bold text-gray-900 tracking-tight">Shop by Category</h3>
+                <div className="flex items-center justify-between mb-4 md:mb-8">
+                    <h3 className="text-lg md:text-2xl font-bold text-gray-900 tracking-tight">Browse Categories</h3>
                 </div>
 
-                {/* Adaptive Layout: Scroll on Mobile, Grid on Desktop */}
-                <div className="
-                    flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x 
-                    md:grid md:grid-cols-3 lg:grid-cols-6 md:gap-8 md:overflow-visible md:pb-0
-                ">
+                {/* 3-Column Grid on Mobile, 6 on Desktop */}
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-6">
                     {categories.map((cat, idx) => (
                         <Link
                             key={cat._id || idx}
                             to={`/products?category=${cat._id}`}
                             className="
-                                flex flex-col items-center gap-4 shrink-0 w-24 md:w-auto group snap-start
-                                transition-all duration-300 md:hover:-translate-y-2
+                                flex flex-col items-center gap-2 group
+                                p-3 rounded-xl hover:bg-gray-50 transition-colors
                             "
                         >
                             <div className="
-                                w-20 h-20 md:w-32 md:h-32 lg:w-40 lg:h-40 
-                                rounded-full bg-gray-50 border-2 border-transparent 
-                                group-hover:border-primary-200 group-hover:shadow-xl group-hover:shadow-primary-500/10
-                                transition-all duration-300 overflow-hidden relative
+                                w-14 h-14 md:w-20 md:h-20 
+                                flex items-center justify-center 
+                                text-primary-600 bg-primary-50/50 rounded-2xl
+                                group-hover:bg-primary-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-primary-500/20
+                                transition-all duration-300
                             ">
-                                {cat.image ? (
-                                    <img
-                                        src={cat.image}
-                                        alt={cat.name}
-                                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center text-gray-400 group-hover:text-primary-500 transition-colors">
-                                        <Grid size={32} className="md:w-10 md:h-10" />
-                                    </div>
-                                )}
-                                {/* Overlay effect */}
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+                                {getCategoryIcon(cat.name)}
                             </div>
 
                             <span className="
-                                text-sm md:text-base lg:text-lg font-bold text-gray-700 text-center 
-                                line-clamp-2 max-w-[100px] md:max-w-none 
-                                group-hover:text-primary-600 transition-colors
+                                text-xs md:text-sm font-bold text-gray-700 text-center 
+                                line-clamp-1 max-w-full
+                                group-hover:text-primary-700
                             ">
                                 {cat.name}
                             </span>
@@ -315,7 +261,7 @@ const Home = () => {
         <div className="bg-gray-50/50 min-h-screen pb-20">
             {/* Hero Section */}
             {cardsLoading ? (
-                <div className="h-[600px] w-full bg-gray-200 animate-pulse sticky top-0" />
+                <div className="h-[300px] w-full bg-gray-200 animate-pulse sticky top-0" />
             ) : showHeroCarousel ? (
                 <AdminHeroCarousel cards={featureCards} />
             ) : (
