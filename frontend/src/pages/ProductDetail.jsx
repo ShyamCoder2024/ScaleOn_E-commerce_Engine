@@ -161,13 +161,13 @@ const ProductDetail = () => {
                         {/* Main Image - Mobile Full Bleed Fix: -mx-4 removes container padding */}
                         {/* Main Image - Mobile Full Bleed Fix: -mx-4 removes container padding */}
                         <div
-                            className="aspect-square relative bg-white -mx-4 sm:mx-0 sm:rounded-2xl overflow-hidden sm:shadow-sm sm:border sm:border-gray-100 group cursor-zoom-in"
+                            className="relative bg-white -mx-4 sm:mx-0 sm:rounded-2xl overflow-hidden sm:shadow-sm sm:border sm:border-gray-100 group cursor-zoom-in"
                             onClick={() => setLightboxOpen(true)}
                         >
                             <img
                                 src={images[selectedImage]?.url}
                                 alt={images[selectedImage]?.alt || product.name}
-                                className="w-full h-full object-contain transform group-hover:scale-105 transition-transform duration-500"
+                                className="w-full h-auto max-h-[70vh] object-contain mx-auto transform group-hover:scale-105 transition-transform duration-500"
                             />
 
                             {/* Zoom Indicator */}

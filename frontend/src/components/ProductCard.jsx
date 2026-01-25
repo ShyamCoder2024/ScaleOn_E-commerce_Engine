@@ -288,7 +288,7 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
             to={`/products/${product.slug}`}
             className="group relative block w-full bg-white rounded-xl sm:rounded-2xl overflow-hidden transition-shadow duration-300 hover:shadow-xl transform-gpu h-full flex flex-col border border-transparent hover:border-gray-100"
         >
-            <div className="relative aspect-square bg-white overflow-hidden isolate">
+            <div className="relative aspect-[4/5] bg-white overflow-hidden isolate">
                 <img
                     src={primaryImage}
                     alt={product.name}
