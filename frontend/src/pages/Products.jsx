@@ -56,7 +56,7 @@ const Products = () => {
         }
     };
 
-    // Data Fetching
+    // Data Fetching with Caching & Scroll Restoration
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -71,6 +71,28 @@ const Products = () => {
 
     useEffect(() => {
         const fetchProducts = async () => {
+            // Check Cache first for "Back" button restoration
+            const cachedUrl = sessionStorage.getItem('products_url');
+            const cachedData = sessionStorage.getItem('products_data');
+            const currentUrl = window.location.search;
+
+            if (cachedUrl === currentUrl && cachedData && loading) {
+                // Restore from Cache
+                const parsedData = JSON.parse(cachedData);
+                setProducts(parsedData.products);
+                setPagination(parsedData.pagination);
+                setLoading(false);
+
+                // Restore Scroll Position
+                const savedScroll = sessionStorage.getItem('products_scroll');
+                if (savedScroll) {
+                    setTimeout(() => {
+                        window.scrollTo({ top: parseInt(savedScroll), behavior: 'auto' });
+                    }, 0);
+                }
+                return;
+            }
+
             setLoading(true);
             try {
                 const params = {
@@ -80,26 +102,41 @@ const Products = () => {
                 };
 
                 const response = await productAPI.getProducts(params);
-                // Ultra-safe data extraction
                 const data = response?.data?.data || {};
 
-                // Ensure products is ALWAYS an array
                 const productsList = Array.isArray(data.products) ? data.products : (Array.isArray(data.items) ? data.items : []);
                 setProducts(productsList);
-
-                // Ensure pagination is valid object
                 setPagination(data.pagination || { page: 1, pages: 1, total: 0 });
+
+                // Save to Cache
+                sessionStorage.setItem('products_url', currentUrl);
+                sessionStorage.setItem('products_data', JSON.stringify({ products: productsList, pagination: data.pagination }));
+
             } catch (err) {
                 console.error('Failed to fetch products', err);
-                // Fallback to prevent crash
                 setProducts([]);
                 setPagination({ page: 1, pages: 1, total: 0 });
             } finally {
                 setLoading(false);
             }
         };
+
+        // If we are strictly changing filters, we might want to clear scroll cache
+        // But for "Back" navigation, typical behavior is handled by the strict URL check above.
         fetchProducts();
-    }, [searchParams, filters.category, filters.sort, filters.minPrice, filters.maxPrice, filters.inStock, filters.search]); // Depend on flattened filters or searchParams
+    }, [searchParams, filters.category, filters.sort, filters.minPrice, filters.maxPrice, filters.inStock, filters.search]);
+
+    // Save Scroll Position on Unmount/Navigation
+    useEffect(() => {
+        const handleScroll = () => {
+            // Optional: Debounce save if needed, but saving on unmount is usually better
+        };
+
+        return () => {
+            // Save current scroll position when leaving the component
+            sessionStorage.setItem('products_scroll', window.scrollY.toString());
+        };
+    }, []);
 
     const updateFilter = (key, value) => {
         setFilters(prev => ({ ...prev, [key]: value }));
