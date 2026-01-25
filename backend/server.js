@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
+import compression from 'compression';
 import dotenv from 'dotenv';
 
 import connectDB from './config/db.js';
@@ -37,6 +38,9 @@ const app = express();
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
+
+// Compression for performance
+app.use(compression());
 
 // CORS configuration - Support multiple origins for production
 const allowedOrigins = [

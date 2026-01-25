@@ -110,13 +110,15 @@ const userSchema = new mongoose.Schema({
         enum: ['active', 'blocked', 'pending'],
         default: 'pending'
     },
-    refreshToken: String
+    // Support for multiple devices (array of refresh tokens)
+    refreshTokens: [String]
 }, {
     timestamps: true,
     toJSON: {
         transform: function (doc, ret) {
             delete ret.password;
-            delete ret.refreshToken;
+            delete ret.refreshTokens;
+            delete ret.refreshToken; // Legacy support
             delete ret.verificationToken;
             delete ret.resetPasswordToken;
             delete ret.__v;
