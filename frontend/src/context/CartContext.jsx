@@ -308,6 +308,13 @@ export const CartProvider = ({ children }) => {
             setCachedCart(EMPTY_CART, EMPTY_TOTALS);
             return { success: true };
         } catch (err) {
+            // Ignore "Cart not found" (404) as it means cart is already cleared
+            if (err.response?.status === 404) {
+                setCart(EMPTY_CART);
+                setTotals(EMPTY_TOTALS);
+                setCachedCart(EMPTY_CART, EMPTY_TOTALS);
+                return { success: true };
+            }
             const message = err.response?.data?.message || 'Failed to clear cart';
             toast.error(message);
             return { success: false, error: message };

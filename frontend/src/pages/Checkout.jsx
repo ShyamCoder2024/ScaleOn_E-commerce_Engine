@@ -238,7 +238,7 @@ const Checkout = () => {
                 navigate(`/orders/${data.order._id}`, {
                     state: { orderSuccess: true }
                 });
-                toast.success('Order placed successfully!');
+                // Toast moved to OrderDetail page after animation
                 return;
             }
 
@@ -342,7 +342,7 @@ const Checkout = () => {
                         navigate(`/orders/${orderId}`, {
                             state: { orderSuccess: true, paymentSuccess: true }
                         });
-                        toast.success('Payment successful! Order placed.');
+                        // Toast moved to OrderDetail page after animation
                     }
                 } catch (err) {
                     console.error('Payment verification failed:', err);

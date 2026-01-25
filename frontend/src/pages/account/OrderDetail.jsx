@@ -36,6 +36,9 @@ const OrderDetail = () => {
     // Disable animation after it plays once
     const handleAnimationComplete = () => {
         setShowSuccessAnimation(false);
+        // Show success message AFTER animation completes
+        toast.success('Order placed successfully!');
+
         // Clean up location state history so it doesn't replay on refresh
         window.history.replaceState({}, document.title);
     };
