@@ -363,12 +363,12 @@ const SettingsPage = () => {
                                                 folder="logos"
                                                 label="Store Logo"
                                                 placeholder="Upload Logo"
-                                                maxSize={2}
+                                                maxSize={5}
                                                 showUrlInput={true}
                                             />
                                             <div className="flex items-center gap-2 mt-3 text-xs text-slate-400">
                                                 <AlertCircle size={14} />
-                                                <span>Recommended: 200x80px PNG with transparent background</span>
+                                                <span>Recommended: Transparent PNG (Auto-fits height)</span>
                                             </div>
                                         </div>
                                     </div>

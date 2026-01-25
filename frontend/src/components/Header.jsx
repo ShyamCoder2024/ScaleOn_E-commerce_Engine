@@ -125,6 +125,15 @@ const Header = () => {
         }
     };
 
+    const [logoError, setLogoError] = useState(false);
+
+    // Reset error when logo changes
+    useEffect(() => {
+        setLogoError(false);
+    }, [logo]);
+
+    // ... (rest of search/scroll logic)
+
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 transition-[height] duration-300 ${scrolled ? 'h-16 md:h-20' : 'h-16 md:h-20'}`}
@@ -135,11 +144,12 @@ const Header = () => {
 
                     {/* Left: Logo */}
                     <Link to="/" className="flex items-center gap-2 sm:gap-3 flex-shrink-0 group z-10">
-                        {logo ? (
+                        {logo && !logoError ? (
                             <img
                                 src={logo}
                                 alt={storeName}
                                 className="h-8 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-110"
+                                onError={() => setLogoError(true)}
                             />
                         ) : (
                             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center text-white font-heading font-bold text-lg sm:text-xl shadow-lg shadow-primary-500/20">
