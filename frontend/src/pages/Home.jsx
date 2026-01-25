@@ -1,11 +1,31 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, TrendingUp, ShieldCheck, Truck, Clock } from 'lucide-react';
+import {
+    ArrowRight, Star, TrendingUp, ShieldCheck, Truck, Clock,
+    Smartphone, Shirt, BookOpen, Home as HomeIcon, Sparkles, Dumbbell,
+    Watch, Headphones, Monitor, Grid, Gift
+} from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { productAPI, featureCardsAPI, categoryAPI } from '../services/api';
 import { useConfig } from '../context/ConfigContext';
 import ProductCard from '../components/ProductCard';
 
-// Admin Hero Carousel Component - Redesigned for Maximum Impact
+// Helper to map category names to icons
+const getCategoryIcon = (name) => {
+    const n = name.toLowerCase();
+    if (n.includes('phone') || n.includes('mobile')) return <Smartphone size={24} />;
+    if (n.includes('fashion') || n.includes('cloth') || n.includes('shirt')) return <Shirt size={24} />;
+    if (n.includes('book')) return <BookOpen size={24} />;
+    if (n.includes('home') || n.includes('living')) return <HomeIcon size={24} />;
+    if (n.includes('beauty') || n.includes('makeup')) return <Sparkles size={24} />;
+    if (n.includes('sport') || n.includes('fit')) return <Dumbbell size={24} />;
+    if (n.includes('watch')) return <Watch size={24} />;
+    if (n.includes('audio') || n.includes('headphone')) return <Headphones size={24} />;
+    if (n.includes('computer') || n.includes('laptop') || n.includes('electron')) return <Monitor size={24} />;
+    if (n.includes('gift')) return <Gift size={24} />;
+    return <Grid size={24} />;
+};
+
+// AdminHeroCarousel Component - Redesigned for Maximum Impact & Mobile Optimization
 const AdminHeroCarousel = ({ cards }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const timerRef = useRef(null);
@@ -31,7 +51,8 @@ const AdminHeroCarousel = ({ cards }) => {
     };
 
     return (
-        <section className="relative w-full h-[600px] md:h-[700px] lg:h-[800px] overflow-hidden">
+        // Mobile: 55vh, Desktop: 700px
+        <section className="relative w-full h-[55vh] min-h-[400px] md:h-[700px] lg:h-[800px] overflow-hidden">
             {/* Background Slides */}
             {cards.map((card, index) => (
                 <div
@@ -41,15 +62,15 @@ const AdminHeroCarousel = ({ cards }) => {
                     <img
                         src={card.image}
                         alt={card.title || 'Welcome'}
-                        className="w-full h-full object-cover object-center scale-105 animate-slow-zoom"
+                        className="w-full h-full object-cover object-center md:scale-105 animate-slow-zoom"
                     />
-                    {/* Premium Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent opacity-90" />
+                    {/* Premium Gradient Overlay - Stronger at bottom for readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent" />
                 </div>
             ))}
 
             {/* Content Content */}
-            <div className="absolute inset-0 z-20 flex items-center justify-center text-center px-4 sm:px-6">
+            <div className="absolute inset-0 z-20 flex items-center justify-center text-center px-4 sm:px-6 pt-10 sm:pt-0">
                 <div className="max-w-4xl w-full">
                     {cards.map((card, index) => (
                         <div
@@ -58,29 +79,30 @@ const AdminHeroCarousel = ({ cards }) => {
                         >
                             {/* Animated Badge */}
                             {card.subtitle && (
-                                <span className="inline-block px-4 py-1.5 mb-6 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs sm:text-sm font-medium tracking-wider uppercase animate-fade-in">
+                                <span className="inline-block px-3 py-1 mb-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] md:text-sm font-medium tracking-wider uppercase animate-fade-in">
                                     {card.subtitle}
                                 </span>
                             )}
 
-                            <h1 className="text-3xl sm:text-5xl md:text-7xl font-heading font-bold text-white mb-6 md:mb-8 leading-tight tracking-tight drop-shadow-xl">
+                            {/* Mobile: Smaller Text */}
+                            <h1 className="text-3xl sm:text-5xl md:text-7xl font-heading font-bold text-white mb-4 md:mb-8 leading-tight tracking-tight drop-shadow-xl">
                                 {card.title || 'Elevate Your Lifestyle'}
                             </h1>
 
-                            <p className="text-lg sm:text-xl md:text-2xl text-gray-200 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-md hidden sm:block">
-                                {card.description || 'Discover our curated collection of premium products designed to enhance your everyday life.'}
+                            <p className="text-sm sm:text-xl md:text-2xl text-gray-200 mb-6 sm:mb-10 max-w-xs sm:max-w-2xl mx-auto leading-relaxed drop-shadow-md line-clamp-2 sm:line-clamp-none">
+                                {card.description || 'Discover our curated collection of premium products.'}
                             </p>
 
-                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center w-full sm:w-auto px-4 sm:px-0">
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center w-full px-8 sm:px-0">
                                 <Link
                                     to={card.link || '/products'}
-                                    className="btn-primary h-12 sm:h-14 px-8 sm:px-10 rounded-full text-base sm:text-lg font-bold shadow-xl hover:shadow-primary-500/30 hover:-translate-y-1 transition-all w-full sm:w-auto flex items-center justify-center gap-2"
+                                    className="btn-primary h-10 sm:h-14 px-6 sm:px-10 rounded-full text-sm sm:text-lg font-bold shadow-xl w-full sm:w-auto flex items-center justify-center gap-2"
                                 >
-                                    Shop Collection <ArrowRight size={20} />
+                                    Shop Now <ArrowRight size={16} className="sm:hidden" /><ArrowRight size={20} className="hidden sm:block" />
                                 </Link>
                                 <Link
                                     to="/products?sort=-salesCount"
-                                    className="h-12 sm:h-14 px-8 sm:px-10 rounded-full bg-white/10 backdrop-blur-md border border-white/30 text-white text-base sm:text-lg font-bold hover:bg-white/20 transition-all w-full sm:w-auto flex items-center justify-center"
+                                    className="h-10 sm:h-14 px-6 sm:px-10 rounded-full bg-white/10 backdrop-blur-md border border-white/30 text-white text-sm sm:text-lg font-bold hover:bg-white/20 transition-all w-full sm:w-auto flex items-center justify-center"
                                 >
                                     Best Sellers
                                 </Link>
@@ -92,12 +114,12 @@ const AdminHeroCarousel = ({ cards }) => {
 
             {/* Progress Indicators */}
             {cards.length > 1 && (
-                <div className="absolute bottom-10 left-0 right-0 z-30 flex justify-center gap-3">
+                <div className="absolute bottom-6 md:bottom-10 left-0 right-0 z-30 flex justify-center gap-2 md:gap-3">
                     {cards.map((_, index) => (
                         <button
                             key={index}
                             onClick={() => goToSlide(index)}
-                            className="group relative h-1.5 w-16 bg-white/20 rounded-full overflow-hidden transition-all hover:bg-white/30"
+                            className="group relative h-1 md:h-1.5 w-10 md:w-16 bg-white/20 rounded-full overflow-hidden transition-all hover:bg-white/30"
                             aria-label={`Go to slide ${index + 1}`}
                         >
                             <div
