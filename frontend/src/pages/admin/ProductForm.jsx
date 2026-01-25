@@ -232,8 +232,8 @@ const ProductForm = () => {
     return (
         <form onSubmit={handleSubmit} className="min-h-screen bg-slate-50/50 pb-20">
             {/* Header - Static on Mobile, Sticky on Desktop */}
-            <div className="relative md:sticky md:top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 py-4 mb-6 md:mb-8 transition-all">
-                <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="relative md:sticky md:top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 py-3 sm:py-4 mb-6 md:mb-8 transition-all">
+                <div className="max-w-6xl mx-auto flex flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <button
                             type="button"
@@ -251,21 +251,22 @@ const ProductForm = () => {
                             </p>
                         </div>
                     </div>
-                    <div className="w-full sm:w-auto flex items-center gap-3">
+                    <div className="flex items-center gap-3">
                         <button
                             type="button"
                             onClick={() => navigate('/admin/products')}
-                            className="flex-1 sm:flex-none py-2.5 sm:px-4 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors text-center"
+                            className="hidden sm:block sm:px-4 sm:py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={saving}
-                            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20 font-semibold transition-all active:scale-95 text-sm"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 bg-blue-600 text-white rounded-lg sm:rounded-xl hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20 font-semibold transition-all active:scale-95 text-sm"
                         >
                             <Save className="w-4 h-4" />
-                            {saving ? 'Saving...' : 'Save Product'}
+                            <span className="sm:hidden">Save</span>
+                            <span className="hidden sm:inline">Save Product</span>
                         </button>
                     </div>
                 </div>
