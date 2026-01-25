@@ -29,6 +29,14 @@ const Checkout = () => {
     // Inline field validation errors
     const [fieldErrors, setFieldErrors] = useState({});
 
+    // Helper to strip country code
+    const stripCountryCode = (phone) => {
+        if (!phone) return '';
+        const clean = phone.replace(/\D/g, '');
+        if (clean.length > 10 && clean.startsWith('91')) return clean.slice(2);
+        return clean.slice(-10);
+    };
+
     const [shippingAddress, setShippingAddress] = useState({
         firstName: user?.profile?.firstName || '',
         lastName: user?.profile?.lastName || '',
@@ -38,7 +46,7 @@ const Checkout = () => {
         state: '',
         postalCode: '',
         country: 'India',
-        phone: user?.profile?.phone || '',
+        phone: stripCountryCode(user?.profile?.phone || ''),
     });
 
     const [selectedPayment, setSelectedPayment] = useState('cod');
@@ -75,6 +83,20 @@ const Checkout = () => {
         const defaultAddress = user?.profile?.addresses?.find(a => a.isDefault && a.type === 'shipping')
             || user?.profile?.addresses?.find(a => a.isDefault)
             || user?.profile?.addresses?.[0];
+
+        // Helper to strip country code for UI display (since UI adds +91 prefix)
+        const formatPhoneForDisplay = (phone) => {
+            if (!phone) return '';
+            // Remove all non-digit characters first to be safe
+            const clean = phone.replace(/\D/g, '');
+            // If it starts with 91 and is longer than 10 digits (e.g. 919876543210 -> 9876543210)
+            if (clean.length > 10 && clean.startsWith('91')) {
+                return clean.slice(2);
+            }
+            // If it's just 10 digits, return as is
+            return clean.slice(-10);
+        };
+
         if (defaultAddress) {
             setShippingAddress({
                 firstName: defaultAddress.firstName || user?.profile?.firstName || '',
@@ -85,7 +107,7 @@ const Checkout = () => {
                 state: defaultAddress.state || '',
                 postalCode: defaultAddress.postalCode || '',
                 country: defaultAddress.country || 'India',
-                phone: defaultAddress.phone || user?.profile?.phone || '',
+                phone: formatPhoneForDisplay(defaultAddress.phone || user?.profile?.phone || ''),
             });
         }
     };
