@@ -370,63 +370,56 @@ const ProductDetail = () => {
                             <div>
                                 <div className="flex items-center justify-between mb-2">
                                     <label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Quantity</label>
-                                    {isFeatureEnabled('inventory') && isInStock() && (
-                                        <span className={`text-xs sm:text-sm font-medium ${getCurrentStock() < 10 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                                            {getCurrentStock()} available
-                                        </span>
-                                    )}
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center bg-white rounded-lg shadow-sm border border-gray-200 p-0.5">
                                         <button
                                             onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-md flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors active:scale-95 disabled:opacity-50"
+                                            className="w-8 h-8 rounded-md flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors active:scale-95 disabled:opacity-50"
                                             disabled={quantity <= 1}
                                         >
-                                            <Minus size={14} className="sm:hidden" />
-                                            <Minus size={16} className="hidden sm:block" />
+                                            <Minus size={16} />
                                         </button>
                                         <input
                                             type="number"
                                             value={quantity}
                                             onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                            className="w-10 sm:w-12 bg-transparent text-center font-bold text-gray-900 text-sm sm:text-lg focus:outline-none"
+                                            className="w-10 bg-transparent text-center font-bold text-gray-900 text-base focus:outline-none"
                                             min="1"
                                         />
                                         <button
                                             onClick={() => setQuantity(quantity + 1)}
-                                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-md flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors active:scale-95 disabled:opacity-50"
+                                            className="w-8 h-8 rounded-md flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors active:scale-95 disabled:opacity-50"
                                             disabled={isFeatureEnabled('inventory') && quantity >= getCurrentStock()}
                                         >
-                                            <Plus size={14} className="sm:hidden" />
-                                            <Plus size={16} className="hidden sm:block" />
+                                            <Plus size={16} />
                                         </button>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Actions - Visible on All Screens */}
-                            <div className="flex flex-row gap-3 pt-4">
+                            <div className="flex flex-row gap-2 pt-4">
                                 {isInStock() ? (
                                     <>
                                         <button
                                             onClick={handleAddToCart}
                                             disabled={addingToCart}
-                                            className="flex-1 btn-secondary py-3 sm:py-3.5 px-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 border-gray-200 hover:bg-gray-50 text-gray-900 shadow-sm rounded-xl active:scale-95 transition-all w-full"
+                                            className="flex-1 btn-secondary py-3 px-2 text-xs sm:text-base font-bold flex items-center justify-center gap-1.5 border-gray-200 hover:bg-gray-50 text-gray-900 shadow-sm rounded-xl active:scale-95 transition-all w-full whitespace-nowrap"
                                         >
-                                            <ShoppingCart size={18} className="shrink-0" />
+                                            <ShoppingCart size={16} className="shrink-0" />
                                             {addingToCart ? 'Adding...' : 'Add to Cart'}
                                         </button>
                                         <button
                                             onClick={handleBuyNow}
                                             disabled={addingToCart}
-                                            className="flex-1 btn-primary py-3 sm:py-3.5 px-4 text-sm sm:text-base font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-all rounded-xl w-full"
+                                            className="flex-1 btn-primary py-3 px-2 text-xs sm:text-base font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-all rounded-xl w-full whitespace-nowrap"
                                         >
                                             Buy Now
                                         </button>
                                     </>
                                 ) : (
-                                    <button disabled className="w-full bg-gray-100 text-gray-400 font-bold py-3.5 rounded-xl border border-gray-200 cursor-not-allowed">
+                                    <button disabled className="w-full bg-gray-100 text-gray-400 font-bold py-3 rounded-xl border border-gray-200 cursor-not-allowed text-sm">
                                         Out of Stock
                                     </button>
                                 )}
