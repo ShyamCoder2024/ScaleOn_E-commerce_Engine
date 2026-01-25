@@ -445,7 +445,7 @@ const OrderDetail = () => {
                     <div className="lg:w-96 space-y-6">
 
                         {/* Order Summary */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-6">
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden lg:sticky lg:top-6">
                             <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-100">
                                 <h2 className="font-bold text-gray-900">Order Summary</h2>
                             </div>
