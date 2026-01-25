@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useConfig } from '../context/ConfigContext';
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Send, ChevronDown, CreditCard } from 'lucide-react';
+import { Facebook, Instagram, Mail, Phone, MapPin, Send, ChevronDown } from 'lucide-react';
 
 const FooterSection = ({ title, children, className = '' }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -116,7 +116,7 @@ const Footer = () => {
                         </form>
 
                         <div className="flex items-center gap-4">
-                            {[Facebook, Twitter, Instagram, Linkedin].map((Icon, idx) => (
+                            {[Facebook, Instagram].map((Icon, idx) => (
                                 <a
                                     key={idx}
                                     href="#"
@@ -130,21 +130,10 @@ const Footer = () => {
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="border-t border-gray-800 pt-8 flex flex-col-reverse md:flex-row justify-between items-center gap-6 text-center md:text-left">
-                    <p className="text-gray-600 text-xs">
+                <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+                    <p className="text-gray-600 text-xs w-full text-center">
                         © {currentYear} {storeName}. All rights reserved.
                     </p>
-
-                    <div className="flex items-center gap-4 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-                        {['Visa', 'Mastercard', 'Amex', 'PayPal'].map((pm, i) => (
-                            <div key={i} className="flex items-center gap-1.5 bg-gray-900 px-3 py-1.5 rounded border border-gray-800">
-                                <CreditCard size={14} className="text-gray-400" />
-                                <span className="text-[10px] font-bold tracking-wider text-gray-400">
-                                    {pm.toUpperCase()}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
                 </div>
             </div>
         </footer>
