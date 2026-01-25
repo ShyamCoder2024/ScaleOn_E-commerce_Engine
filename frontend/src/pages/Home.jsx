@@ -146,33 +146,50 @@ const CategoryGrid = ({ categories }) => {
     return (
         <section className="py-8 bg-white border-b border-gray-100">
             <div className="container-custom">
-                <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg md:text-xl font-heading font-bold text-gray-900">Shop by Category</h3>
-                    {/* <Link to="/products" className="text-sm font-medium text-primary-600 hover:text-primary-700">View All</Link> */}
+                <div className="flex items-center justify-between mb-8 md:mb-12">
+                    <h3 className="text-xl md:text-3xl font-heading font-bold text-gray-900 tracking-tight">Shop by Category</h3>
                 </div>
 
-                {/* Horizontal Scroll Container */}
-                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
+                {/* Adaptive Layout: Scroll on Mobile, Grid on Desktop */}
+                <div className="
+                    flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x 
+                    md:grid md:grid-cols-3 lg:grid-cols-6 md:gap-8 md:overflow-visible md:pb-0
+                ">
                     {categories.map((cat, idx) => (
                         <Link
                             key={cat._id || idx}
                             to={`/products?category=${cat._id}`}
-                            className="flex flex-col items-center gap-3 shrink-0 w-20 md:w-24 group snap-start"
+                            className="
+                                flex flex-col items-center gap-4 shrink-0 w-24 md:w-auto group snap-start
+                                transition-all duration-300 md:hover:-translate-y-2
+                            "
                         >
-                            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-50 border border-gray-100 p-1 group-hover:border-primary-200 transition-colors overflow-hidden">
+                            <div className="
+                                w-20 h-20 md:w-32 md:h-32 lg:w-40 lg:h-40 
+                                rounded-full bg-gray-50 border-2 border-transparent 
+                                group-hover:border-primary-200 group-hover:shadow-xl group-hover:shadow-primary-500/10
+                                transition-all duration-300 overflow-hidden relative
+                            ">
                                 {cat.image ? (
                                     <img
                                         src={cat.image}
                                         alt={cat.name}
-                                        className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-500"
+                                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                                     />
                                 ) : (
-                                    <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-400 group-hover:text-primary-500 transition-colors">
-                                        <Grid size={24} />
+                                    <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center text-gray-400 group-hover:text-primary-500 transition-colors">
+                                        <Grid size={32} className="md:w-10 md:h-10" />
                                     </div>
                                 )}
+                                {/* Overlay effect */}
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
                             </div>
-                            <span className="text-xs md:text-sm font-medium text-gray-700 text-center line-clamp-2 max-w-[80px] group-hover:text-primary-700 transition-colors">
+
+                            <span className="
+                                text-sm md:text-base lg:text-lg font-bold text-gray-700 text-center 
+                                line-clamp-2 max-w-[100px] md:max-w-none 
+                                group-hover:text-primary-600 transition-colors
+                            ">
                                 {cat.name}
                             </span>
                         </Link>
