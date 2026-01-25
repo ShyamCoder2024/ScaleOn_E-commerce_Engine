@@ -173,6 +173,7 @@ const Home = () => {
     const { isFeatureEnabled } = useConfig();
     const { isAuthenticated } = useAuth(); // Get auth state
     const [featuredProducts, setFeaturedProducts] = useState([]);
+    const [newArrivals, setNewArrivals] = useState([]); // Separate state for true new arrivals
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -192,13 +193,19 @@ const Home = () => {
 
         const fetchAllData = async () => {
             try {
-                // Fetch Products, Feature Cards, AND Categories
+                // Fetch Featured Products, New Arrivals, Feature Cards, AND Categories
                 const fetchPromises = [
+                    // 1. Featured Products (curated)
                     productAPI.getFeatured(8).catch(err => {
                         console.error('Failed to fetch featured products:', err);
-                        if (isMountedRef.current) setError(err.response?.data?.message || 'Failed to load products');
                         return null;
                     }),
+                    // 2. New Arrivals (sorted by creation date)
+                    productAPI.getProducts({ sort: '-createdAt', limit: 8 }).catch(err => {
+                        console.error('Failed to fetch new arrivals:', err);
+                        return null;
+                    }),
+                    // 3. Categories
                     categoryAPI.getCategories().catch(err => {
                         console.error('Failed to fetch categories:', err);
                         return null;
@@ -218,6 +225,7 @@ const Home = () => {
 
                 if (!isMountedRef.current) return;
 
+                // Process Featured
                 const productsResult = results[0];
                 if (productsResult?.data?.data?.products) {
                     setFeaturedProducts(productsResult.data.data.products);
@@ -225,13 +233,21 @@ const Home = () => {
                     setError(null);
                 }
 
-                const catsResult = results[1];
+                // Process New Arrivals
+                const newArrivalsResult = results[1];
+                if (newArrivalsResult?.data?.data?.products) {
+                    setNewArrivals(newArrivalsResult.data.data.products);
+                } else if (newArrivalsResult?.data?.data?.items) {
+                    setNewArrivals(newArrivalsResult.data.data.items);
+                }
+
+                const catsResult = results[2];
                 if (catsResult?.data?.data?.categories) {
                     setCategories(catsResult.data.data.categories);
                 }
 
-                if (featureCardsEnabled && results[2]?.data?.data?.cards) {
-                    setFeatureCards(results[2].data.data.cards);
+                if (featureCardsEnabled && results[3]?.data?.data?.cards) {
+                    setFeatureCards(results[3].data.data.cards);
                 }
 
             } catch (err) {
@@ -290,24 +306,18 @@ const Home = () => {
             {/* Replaced 'Ugly' Feature Strip with Category Grid */}
             <CategoryGrid categories={categories} />
 
-            {/* Featured Section */}
+            {/* New Arrivals Section (Now ABOVE Featured) */}
             <section className="py-8 md:py-20">
                 <div className="container-custom">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-12 gap-4 text-center md:text-left">
-                        <div>
-                            {/* Adjusted Font Size for Mobile */}
-                            <h2 className="text-2xl md:text-4xl font-heading font-bold text-gray-900 mb-2 md:mb-3 tracking-tight">
-                                Featured Collection
-                            </h2>
-                            <p className="text-gray-500 text-sm md:text-lg max-w-xl mx-auto md:mx-0">
-                                Curated hand-picked items that define style and quality.
-                            </p>
-                        </div>
+                    <div className="flex items-center justify-between mb-6 md:mb-12">
+                        <h2 className="text-2xl md:text-4xl font-heading font-bold text-gray-900 tracking-tight">
+                            New Arrivals
+                        </h2>
                         <Link
-                            to="/products"
-                            className="group inline-flex items-center gap-2 text-primary-600 font-bold hover:text-primary-700 transition-colors mx-auto md:mx-0"
+                            to="/products?sort=-createdAt"
+                            className="group inline-flex items-center gap-2 text-primary-600 font-bold hover:text-primary-700 transition-colors"
                         >
-                            View All Products
+                            View All
                             <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                         </Link>
                     </div>
@@ -318,22 +328,15 @@ const Home = () => {
                                 <div key={idx} className="card h-[400px] animate-pulse bg-white border-0 shadow-sm" />
                             ))}
                         </div>
-                    ) : Array.isArray(featuredProducts) && featuredProducts.length > 0 ? (
+                    ) : Array.isArray(newArrivals) && newArrivals.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-                            {featuredProducts
-                                .filter(p => p && p._id) // Filter out invalid products
-                                .slice(0, 4)
-                                .map(product => (
-                                    <div key={product._id} className="animate-fade-in">
-                                        <ProductCard product={product} />
-                                    </div>
-                                ))}
+                            {newArrivals.slice(0, 4).map(product => (
+                                <div key={product._id} className="animate-fade-in">
+                                    <ProductCard product={product} />
+                                </div>
+                            ))}
                         </div>
-                    ) : (
-                        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-                            <p className="text-gray-400 text-lg">No featured products available at the moment.</p>
-                        </div>
-                    )}
+                    ) : null}
                 </div>
             </section>
 
@@ -371,13 +374,26 @@ const Home = () => {
                 </section>
             )}
 
-            {/* New Arrivals Section - Reduced bottom padding */}
+            {/* Featured Section (Now BELOW New Arrivals) */}
             <section className="pb-8 md:pb-16">
                 <div className="container-custom">
-                    <div className="flex items-center justify-between mb-6 md:mb-12">
-                        <h2 className="text-2xl md:text-4xl font-heading font-bold text-gray-900 tracking-tight">
-                            New Arrivals
-                        </h2>
+                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-12 gap-4 text-center md:text-left">
+                        <div>
+                            {/* Adjusted Font Size for Mobile */}
+                            <h2 className="text-2xl md:text-4xl font-heading font-bold text-gray-900 mb-2 md:mb-3 tracking-tight">
+                                Featured Collection
+                            </h2>
+                            <p className="text-gray-500 text-sm md:text-lg max-w-xl mx-auto md:mx-0">
+                                Curated hand-picked items that define style and quality.
+                            </p>
+                        </div>
+                        <Link
+                            to="/products?featured=true"
+                            className="group inline-flex items-center gap-2 text-primary-600 font-bold hover:text-primary-700 transition-colors mx-auto md:mx-0"
+                        >
+                            View All Products
+                            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                        </Link>
                     </div>
 
                     {loading ? (
@@ -386,22 +402,22 @@ const Home = () => {
                                 <div key={idx} className="card h-[400px] animate-pulse bg-white border-0 shadow-sm" />
                             ))}
                         </div>
-                    ) : featuredProducts.length > 0 ? (
+                    ) : Array.isArray(featuredProducts) && featuredProducts.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-                            {featuredProducts.slice(4, 8).length > 0 ?
-                                featuredProducts.slice(4, 8).map(product => (
+                            {featuredProducts
+                                .filter(p => p && p._id) // Filter out invalid products
+                                .slice(0, 4)
+                                .map(product => (
                                     <div key={product._id} className="animate-fade-in">
                                         <ProductCard product={product} />
                                     </div>
-                                )) :
-                                featuredProducts.slice(0, 4).map(product => (
-                                    <div key={`${product._id}-dup`} className="animate-fade-in">
-                                        <ProductCard product={product} />
-                                    </div>
-                                ))
-                            }
+                                ))}
                         </div>
-                    ) : null}
+                    ) : (
+                        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+                            <p className="text-gray-400 text-lg">No featured products available at the moment.</p>
+                        </div>
+                    )}
                 </div>
             </section>
         </div>

@@ -398,28 +398,29 @@ const Header = () => {
                     </div>
                 </div>
 
-                {/* Mobile Search & Controls Panel */}
-                {(showMobileSearch || isProductsPage) && (
-                    <div className="md:hidden py-3 animate-slide-up border-t border-gray-100">
-                        {searchEnabled && showMobileSearch && (
-                            <form onSubmit={handleSearch} className="mb-3">
-                                <div className="relative">
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder="Search products..."
-                                        autoFocus
-                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    />
-                                </div>
-                            </form>
-                        )}
-
-                        {isProductsPage && (
-                            <div className="hidden"></div>
-                        )}
+                {/* Mobile Search & Controls Panel - Absolute Positioning to avoid layout shift/overlap issues */}
+                {searchEnabled && showMobileSearch && (
+                    <div className="absolute top-full left-0 right-0 bg-white border-t border-gray-100 shadow-xl p-4 md:hidden animate-slide-down z-40">
+                        <form onSubmit={handleSearch}>
+                            <div className="relative">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search products..."
+                                    autoFocus
+                                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowMobileSearch(false)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 bg-gray-200 rounded-full text-gray-500"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 )}
             </div>
