@@ -9,6 +9,7 @@ import { PageLoader } from './components/LoadingSpinner'
 // Layouts (keep eager for shell)
 import MainLayout from './layouts/MainLayout'
 import AdminLayout from './layouts/AdminLayout'
+import { Toaster } from 'react-hot-toast'
 
 // ALL pages lazy-loaded for optimal bundle splitting
 const Home = lazy(() => import('./pages/Home'))
@@ -53,6 +54,19 @@ function App() {
         <ErrorBoundary>
             <OfflineIndicator />
             <ScrollToTop />
+            <Toaster position="top-center" toastOptions={{
+                duration: 3000,
+                style: {
+                    background: '#333',
+                    color: '#fff',
+                },
+                success: {
+                    iconTheme: {
+                        primary: '#22c55e',
+                        secondary: '#fff',
+                    },
+                },
+            }} />
 
             <Suspense fallback={<PageLoader />}>
                 <Routes>
