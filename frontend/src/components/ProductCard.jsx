@@ -127,12 +127,28 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
         ? Math.round((1 - product.price / product.compareAtPrice) * 100)
         : 0;
 
-    const primaryImage = product.primaryImage ||
-        product.images?.find(img => img.isPrimary)?.url ||
-        product.images?.[0]?.url ||
-        `https://placehold.co/400x400/e2e8f0/475569?text=${encodeURIComponent(product.name?.slice(0, 10) || 'Product')}`;
+    // Helper to resolve full image URL
+    // Handles local uploads (relative paths) vs Cloudinary/External (absolute URLs)
+    const getImageUrl = (url) => {
+        if (!url) return null;
+        if (url.startsWith('http')) return url;
+        // If it sends a relative path like '/uploads/...', prepend the backend URL
+        // We use import.meta.env.VITE_API_URL or fallback logic
+        const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const serverBase = backendUrl.replace('/api', ''); // Strip /api to get base
+        return `${serverBase}${url.startsWith('/') ? '' : '/'}${url}`;
+    };
 
-    const secondaryImage = product.images?.find(img => img.url !== primaryImage)?.url || primaryImage;
+    const rawPrimaryImage = product.primaryImage ||
+        product.images?.find(img => img.isPrimary)?.url ||
+        product.images?.[0]?.url;
+
+    const primaryImage = rawPrimaryImage
+        ? getImageUrl(rawPrimaryImage)
+        : `https://placehold.co/400x400/e2e8f0/475569?text=${encodeURIComponent(product.name?.slice(0, 10) || 'Product')}`;
+
+    const rawSecondaryImage = product.images?.find(img => img.url !== rawPrimaryImage)?.url;
+    const secondaryImage = rawSecondaryImage ? getImageUrl(rawSecondaryImage) : primaryImage;
 
     // Fallback placeholder for broken images
     const placeholderImage = `https://placehold.co/400x400/e2e8f0/475569?text=${encodeURIComponent(product.name?.slice(0, 10) || 'Product')}`;
