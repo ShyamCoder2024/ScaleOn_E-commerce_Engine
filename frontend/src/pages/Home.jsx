@@ -217,25 +217,18 @@ const Home = () => {
 
         const fetchAllData = async () => {
             try {
-                // Fetch INTELLIGENT collections: Price Drops, New Arrivals (< 30 days), AND Categories
+                // TEMPORARY: Using old endpoints until backend deployed with new intelligent endpoints
+                // TODO: Switch back to getPriceDrops and getNewArrivals after backend deployment
                 const fetchPromises = [
-                    // 1. Price Drops & Hot Deals (intelligent - auto-curated)
-                    // Fallback chain: getPriceDrops -> getFeatured -> empty array
-                    productAPI.getPriceDrops(8).catch(err => {
-                        console.warn('Price drops endpoint not available, using featured:', err.message);
-                        return productAPI.getFeatured(8).catch(() => {
-                            console.warn('Featured endpoint failed, using empty array');
-                            return { data: { data: { products: [] } } };
-                        });
+                    // 1. Featured Products (will be Hot Deals after backend update)
+                    productAPI.getFeatured(8).catch(err => {
+                        console.error('Failed to fetch featured products:', err);
+                        return { data: { data: { products: [] } } };
                     }),
-                    // 2. New Arrivals (intelligent - only products < 30 days old)
-                    // Fallback chain: getNewArrivals -> getProducts (sorted) -> empty array
-                    productAPI.getNewArrivals(8).catch(err => {
-                        console.warn('New arrivals endpoint not available, using recent products:', err.message);
-                        return productAPI.getProducts({ sort: '-createdAt', limit: 8 }).catch(() => {
-                            console.warn('Products endpoint failed, using empty array');
-                            return { data: { data: { products: [] } } };
-                        });
+                    // 2. New Arrivals (sorted by creation date)
+                    productAPI.getProducts({ sort: '-createdAt', limit: 8 }).catch(err => {
+                        console.error('Failed to fetch new arrivals:', err);
+                        return { data: { data: { products: [] } } };
                     }),
                     // 3. Categories
                     categoryAPI.getCategories().catch(err => {
@@ -255,13 +248,12 @@ const Home = () => {
 
                 const results = await Promise.all(fetchPromises);
 
-
                 if (!isMountedRef.current) return;
 
-                // Process Price Drops / Featured (Hot Deals)
-                const priceDropsResult = results[0];
-                if (priceDropsResult?.data?.data?.products) {
-                    setFeaturedProducts(priceDropsResult.data.data.products);
+                // Process Featured Products
+                const productsResult = results[0];
+                if (productsResult?.data?.data?.products) {
+                    setFeaturedProducts(productsResult.data.data.products);
                     hasLoadedProductsRef.current = true;
                     setError(null);
                 }
