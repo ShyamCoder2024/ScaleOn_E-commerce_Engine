@@ -214,26 +214,33 @@ const Home = () => {
         const controller = new AbortController();
         fetchControllerRef.current = controller;
 
+
         const fetchAllData = async () => {
             try {
                 // Fetch INTELLIGENT collections: Price Drops, New Arrivals (< 30 days), AND Categories
                 const fetchPromises = [
                     // 1. Price Drops & Hot Deals (intelligent - auto-curated)
+                    // Fallback chain: getPriceDrops -> getFeatured -> empty array
                     productAPI.getPriceDrops(8).catch(err => {
-                        console.error('Failed to fetch price drops:', err);
-                        // Fallback to manual featured if price drops fail
-                        return productAPI.getFeatured(8).catch(() => null);
+                        console.warn('Price drops endpoint not available, using featured:', err.message);
+                        return productAPI.getFeatured(8).catch(() => {
+                            console.warn('Featured endpoint failed, using empty array');
+                            return { data: { data: { products: [] } } };
+                        });
                     }),
                     // 2. New Arrivals (intelligent - only products < 30 days old)
+                    // Fallback chain: getNewArrivals -> getProducts (sorted) -> empty array
                     productAPI.getNewArrivals(8).catch(err => {
-                        console.error('Failed to fetch new arrivals:', err);
-                        // Fallback to recent products
-                        return productAPI.getProducts({ sort: '-createdAt', limit: 8 }).catch(() => null);
+                        console.warn('New arrivals endpoint not available, using recent products:', err.message);
+                        return productAPI.getProducts({ sort: '-createdAt', limit: 8 }).catch(() => {
+                            console.warn('Products endpoint failed, using empty array');
+                            return { data: { data: { products: [] } } };
+                        });
                     }),
                     // 3. Categories
                     categoryAPI.getCategories().catch(err => {
                         console.error('Failed to fetch categories:', err);
-                        return null;
+                        return { data: { data: { categories: [] } } };
                     })
                 ];
 
@@ -241,12 +248,13 @@ const Home = () => {
                     fetchPromises.push(
                         featureCardsAPI.getAll().catch(err => {
                             console.error('Failed to fetch feature cards:', err);
-                            return null;
+                            return { data: { data: { cards: [] } } };
                         })
                     );
                 }
 
                 const results = await Promise.all(fetchPromises);
+
 
                 if (!isMountedRef.current) return;
 
