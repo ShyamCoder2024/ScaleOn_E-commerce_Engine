@@ -11,7 +11,8 @@ import {
     X,
     Image,
     ChevronRight,
-    ExternalLink // Added ExternalLink
+    ExternalLink,
+    FolderTree
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -19,7 +20,7 @@ import { useConfig } from '../context/ConfigContext';
 
 const AdminLayout = () => {
     const { logout, user } = useAuth();
-    const { storeName } = useConfig();
+    const { storeName, isFeatureEnabled } = useConfig();
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -28,6 +29,7 @@ const AdminLayout = () => {
         { name: 'Products', icon: Package, path: '/admin/products' },
         { name: 'Orders', icon: ShoppingCart, path: '/admin/orders' },
         { name: 'Customers', icon: Users, path: '/admin/customers' },
+        ...(isFeatureEnabled('categories') ? [{ name: 'Categories', icon: FolderTree, path: '/admin/categories' }] : []),
         { name: 'Feature Cards', icon: Image, path: '/admin/feature-cards' },
         { name: 'Settings', icon: Settings, path: '/admin/settings' },
     ];

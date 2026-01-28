@@ -38,6 +38,8 @@ const AdminSettings = lazy(() => import('./pages/admin/Settings'))
 const AdminCustomerDetail = lazy(() => import('./pages/admin/CustomerDetail'))
 const AdminFeatureCards = lazy(() => import('./pages/admin/FeatureCards'))
 const AdminRevenue = lazy(() => import('./pages/admin/Revenue'))
+const AdminCategories = lazy(() => import('./pages/admin/Categories'))
+const AdminCategoryForm = lazy(() => import('./pages/admin/CategoryForm'))
 
 // Policy Pages (lazy loaded)
 const ShippingPolicy = lazy(() => import('./pages/policies/ShippingPolicy'))
@@ -112,6 +114,9 @@ function App() {
                             <Route path="orders/:id" element={<AdminOrderDetail />} />
                             <Route path="customers" element={<AdminCustomers />} />
                             <Route path="customers/:id" element={<AdminCustomerDetail />} />
+                            <Route path="categories" element={<AdminCategories />} />
+                            <Route path="categories/new" element={<AdminCategoryForm />} />
+                            <Route path="categories/:id/edit" element={<AdminCategoryForm />} />
                             <Route path="feature-cards" element={<AdminFeatureCards />} />
                             <Route path="settings" element={<AdminSettings />} />
                             <Route path="revenue" element={<AdminRevenue />} />

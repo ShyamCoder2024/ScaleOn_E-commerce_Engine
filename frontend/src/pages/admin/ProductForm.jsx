@@ -37,6 +37,20 @@ const ProductForm = () => {
         setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
     };
 
+    const renderCategoryOptions = (cats, depth = 0) => {
+        return cats.flatMap(cat => {
+            const option = (
+                <option key={cat._id} value={cat._id}>
+                    {'\u00A0'.repeat(depth * 4)}{cat.name}
+                </option>
+            );
+            const childOptions = cat.children && cat.children.length > 0
+                ? renderCategoryOptions(cat.children, depth + 1)
+                : [];
+            return [option, ...childOptions];
+        });
+    };
+
     const [formData, setFormData] = useState({
         name: '',
         slug: '',
@@ -595,25 +609,25 @@ const ProductForm = () => {
                         </div>
                     </div>
 
-                    {/* Category Card */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div className="p-5 border-b border-slate-50">
-                            <h3 className="font-bold text-slate-900">Category</h3>
+                    {/* Category Card - Only show if feature enabled */}
+                    {isFeatureEnabled('categories') && (
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="p-5 border-b border-slate-50">
+                                <h3 className="font-bold text-slate-900">Category</h3>
+                            </div>
+                            <div className="p-5">
+                                <select
+                                    name="category"
+                                    value={formData.category}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700"
+                                >
+                                    <option value="">Select Category</option>
+                                    {renderCategoryOptions(categories)}
+                                </select>
+                            </div>
                         </div>
-                        <div className="p-5">
-                            <select
-                                name="category"
-                                value={formData.category}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700"
-                            >
-                                <option value="">Select Category</option>
-                                {categories.map(cat => (
-                                    <option key={cat._id} value={cat._id}>{cat.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
+                    )}
 
                     {/* Inventory Card */}
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
