@@ -209,6 +209,11 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
                         className="w-full h-full object-contain transition-transform duration-500 transform font-sans group-hover:scale-105"
                         onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
                     />
+                    {product.hasPriceDrop && (
+                        <span className="absolute top-3 left-3 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full tracking-wide uppercase shadow-lg flex items-center gap-1">
+                            🔥 Hot Deal
+                        </span>
+                    )}
                     {hasDiscount && (
                         <span className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full tracking-wide uppercase">
                             -{discountPercent}%
@@ -306,6 +311,12 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
                 />
 
                 <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-30 flex flex-col gap-1.5 pointer-events-none">
+                    {/* Price Drop Badge (Intelligent - Auto-detected) */}
+                    {product.hasPriceDrop && (
+                        <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg tracking-wide uppercase animate-fade-in flex items-center gap-1">
+                            🔥 Price Drop
+                        </span>
+                    )}
                     {product.isFeatured && (
                         <span className="bg-white/95 backdrop-blur-sm text-gray-900 text-[10px] font-bold px-2 py-1 rounded shadow-sm tracking-wide uppercase animate-fade-in">
                             Featured

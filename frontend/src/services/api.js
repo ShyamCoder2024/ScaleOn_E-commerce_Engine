@@ -283,6 +283,8 @@ export const authAPI = {
 export const productAPI = {
     getProducts: (params) => deduplicatedGet('/products', { params }),
     getFeatured: (limit = 8) => deduplicatedGet('/products/featured', { params: { limit } }),
+    getPriceDrops: (limit = 8, daysBack = 30) => deduplicatedGet('/products/price-drops', { params: { limit, daysBack } }),
+    getNewArrivals: (limit = 8, daysBack = 30) => deduplicatedGet('/products/new-arrivals', { params: { limit, daysBack } }),
     search: (query, params) => deduplicatedGet('/products/search', { params: { q: query, ...params } }),
     getBySlug: (slug) => deduplicatedGet(`/products/slug/${slug}`),
     getById: (id) => deduplicatedGet(`/products/${id}`),

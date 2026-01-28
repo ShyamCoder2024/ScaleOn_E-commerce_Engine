@@ -100,6 +100,34 @@ const productSchema = new mongoose.Schema({
         min: 0
     },
 
+    // Price History & Intelligence
+    originalPrice: {
+        type: Number,
+        min: 0
+    },
+    priceHistory: [{
+        price: {
+            type: Number,
+            required: true
+        },
+        compareAtPrice: Number,
+        changedAt: {
+            type: Date,
+            default: Date.now
+        },
+        changedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
+    }],
+    lastPriceChange: {
+        type: Date
+    },
+    hasPriceDrop: {
+        type: Boolean,
+        default: false
+    },
+
     // Categories (many-to-many)
     categories: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -194,6 +222,9 @@ productSchema.index({ price: 1 });
 productSchema.index({ createdAt: -1 });
 productSchema.index({ salesCount: -1 });
 productSchema.index({ sku: 1 }, { sparse: true });
+// New indexes for intelligent product discovery
+productSchema.index({ hasPriceDrop: 1, lastPriceChange: -1, status: 1 });
+productSchema.index({ createdAt: -1, status: 1 });
 
 // Virtual for primary image
 productSchema.virtual('primaryImage').get(function () {
@@ -229,8 +260,9 @@ productSchema.virtual('formattedPrice').get(function () {
     return (this.price / 100).toFixed(2);
 });
 
-// Pre-save middleware to generate slug
+// Pre-save middleware to generate slug and track price changes
 productSchema.pre('save', async function (next) {
+    // Slug generation
     if (this.isModified('name') || !this.slug) {
         let baseSlug = slugify(this.name, {
             lower: true,
@@ -258,6 +290,43 @@ productSchema.pre('save', async function (next) {
         }
 
         this.slug = slug;
+    }
+
+    // Intelligent Price Tracking
+    if (this.isModified('price') || this.isModified('compareAtPrice')) {
+        if (this.isNew) {
+            // New product - set original price
+            this.originalPrice = this.price;
+            this.priceHistory = [];
+            this.hasPriceDrop = false;
+        } else {
+            // Existing product - track price change
+            const oldProduct = await mongoose.model('Product').findById(this._id).select('price compareAtPrice');
+
+            if (oldProduct && oldProduct.price !== this.price) {
+                // Add old price to history
+                this.priceHistory.push({
+                    price: oldProduct.price,
+                    compareAtPrice: oldProduct.compareAtPrice,
+                    changedAt: new Date()
+                });
+
+                // Limit history to last 10 changes (prevent unbounded growth)
+                if (this.priceHistory.length > 10) {
+                    this.priceHistory = this.priceHistory.slice(-10);
+                }
+
+                // Detect price drop
+                if (this.price < oldProduct.price) {
+                    this.hasPriceDrop = true;
+                    this.lastPriceChange = new Date();
+                } else {
+                    // Price increased or stayed same - remove drop flag
+                    this.hasPriceDrop = false;
+                    this.lastPriceChange = new Date();
+                }
+            }
+        }
     }
 
     // Ensure at least one primary image
@@ -306,14 +375,63 @@ productSchema.methods.restoreInventory = async function (quantity, variantSku = 
     return this.save();
 };
 
-// Static method to get featured products
-productSchema.statics.getFeatured = function (limit = 8) {
-    return this.find({
+// Static method to get featured products (enhanced with smart logic)
+productSchema.statics.getFeatured = async function (limit = 8) {
+    // Smart algorithm: Combine price drops, top sellers, and manual featured
+    const priceDrops = await this.find({
+        status: PRODUCT_STATUS.ACTIVE,
+        hasPriceDrop: true
+    })
+        .sort({ lastPriceChange: -1 })
+        .limit(4);
+
+    const topSellers = await this.find({
+        status: PRODUCT_STATUS.ACTIVE
+    })
+        .sort({ salesCount: -1 })
+        .limit(2);
+
+    const manualFeatured = await this.find({
         status: PRODUCT_STATUS.ACTIVE,
         isFeatured: true
     })
-        .limit(limit)
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .limit(4);
+
+    // Combine and deduplicate
+    const allFeatured = [...priceDrops, ...topSellers, ...manualFeatured];
+    const uniqueFeatured = allFeatured.filter((product, index, self) =>
+        index === self.findIndex(p => p._id.toString() === product._id.toString())
+    );
+
+    return uniqueFeatured.slice(0, limit);
+};
+
+// Static method to get products with price drops
+productSchema.statics.getPriceDrops = function (limit = 8, daysBack = 30) {
+    const dateThreshold = new Date();
+    dateThreshold.setDate(dateThreshold.getDate() - daysBack);
+
+    return this.find({
+        status: PRODUCT_STATUS.ACTIVE,
+        hasPriceDrop: true,
+        lastPriceChange: { $gte: dateThreshold }
+    })
+        .sort({ lastPriceChange: -1 })
+        .limit(limit);
+};
+
+// Static method to get new arrivals (truly new products)
+productSchema.statics.getNewArrivals = function (limit = 8, daysBack = 30) {
+    const dateThreshold = new Date();
+    dateThreshold.setDate(dateThreshold.getDate() - daysBack);
+
+    return this.find({
+        status: PRODUCT_STATUS.ACTIVE,
+        createdAt: { $gte: dateThreshold }
+    })
+        .sort({ createdAt: -1 })
+        .limit(limit);
 };
 
 // Static method for search

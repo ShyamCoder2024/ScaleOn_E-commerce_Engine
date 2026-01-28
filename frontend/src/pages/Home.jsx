@@ -216,17 +216,19 @@ const Home = () => {
 
         const fetchAllData = async () => {
             try {
-                // Fetch Featured Products, New Arrivals, Feature Cards, AND Categories
+                // Fetch INTELLIGENT collections: Price Drops, New Arrivals (< 30 days), AND Categories
                 const fetchPromises = [
-                    // 1. Featured Products (curated)
-                    productAPI.getFeatured(8).catch(err => {
-                        console.error('Failed to fetch featured products:', err);
-                        return null;
+                    // 1. Price Drops & Hot Deals (intelligent - auto-curated)
+                    productAPI.getPriceDrops(8).catch(err => {
+                        console.error('Failed to fetch price drops:', err);
+                        // Fallback to manual featured if price drops fail
+                        return productAPI.getFeatured(8).catch(() => null);
                     }),
-                    // 2. New Arrivals (sorted by creation date)
-                    productAPI.getProducts({ sort: '-createdAt', limit: 8 }).catch(err => {
+                    // 2. New Arrivals (intelligent - only products < 30 days old)
+                    productAPI.getNewArrivals(8).catch(err => {
                         console.error('Failed to fetch new arrivals:', err);
-                        return null;
+                        // Fallback to recent products
+                        return productAPI.getProducts({ sort: '-createdAt', limit: 8 }).catch(() => null);
                     }),
                     // 3. Categories
                     categoryAPI.getCategories().catch(err => {
@@ -248,10 +250,10 @@ const Home = () => {
 
                 if (!isMountedRef.current) return;
 
-                // Process Featured
-                const productsResult = results[0];
-                if (productsResult?.data?.data?.products) {
-                    setFeaturedProducts(productsResult.data.data.products);
+                // Process Price Drops / Featured (Hot Deals)
+                const priceDropsResult = results[0];
+                if (priceDropsResult?.data?.data?.products) {
+                    setFeaturedProducts(priceDropsResult.data.data.products);
                     hasLoadedProductsRef.current = true;
                     setError(null);
                 }
@@ -329,12 +331,12 @@ const Home = () => {
             {/* Replaced 'Ugly' Feature Strip with Category Grid */}
             <CategoryGrid categories={categories} />
 
-            {/* New Arrivals Section (Now ABOVE Featured) */}
+            {/* New Arrivals Section (Intelligent - < 30 days) */}
             <section className="py-8 md:py-20">
                 <div className="container-custom">
                     <div className="flex items-center justify-between mb-6 md:mb-12">
                         <h2 className="text-2xl md:text-4xl font-heading font-bold text-gray-900 tracking-tight">
-                            New Arrivals
+                            ✨ New Arrivals
                         </h2>
                         <Link
                             to="/products?sort=-createdAt"
@@ -397,17 +399,17 @@ const Home = () => {
                 </section>
             )}
 
-            {/* Featured Section (Now BELOW New Arrivals) */}
+            {/* Hot Deals & Price Drops Section (Intelligent - auto-curated) */}
             <section className="pb-8 md:pb-16">
                 <div className="container-custom">
                     <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-12 gap-4 text-center md:text-left">
                         <div>
-                            {/* Adjusted Font Size for Mobile */}
+                            {/* Updated Title */}
                             <h2 className="text-2xl md:text-4xl font-heading font-bold text-gray-900 mb-2 md:mb-3 tracking-tight">
-                                Featured Collection
+                                🔥 Hot Deals & Price Drops
                             </h2>
                             <p className="text-gray-500 text-sm md:text-lg max-w-xl mx-auto md:mx-0">
-                                Curated hand-picked items that define style and quality.
+                                Automatically curated deals and price reductions - updated in real-time.
                             </p>
                         </div>
                         <Link

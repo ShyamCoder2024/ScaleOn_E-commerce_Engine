@@ -401,6 +401,20 @@ class ProductService {
     }
 
     /**
+     * Get products with price drops (intelligent)
+     */
+    async getPriceDrops(limit = 8, daysBack = 30) {
+        return Product.getPriceDrops(limit, daysBack);
+    }
+
+    /**
+     * Get new arrivals (truly new products)
+     */
+    async getNewArrivals(limit = 8, daysBack = 30) {
+        return Product.getNewArrivals(limit, daysBack);
+    }
+
+    /**
      * Search products
      */
     async searchProducts(query, options = {}) {

@@ -60,6 +60,38 @@ router.get('/featured', asyncHandler(async (req, res) => {
 }));
 
 /**
+ * @route   GET /api/products/price-drops
+ * @desc    Get products with recent price drops (intelligent)
+ * @access  Public
+ */
+router.get('/price-drops', asyncHandler(async (req, res) => {
+    const limit = parseInt(req.query.limit) || 8;
+    const daysBack = parseInt(req.query.daysBack) || 30;
+    const products = await productService.getPriceDrops(limit, daysBack);
+
+    res.json({
+        success: true,
+        data: { products }
+    });
+}));
+
+/**
+ * @route   GET /api/products/new-arrivals
+ * @desc    Get truly new products (created within last 30 days)
+ * @access  Public
+ */
+router.get('/new-arrivals', asyncHandler(async (req, res) => {
+    const limit = parseInt(req.query.limit) || 8;
+    const daysBack = parseInt(req.query.daysBack) || 30;
+    const products = await productService.getNewArrivals(limit, daysBack);
+
+    res.json({
+        success: true,
+        data: { products }
+    });
+}));
+
+/**
  * @route   GET /api/products/search
  * @desc    Search products
  * @access  Public
