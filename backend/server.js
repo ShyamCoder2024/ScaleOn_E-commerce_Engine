@@ -67,29 +67,55 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
-// Rate limiting - more lenient in development
-// Rate limiting - more lenient in development
+// ===========================================
+// Rate Limiting - ALWAYS ENABLED (different limits per environment)
+// ===========================================
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  // Increased limit to prevent blocking legitimate users during heavy browsing
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 2000,
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+  // Different limits based on environment
+  max: process.env.NODE_ENV === 'production'
+    ? (parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 2000)  // Production: 2000 req/15min
+    : 500,  // Development: 500 req/15min (prevents testing crashes)
   message: {
     success: false,
     message: 'Too many requests, please try again later.'
   },
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => process.env.NODE_ENV !== 'production' // Skip rate limiting entirely in development
+  // CRITICAL FIX: Always enable rate limiting (was disabled in development)
+  skip: () => false,
+  // Skip rate limit check for health endpoint
+  skipSuccessfulRequests: false,
+  skipFailedRequests: true, // Don't count failed requests against limit
 });
 
 app.use('/api', limiter);
 
 // ===========================================
+// Request Timeout Middleware - Prevents hanging requests
+// ===========================================
+app.use((req, res, next) => {
+  // 30 second timeout per request
+  req.setTimeout(30000, () => {
+    console.warn(`⏱️ Request timeout: ${req.method} ${req.url}`);
+    if (!res.headersSent) {
+      res.status(408).json({
+        success: false,
+        error: { message: 'Request timeout', statusCode: 408 }
+      });
+    }
+  });
+  res.setTimeout(30000);
+  next();
+});
+
+// ===========================================
 // Body Parsing Middleware
 // ===========================================
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+// Reduced from 50MB to 10MB for security (prevents DoS attacks)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
 // ===========================================
@@ -140,7 +166,7 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`
 ╔═══════════════════════════════════════════════════════════╗
 ║                                                           ║
@@ -148,11 +174,52 @@ app.listen(PORT, () => {
 ║   ─────────────────────────────────────────────────────   ║
 ║   Environment: ${process.env.NODE_ENV || 'development'}                              ║
 ║   Port: ${PORT}                                              ║
+║   Rate Limit: ${process.env.NODE_ENV === 'production' ? '2000' : '500'} req/15min                            ║
 ║   API: http://localhost:${PORT}/api                          ║
 ║   Health: http://localhost:${PORT}/health                    ║
 ║                                                           ║
 ╚═══════════════════════════════════════════════════════════╝
   `);
 });
+
+// ===========================================
+// Server Configuration for Concurrent Connections
+// ===========================================
+
+// Set maximum concurrent connections (prevents server overload)
+server.maxConnections = 1000;
+
+// Set keep-alive timeout (must be higher than load balancer timeout)
+server.keepAliveTimeout = 65000; // 65 seconds
+server.headersTimeout = 66000;    // Slightly higher than keepAliveTimeout
+
+// ===========================================
+// Graceful Shutdown Handler
+// ===========================================
+
+const gracefulShutdown = () => {
+  console.log('\n🛑 Received shutdown signal, closing server gracefully...');
+
+  server.close(() => {
+    console.log('✅ HTTP server closed');
+
+    // Close database connection
+    import('./config/db.js').then(({ default: mongoose }) => {
+      mongoose.connection.close(false, () => {
+        console.log('✅ MongoDB connection closed');
+        process.exit(0);
+      });
+    });
+  });
+
+  // Force shutdown after 30 seconds
+  setTimeout(() => {
+    console.error('❌ Could not close connections in time, forcefully shutting down');
+    process.exit(1);
+  }, 30000);
+};
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
 
 export default app;

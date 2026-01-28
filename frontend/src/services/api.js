@@ -1,14 +1,32 @@
-import axios from 'axios';
-import toast from 'react-hot-toast';
-
-import { getFriendlyErrorMessage } from '../utils/errorUtils';
-
 // ===========================================
 // REQUEST DEDUPLICATION & RETRY SYSTEM
 // ===========================================
 
 // In-flight request cache to prevent duplicate calls
 const pendingRequests = new Map();
+
+// CRITICAL: Auto-cleanup for pendingRequests to prevent memory leaks
+// Runs every 30 seconds and removes entries older than 60 seconds
+setInterval(() => {
+    const MAX_AGE_MS = 60000; // 60 seconds
+    const MAX_SIZE = 50; // Emergency limit
+
+    // Emergency clear if map grows too large
+    if (pendingRequests.size > MAX_SIZE) {
+        console.warn(`⚠️ Clearing ${pendingRequests.size} pending requests (exceeded max size)`);
+        pendingRequests.clear();
+        return;
+    }
+
+    // Normal cleanup of old entries
+    const now = Date.now();
+    for (const [key, value] of pendingRequests.entries()) {
+        // If promise is settled or too old, remove it
+        if (value._createdAt && (now - value._createdAt > MAX_AGE_MS)) {
+            pendingRequests.delete(key);
+        }
+    }
+}, 30000); // Run every 30 seconds
 
 // Generate a unique key for each request
 const getRequestKey = (config) => {
@@ -68,7 +86,8 @@ const isThrottled = (key) => {
         return true;
     }
     requestThrottle.set(key, Date.now());
-    // Clean up old entries periodically
+
+    // IMPROVED: More aggressive cleanup every 100 throttle checks
     if (requestThrottle.size > 100) {
         const now = Date.now();
         for (const [k, v] of requestThrottle.entries()) {
@@ -81,7 +100,7 @@ const isThrottled = (key) => {
 // Create axios instance with base configuration
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || '/api',
-    timeout: 15000, // 15 seconds - faster failure detection
+    timeout: 12000, // Reduced from 15s to 12s for faster failure detection
     headers: {
         'Content-Type': 'application/json',
     },
@@ -214,10 +233,10 @@ const deduplicatedGet = (url, config = {}) => {
 
     // If same request is already in flight, return the existing promise
     if (pendingRequests.has(key)) {
-        return pendingRequests.get(key);
+        return pendingRequests.get(key).promise;
     }
 
-    // Create new request
+    // Create new request with timestamp for cleanup
     const promise = api.get(url, config)
         .then((response) => {
             // Success - clear from pending after small delay to batch requests
@@ -231,7 +250,12 @@ const deduplicatedGet = (url, config = {}) => {
             throw error;
         });
 
-    pendingRequests.set(key, promise);
+    // Store with timestamp for cleanup
+    pendingRequests.set(key, {
+        promise,
+        _createdAt: Date.now()
+    });
+
     return promise;
 };
 
