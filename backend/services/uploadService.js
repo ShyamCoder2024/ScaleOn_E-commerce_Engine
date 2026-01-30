@@ -309,11 +309,17 @@ class UploadService {
         // Move from temp to final destination
         fs.renameSync(file.path, destPath);
 
-        // Generate absolute URL using BACKEND_URL for production (cross-domain support)
-        // Falls back to relative path for local development
-        const backendUrl = process.env.BACKEND_URL || process.env.API_URL || '';
+        // FIXED: Always generate complete URL for cross-origin support
+        // Construct proper backend URL using PORT env variable
+        const port = process.env.PORT || 5001;
+        const backendUrl = process.env.BACKEND_URL ||
+            process.env.API_URL ||
+            `http://localhost:${port}`;
+
         const relativePath = `/uploads/${folder}/${fileName}`;
-        const url = backendUrl ? `${backendUrl}${relativePath}` : relativePath;
+        const url = `${backendUrl}${relativePath}`;
+
+        console.log('🖼️ Image URL generated:', url);
 
         return {
             url,
