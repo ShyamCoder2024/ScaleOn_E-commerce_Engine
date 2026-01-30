@@ -237,7 +237,7 @@ router.get('/admin/feature-cards', protect, adminOnly, asyncHandler(async (req, 
  * @access  Admin
  */
 router.post('/admin/feature-cards', protect, adminOnly, asyncHandler(async (req, res) => {
-    const { image, title, link } = req.body;
+    const { image, title, link, linkType, categoryId, productId } = req.body;
 
     if (!image) {
         throw createError.badRequest('Image URL is required');
@@ -250,6 +250,9 @@ router.post('/admin/feature-cards', protect, adminOnly, asyncHandler(async (req,
         image,
         title: title || '',
         link: link || '',
+        linkType: linkType || 'url', // 'url', 'category', 'product'
+        categoryId: categoryId || null,
+        productId: productId || null,
         order: existingCards.length,
         createdAt: new Date().toISOString()
     };

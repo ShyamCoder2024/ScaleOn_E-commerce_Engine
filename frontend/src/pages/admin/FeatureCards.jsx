@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Image, AlertCircle, Upload, X, Link2 } from 'lucide-react';
-import { featureCardsAPI } from '../../services/api';
+import { featureCardsAPI, categoryAPI, productAPI } from '../../services/api';
 import { useConfig } from '../../context/ConfigContext';
 import toast from 'react-hot-toast';
 
@@ -9,14 +9,25 @@ const FeatureCards = () => {
     const [cards, setCards] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
-    const [newCard, setNewCard] = useState({ image: '', title: '', link: '' });
+    const [newCard, setNewCard] = useState({
+        image: '',
+        title: '',
+        link: '',
+        linkType: 'url', // 'url', 'category', 'product'
+        categoryId: '',
+        productId: ''
+    });
     const [saving, setSaving] = useState(false);
     const [imagePreview, setImagePreview] = useState('');
+    const [categories, setCategories] = useState([]);
+    const [products, setProducts] = useState([]);
 
     const featureEnabled = isFeatureEnabled('featureCards');
 
     useEffect(() => {
         fetchCards();
+        fetchCategories();
+        fetchProducts();
     }, []);
 
     const fetchCards = async () => {
@@ -28,6 +39,24 @@ const FeatureCards = () => {
             toast.error('Failed to load feature cards');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchCategories = async () => {
+        try {
+            const response = await categoryAPI.getCategoryTree();
+            setCategories(response.data.data.categories || []);
+        } catch (err) {
+            console.error('Failed to fetch categories:', err);
+        }
+    };
+
+    const fetchProducts = async () => {
+        try {
+            const response = await productAPI.getAll();
+            setProducts(response.data.data.products || []);
+        } catch (err) {
+            console.error('Failed to fetch products:', err);
         }
     };
 
@@ -72,7 +101,7 @@ const FeatureCards = () => {
     };
 
     const openModal = () => {
-        setNewCard({ image: '', title: '', link: '' });
+        setNewCard({ image: '', title: '', link: '', linkType: 'url', categoryId: '', productId: '' });
         setImagePreview('');
         setShowAddModal(true);
     };
@@ -265,18 +294,100 @@ const FeatureCards = () => {
                                 />
                             </div>
 
-                            {/* Link Input */}
+                            {/* Link Type Selector */}
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-2">
-                                    Link <span className="text-slate-400 font-normal">(Optional)</span>
+                                <label className="block text-sm font-bold text-slate-700 mb-3">
+                                    Link Destination <span className="text-rose-500">*</span>
                                 </label>
-                                <input
-                                    type="text"
-                                    value={newCard.link}
-                                    onChange={(e) => setNewCard(prev => ({ ...prev, link: e.target.value }))}
-                                    placeholder="/products/category-name"
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                                />
+
+                                <div className="space-y-3">
+                                    {/* Link Type Radio Buttons */}
+                                    <div className="flex flex-col gap-2">
+                                        <label className="flex items-center gap-3 p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                                            <input
+                                                type="radio"
+                                                name="linkType"
+                                                value="url"
+                                                checked={newCard.linkType === 'url'}
+                                                onChange={(e) => setNewCard(prev => ({ ...prev, linkType: e.target.value }))}
+                                                className="w-4 h-4 text-blue-600"
+                                            />
+                                            <div>
+                                                <span className="font-semibold text-slate-900">External URL</span>
+                                                <p className="text-xs text-slate-500">Link to any external website</p>
+                                            </div>
+                                        </label>
+
+                                        <label className="flex items-center gap-3 p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                                            <input
+                                                type="radio"
+                                                name="linkType"
+                                                value="category"
+                                                checked={newCard.linkType === 'category'}
+                                                onChange={(e) => setNewCard(prev => ({ ...prev, linkType: e.target.value }))}
+                                                className="w-4 h-4 text-blue-600"
+                                            />
+                                            <div>
+                                                <span className="font-semibold text-slate-900">Product Category</span>
+                                                <p className="text-xs text-slate-500">Link to a specific category page</p>
+                                            </div>
+                                        </label>
+
+                                        <label className="flex items-center gap-3 p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                                            <input
+                                                type="radio"
+                                                name="linkType"
+                                                value="product"
+                                                checked={newCard.linkType === 'product'}
+                                                onChange={(e) => setNewCard(prev => ({ ...prev, linkType: e.target.value }))}
+                                                className="w-4 h-4 text-blue-600"
+                                            />
+                                            <div>
+                                                <span className="font-semibold text-slate-900">Specific Product</span>
+                                                <p className="text-xs text-slate-500">Link directly to a product page</p>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    {/* Conditional Inputs Based on Type */}
+                                    <div className="mt-4">
+                                        {newCard.linkType === 'url' && (
+                                            <input
+                                                type="url"
+                                                value={newCard.link}
+                                                onChange={(e) => setNewCard(prev => ({ ...prev, link: e.target.value }))}
+                                                placeholder="https://example.com"
+                                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                                            />
+                                        )}
+
+                                        {newCard.linkType === 'category' && (
+                                            <select
+                                                value={newCard.categoryId}
+                                                onChange={(e) => setNewCard(prev => ({ ...prev, categoryId: e.target.value }))}
+                                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                                            >
+                                                <option value="">Select Category</option>
+                                                {categories.map(cat => (
+                                                    <option key={cat._id} value={cat._id}>{cat.name}</option>
+                                                ))}
+                                            </select>
+                                        )}
+
+                                        {newCard.linkType === 'product' && (
+                                            <select
+                                                value={newCard.productId}
+                                                onChange={(e) => setNewCard(prev => ({ ...prev, productId: e.target.value }))}
+                                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                                            >
+                                                <option value="">Select Product</option>
+                                                {products.map(prod => (
+                                                    <option key={prod._id} value={prod._id}>{prod.name}</option>
+                                                ))}
+                                            </select>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -284,7 +395,7 @@ const FeatureCards = () => {
                             <button
                                 onClick={() => {
                                     setShowAddModal(false);
-                                    setNewCard({ image: '', title: '', link: '' });
+                                    setNewCard({ image: '', title: '', link: '', linkType: 'url', categoryId: '', productId: '' });
                                     setImagePreview('');
                                 }}
                                 className="px-5 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors"
