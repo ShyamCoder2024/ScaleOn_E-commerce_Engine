@@ -5,6 +5,7 @@
 
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
+import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
 import { createError } from '../middleware/errorHandler.js';
@@ -49,14 +50,29 @@ const storage = multer.diskStorage({
     }
 });
 
-// File filter for images
+// File filter for images - Enhanced to support mobile formats
 const imageFilter = (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/svg+xml',
+        'image/heic',           // iPhone HEIC format
+        'image/heif',           // Modern mobile format
+        'image/heic-sequence',
+        'image/heif-sequence'
+    ];
 
-    if (allowedTypes.includes(file.mimetype)) {
+    // Also check file extensions for cases where MIME type is incorrect
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.heic', '.heif'];
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    if (allowedTypes.includes(file.mimetype) || allowedExtensions.includes(ext)) {
         cb(null, true);
     } else {
-        cb(new Error('Only image files are allowed (JPEG, PNG, GIF, WebP, SVG)'), false);
+        cb(new Error(`Invalid file type. Accepted formats: JPEG, PNG, GIF, WebP, SVG, HEIC/HEIF`), false);
     }
 };
 
@@ -71,6 +87,112 @@ export const upload = multer({
 
 class UploadService {
     /**
+     * Process image with Sharp - CRITICAL FIX for smartphone images
+     * Handles EXIF orientation, format conversion, and optimization
+     * @param {string} inputPath - Path to input image
+     * @param {Object} options - Processing options
+     * @returns {Promise<Object>} - Processed image details
+     */
+    async processImage(inputPath, options = {}) {
+        const {
+            maxWidth = 2000,       // Max width for products
+            maxHeight = 2000,      // Max height
+            quality = 90,          // High quality for product images
+            format = 'jpeg',       // Output format (jpeg, png, webp)
+            fit = 'inside'         // Resize strategy
+        } = options;
+
+        try {
+            console.log('📸 Processing image:', {
+                input: path.basename(inputPath),
+                maxDimensions: `${maxWidth}x${maxHeight}`,
+                quality,
+                format
+            });
+
+            const image = sharp(inputPath);
+            const metadata = await image.metadata();
+
+            console.log('📊 Original image metadata:', {
+                format: metadata.format,
+                width: metadata.width,
+                height: metadata.height,
+                size: `${(metadata.size / 1024 / 1024).toFixed(2)}MB`,
+                orientation: metadata.orientation,
+                hasAlpha: metadata.hasAlpha,
+                space: metadata.space
+            });
+
+            // CRITICAL FIX: Auto-rotate based on EXIF orientation
+            // This fixes images appearing rotated/upside-down from smartphones
+            image.rotate();
+
+            // Resize if image exceeds max dimensions (preserve aspect ratio)
+            if (metadata.width > maxWidth || metadata.height > maxHeight) {
+                console.log(`🔄 Resizing from ${metadata.width}x${metadata.height} to max ${maxWidth}x${maxHeight}`);
+                image.resize(maxWidth, maxHeight, {
+                    fit,
+                    withoutEnlargement: true
+                });
+            }
+
+            // Convert to web-friendly format with optimization
+            if (format === 'jpeg' || format === 'jpg') {
+                image.jpeg({
+                    quality,
+                    progressive: true,      // Better for web display
+                    mozjpeg: true,          // Use mozjpeg compression
+                    chromaSubsampling: '4:4:4' // Better quality
+                });
+            } else if (format === 'png') {
+                image.png({
+                    quality,
+                    compressionLevel: 9,    // Max compression
+                    progressive: true
+                });
+            } else if (format === 'webp') {
+                image.webp({
+                    quality,
+                    lossless: false
+                });
+            }
+
+            // Strip EXIF metadata after rotation (privacy + smaller file size)
+            // Keeps orientation fixed at 1 (normal)
+            image.withMetadata({ orientation: undefined });
+
+            // Generate output path
+            const ext = format === 'jpeg' || format === 'jpg' ? 'jpg' : format;
+            const outputPath = inputPath.replace(/\.[^.]+$/, `.processed.${ext}`);
+
+            // Process and save
+            await image.toFile(outputPath);
+
+            // Get processed file stats
+            const stats = fs.statSync(outputPath);
+
+            console.log('✅ Image processed successfully:', {
+                output: path.basename(outputPath),
+                size: `${(stats.size / 1024 / 1024).toFixed(2)}MB`,
+                reduction: `${((1 - stats.size / metadata.size) * 100).toFixed(1)}%`
+            });
+
+            return {
+                path: outputPath,
+                originalPath: inputPath,
+                width: metadata.width,
+                height: metadata.height,
+                format: ext,
+                size: stats.size,
+                originalSize: metadata.size
+            };
+        } catch (error) {
+            console.error('❌ Image processing error:', error);
+            throw new Error(`Failed to process image: ${error.message}`);
+        }
+    }
+
+    /**
      * Upload image to cloud storage or local
      * @param {Object} file - Multer file object
      * @param {Object} options - Upload options
@@ -78,17 +200,39 @@ class UploadService {
      */
     async uploadImage(file, options = {}) {
         const { folder = 'general', transformation = null } = options;
+        let processedPath = null;
 
         try {
+            console.log('📤 Starting upload:', {
+                filename: file.originalname,
+                mimetype: file.mimetype,
+                size: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
+                folder
+            });
+
+            // CRITICAL: Process image with Sharp BEFORE upload
+            // This handles EXIF orientation, format conversion, and optimization
+            const processed = await this.processImage(file.path, {
+                maxWidth: 2000,
+                maxHeight: 2000,
+                quality: 90,
+                format: 'jpeg'  // Always convert to JPEG for consistency
+            });
+
+            processedPath = processed.path;
+
             if (cloudinaryConfigured) {
-                // Upload to Cloudinary
-                const result = await this.uploadToCloudinary(file.path, {
+                // Upload processed image to Cloudinary
+                const result = await this.uploadToCloudinary(processedPath, {
                     folder: `scaleon/${folder}`,
                     transformation
                 });
 
-                // Delete temp file
+                // Delete both temp and processed files
                 this.deleteFile(file.path);
+                this.deleteFile(processedPath);
+
+                console.log('☁️ Uploaded to Cloudinary:', result.secure_url);
 
                 return {
                     url: result.secure_url,
@@ -104,18 +248,30 @@ class UploadService {
                     console.warn('⚠️ Cloudinary not configured. Using local storage (files may be lost on restart). Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET in environment variables.');
                 }
 
-                // Use local storage
-                const result = await this.saveLocally(file, folder);
+                // Use local storage with processed image
+                const result = await this.saveLocally({ path: processedPath }, folder);
+
+                // Delete original temp file, keep processed file
+                this.deleteFile(file.path);
+
+                console.log('💾 Saved locally:', result.url);
+
                 return {
                     url: result.url,
                     path: result.path,
-                    provider: 'local'
+                    provider: 'local',
+                    width: processed.width,
+                    height: processed.height,
+                    format: processed.format
                 };
             }
         } catch (error) {
-            // Clean up temp file on error
+            // Clean up all temp files on error
             this.deleteFile(file.path);
-            console.error('Upload error details:', error);
+            if (processedPath) {
+                this.deleteFile(processedPath);
+            }
+            console.error('❌ Upload error:', error);
             throw createError.internal(`Upload failed: ${error.message}`);
         }
     }

@@ -40,10 +40,26 @@ const ImageUpload = ({
     const handleFile = useCallback(async (file) => {
         setError('');
 
-        // Validate file type
-        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
-        if (!allowedTypes.includes(file.type)) {
-            setError('Please upload a valid image file (JPEG, PNG, GIF, WebP, or SVG)');
+        // Validate file type - Enhanced to support mobile formats
+        const allowedTypes = [
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'image/svg+xml',
+            'image/heic',           // iPhone HEIC format
+            'image/heif',           // Modern mobile format
+            'image/heic-sequence',
+            'image/heif-sequence'
+        ];
+
+        // Also check file extension for cases where MIME type is incorrect
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+        const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'heic', 'heif'];
+
+        if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+            setError(`Unsupported image format. Accepted: JPEG, PNG, GIF, WebP, SVG, HEIC/HEIF (all modern mobile formats supported)`);
             return;
         }
 
@@ -171,7 +187,7 @@ const ImageUpload = ({
                 <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     onChange={handleFileChange}
                     className="hidden"
                     disabled={disabled || isUploading}
@@ -217,7 +233,7 @@ const ImageUpload = ({
                                 <div>
                                     <span className="text-xs sm:text-sm text-gray-500 block">{placeholder}</span>
                                     <span className="text-[10px] sm:text-xs text-gray-400 mt-0.5 sm:mt-1 block">
-                                        Max {maxSize}MB • Images only
+                                        Max {maxSize}MB • All formats (iPhone HEIC supported)
                                     </span>
                                 </div>
                             </>
