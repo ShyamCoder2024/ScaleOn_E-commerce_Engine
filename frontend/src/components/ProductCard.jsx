@@ -371,25 +371,25 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
                 )}
             </div>
 
-            <div className="p-3 sm:p-5 bg-white relative z-20 flex-1 flex flex-col justify-between">
+            <div className="p-2.5 sm:p-5 bg-white relative z-20 flex-1 flex flex-col justify-between">
                 <div>
                     {product.categories?.[0] && (
-                        <div className="text-[10px] font-bold text-primary-600 uppercase tracking-wider mb-1.5 opacity-80 truncate">
+                        <div className="text-[10px] font-bold text-primary-600 uppercase tracking-wider mb-1 opacity-80 truncate">
                             {product.categories[0].name}
                         </div>
                     )}
 
-                    <div className="flex items-center gap-1 mb-1.5">
+                    <div className="flex items-center gap-1 mb-1">
                         <Star size={12} className="fill-yellow-400 text-yellow-400" />
                         <span className="text-xs font-medium text-gray-700">{rating}</span>
                         <span className="text-[10px] text-gray-400">({reviewCount})</span>
                     </div>
 
-                    <h3 className="font-heading font-bold text-gray-900 text-sm sm:text-base leading-tight mb-2 line-clamp-2 md:line-clamp-1 group-hover:text-primary-600 transition-colors h-[2.5em] md:h-auto">
+                    <h3 className="font-heading font-bold text-gray-900 text-sm sm:text-base leading-tight mb-1.5 sm:mb-2 line-clamp-2 md:line-clamp-1 group-hover:text-primary-600 transition-colors h-[2.5em] md:h-auto">
                         {product.name}
                     </h3>
 
-                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 mb-3">
+                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 mb-2 sm:mb-3">
                         <span className="font-bold text-base sm:text-lg text-gray-900">
                             {formatPrice(product.price)}
                         </span>
@@ -403,15 +403,15 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
 
                 {/* Mobile: Action Area */}
                 {inStock && (
-                    <div className="md:hidden mt-auto pt-3">
+                    <div className="md:hidden mt-auto pt-2 sm:pt-3">
                         {localQuantity > 0 ? (
-                            <div className="h-10">
+                            <div className="h-9 sm:h-10">
                                 <QuantityCounter />
                             </div>
                         ) : (
                             <button
                                 onClick={handleAddToCart}
-                                className="w-full bg-primary-600 text-white h-10 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform hover:bg-primary-700 whitespace-nowrap shadow-md shadow-primary-500/20"
+                                className="w-full bg-primary-600 text-white h-9 sm:h-10 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform hover:bg-primary-700 whitespace-nowrap shadow-md shadow-primary-500/20"
                             >
                                 <ShoppingCart size={16} className="shrink-0" />
                                 Add to Cart
