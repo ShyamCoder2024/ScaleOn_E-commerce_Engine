@@ -37,6 +37,10 @@ const ProductDetail = () => {
     const [addingToCart, setAddingToCart] = useState(false);
     const [lightboxOpen, setLightboxOpen] = useState(false);
 
+    // Touch swipe state for mobile gallery
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
+
     useEffect(() => {
         fetchProduct();
     }, [slug]);
@@ -99,6 +103,36 @@ const ProductDetail = () => {
         return getCurrentStock() > 0;
     };
 
+    // Touch swipe handlers for mobile image gallery
+    const minSwipeDistance = 50; // Minimum distance for swipe
+
+    const onTouchStart = (e) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        const images = product?.images || [];
+        if (images.length <= 1) return;
+
+        if (isLeftSwipe && selectedImage < images.length - 1) {
+            setSelectedImage(prev => prev + 1);
+        }
+        if (isRightSwipe && selectedImage > 0) {
+            setSelectedImage(prev => prev - 1);
+        }
+    };
+
     if (loading) {
         return (
             <div className="container-custom py-8">
@@ -159,10 +193,12 @@ const ProductDetail = () => {
                     {/* Gallery Section */}
                     <div className="space-y-4 w-full">
                         {/* Main Image - Mobile Full Bleed Fix: -mx-4 removes container padding */}
-                        {/* Main Image - Mobile Full Bleed Fix: -mx-4 removes container padding */}
                         <div
                             className="relative bg-white -mx-4 sm:mx-0 sm:rounded-2xl overflow-hidden sm:shadow-sm sm:border sm:border-gray-100 group cursor-zoom-in"
                             onClick={() => setLightboxOpen(true)}
+                            onTouchStart={onTouchStart}
+                            onTouchMove={onTouchMove}
+                            onTouchEnd={onTouchEnd}
                         >
                             <img
                                 src={images[selectedImage]?.url}
@@ -170,11 +206,31 @@ const ProductDetail = () => {
                                 className="w-full h-auto max-h-[50vh] sm:max-h-[60vh] lg:max-h-[70vh] object-contain mx-auto transform group-hover:scale-105 transition-transform duration-500"
                             />
 
-                            {/* Zoom Indicator */}
-                            <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-2 rounded-full text-xs font-medium flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                            {/* Zoom Indicator - Hidden on mobile */}
+                            <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-2 rounded-full text-xs font-medium items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none hidden sm:flex">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /><path d="M11 8v6" /><path d="M8 11h6" /></svg>
                                 Click to zoom
                             </div>
+
+                            {/* Mobile: Dot Indicators for Swipe */}
+                            {images.length > 1 && (
+                                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 sm:hidden bg-black/30 backdrop-blur-sm px-3 py-2 rounded-full">
+                                    {images.map((_, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedImage(idx);
+                                            }}
+                                            className={`transition-all duration-300 rounded-full ${selectedImage === idx
+                                                    ? 'w-6 h-2 bg-white'
+                                                    : 'w-2 h-2 bg-white/50 hover:bg-white/75'
+                                                }`}
+                                            aria-label={`Go to image ${idx + 1}`}
+                                        />
+                                    ))}
+                                </div>
+                            )}
 
                             {/* Wishlist Button - Stop propagation to prevent opening lightbox */}
                             {isFeatureEnabled('wishlist') && (

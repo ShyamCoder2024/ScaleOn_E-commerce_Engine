@@ -233,7 +233,8 @@ const ProductForm = () => {
                     name: v.name || '',
                     price: v.price || null,
                     inventory: v.inventory || 0,
-                    options: v.options || {}
+                    options: v.options || {},
+                    isAvailable: true  // Explicitly set to true so variants show as in-stock
                 })) : []
             };
 
