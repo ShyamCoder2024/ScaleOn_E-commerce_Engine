@@ -167,7 +167,7 @@ const ProductDetail = () => {
                             <img
                                 src={images[selectedImage]?.url}
                                 alt={images[selectedImage]?.alt || product.name}
-                                className="w-full h-auto max-h-[70vh] object-contain mx-auto transform group-hover:scale-105 transition-transform duration-500"
+                                className="w-full h-auto max-h-[50vh] sm:max-h-[60vh] lg:max-h-[70vh] object-contain mx-auto transform group-hover:scale-105 transition-transform duration-500"
                             />
 
                             {/* Zoom Indicator */}
