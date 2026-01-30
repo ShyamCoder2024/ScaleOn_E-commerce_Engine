@@ -127,6 +127,21 @@ const productSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    // Manual Price Drop Control (Admin can override automatic detection)
+    manualPriceDrop: {
+        enabled: {
+            type: Boolean,
+            default: false
+        },
+        discountPercent: {
+            type: Number,
+            min: 0,
+            max: 100
+        },
+        expiresAt: {
+            type: Date
+        }
+    },
 
     // Categories (many-to-many)
     categories: [{

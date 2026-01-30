@@ -69,6 +69,11 @@ const ProductForm = () => {
         images: [],
         hasVariants: false,
         variants: [],
+        manualPriceDrop: {
+            enabled: false,
+            discountPercent: '',
+            expiresAt: ''
+        },
         seo: {
             metaTitle: '',
             metaDescription: ''
@@ -113,6 +118,11 @@ const ProductForm = () => {
                 images: product.images || [],
                 hasVariants: product.hasVariants || false,
                 variants: product.variants || [],
+                manualPriceDrop: {
+                    enabled: product.manualPriceDrop?.enabled || false,
+                    discountPercent: product.manualPriceDrop?.discountPercent?.toString() || '',
+                    expiresAt: product.manualPriceDrop?.expiresAt ? new Date(product.manualPriceDrop.expiresAt).toISOString().split('T')[0] : ''
+                },
                 seo: {
                     metaTitle: product.seo?.metaTitle || '',
                     metaDescription: product.seo?.metaDescription || ''
@@ -135,6 +145,15 @@ const ProductForm = () => {
             setFormData(prev => ({
                 ...prev,
                 seo: { ...prev.seo, [seoField]: value }
+            }));
+        } else if (name.startsWith('manualPriceDrop.')) {
+            const field = name.split('.')[1];
+            setFormData(prev => ({
+                ...prev,
+                manualPriceDrop: {
+                    ...prev.manualPriceDrop,
+                    [field]: type === 'checkbox' ? checked : value
+                }
             }));
         } else {
             setFormData(prev => ({
@@ -203,6 +222,11 @@ const ProductForm = () => {
                     order: img.order || 0
                 })),
                 seo: formData.seo,
+                manualPriceDrop: {
+                    enabled: formData.manualPriceDrop.enabled,
+                    discountPercent: formData.manualPriceDrop.discountPercent ? parseFloat(formData.manualPriceDrop.discountPercent) : undefined,
+                    expiresAt: formData.manualPriceDrop.expiresAt || undefined
+                },
                 hasVariants: formData.hasVariants,
                 variants: formData.hasVariants ? formData.variants.map(v => ({
                     sku: v.sku || '',
@@ -695,6 +719,74 @@ const ProductForm = () => {
                                 placeholder="0.00"
                                 step="0.01"
                             />
+                        </div>
+                    </div>
+
+                    {/* Price Drop Tag Card */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div className="p-5 border-b border-slate-50">
+                            <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                                <Tag className="w-4 h-4 text-rose-500" />
+                                Price Drop Badge
+                            </h3>
+                        </div>
+                        <div className="p-5 space-y-4">
+                            <label className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors">
+                                <input
+                                    type="checkbox"
+                                    name="manualPriceDrop.enabled"
+                                    checked={formData.manualPriceDrop.enabled}
+                                    onChange={handleChange}
+                                    className="w-5 h-5 text-rose-600 rounded focus:ring-rose-500 border-gray-300"
+                                />
+                                <div>
+                                    <span className="font-medium text-slate-700 block">Enable Price Drop Tag</span>
+                                    <span className="text-xs text-slate-500">Show "🔥 Price Drop" badge on product</span>
+                                </div>
+                            </label>
+
+                            {formData.manualPriceDrop.enabled && (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                                    <div>
+                                        <label className={labelClass}>
+                                            Discount %
+                                            <span className="text-xs font-normal text-slate-400 ml-2">(Optional Override)</span>
+                                        </label>
+                                        <input
+                                            type="number"
+                                            name="manualPriceDrop.discountPercent"
+                                            value={formData.manualPriceDrop.discountPercent}
+                                            onChange={handleChange}
+                                            className={inputClass}
+                                            placeholder="Auto-calculated"
+                                            min="0"
+                                            max="100"
+                                        />
+                                        {formData.price && formData.compareAtPrice && (
+                                            <p className="text-xs text-slate-500 mt-1 ml-1">
+                                                Auto: {Math.round((1 - parseFloat(formData.price) / parseFloat(formData.compareAtPrice)) * 100)}% off
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <label className={labelClass}>
+                                            Expires On
+                                            <span className="text-xs font-normal text-slate-400 ml-2">(Optional)</span>
+                                        </label>
+                                        <input
+                                            type="date"
+                                            name="manualPriceDrop.expiresAt"
+                                            value={formData.manualPriceDrop.expiresAt}
+                                            onChange={handleChange}
+                                            className={inputClass}
+                                            min={new Date().toISOString().split('T')[0]}
+                                        />
+                                        <p className="text-xs text-slate-500 mt-1 ml-1">
+                                            Badge will auto-hide after this date
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
