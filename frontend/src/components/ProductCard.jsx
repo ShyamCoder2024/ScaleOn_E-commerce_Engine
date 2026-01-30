@@ -297,7 +297,7 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
                 <img
                     src={primaryImage}
                     alt={product.name}
-                    className="absolute inset-0 w-full h-full object-contain z-10 transition-opacity duration-300 group-hover:opacity-0 will-change-opacity"
+                    className="absolute inset-0 w-full h-full object-contain z-20 transition-opacity duration-300 group-hover:opacity-0 will-change-opacity"
                     loading="lazy"
                     onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
                 />
@@ -305,7 +305,7 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
                 <img
                     src={secondaryImage}
                     alt={product.name}
-                    className="absolute inset-0 w-full h-full object-contain z-0 transition-transform duration-500 scale-100 group-hover:scale-110 transform-gpu will-change-transform"
+                    className="absolute inset-0 w-full h-full object-contain z-10 opacity-0 group-hover:opacity-100 transition-all duration-500 scale-100 group-hover:scale-110 transform-gpu will-change-transform"
                     aria-hidden="true"
                     onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
                 />
