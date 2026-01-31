@@ -697,6 +697,12 @@ const Account = () => {
 
 
                                     </div>
+
+                                    {/* Live Support Chat Board */}
+                                    <CustomerCareChat
+                                        userName={user?.profile?.firstName || ''}
+                                        userEmail={user?.email || ''}
+                                    />
                                 </div>
 
                                 {/* Change Password Section */}
