@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { authAPI, orderAPI } from '../../services/api';
 import { useConfig } from '../../context/ConfigContext';
 import toast from 'react-hot-toast';
+import CustomerCareChat from '../../components/CustomerCareChat';
 
 const Account = () => {
     const { user, logout, updateProfile, refetchUser } = useAuth();
