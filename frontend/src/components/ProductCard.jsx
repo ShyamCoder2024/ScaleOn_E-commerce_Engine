@@ -5,6 +5,7 @@ import { useConfig } from '../context/ConfigContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
+import { getImageUrl } from '../services/api';
 import AuthPromptModal from './AuthPromptModal';
 
 // Utility for debounce
@@ -127,17 +128,7 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
         ? Math.round((1 - product.price / product.compareAtPrice) * 100)
         : 0;
 
-    // Helper to resolve full image URL
-    // Handles local uploads (relative paths) vs Cloudinary/External (absolute URLs)
-    const getImageUrl = (url) => {
-        if (!url) return null;
-        if (url.startsWith('http')) return url;
-        // If it sends a relative path like '/uploads/...', prepend the backend URL
-        // We use import.meta.env.VITE_API_URL or fallback logic
-        const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-        const serverBase = backendUrl.replace('/api', ''); // Strip /api to get base
-        return `${serverBase}${url.startsWith('/') ? '' : '/'}${url}`;
-    };
+    // Image URL resolution is now handled by centralized getImageUrl helper from api.js
 
     const rawPrimaryImage = product.primaryImage ||
         product.images?.find(img => img.isPrimary)?.url ||

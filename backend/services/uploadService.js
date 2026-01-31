@@ -309,17 +309,15 @@ class UploadService {
         // Move from temp to final destination
         fs.renameSync(file.path, destPath);
 
-        // FIXED: Always generate complete URL for cross-origin support
-        // Construct proper backend URL using PORT env variable
-        const port = process.env.PORT || 5001;
-        const backendUrl = process.env.BACKEND_URL ||
-            process.env.API_URL ||
-            `http://localhost:${port}`;
+        // CRITICAL FIX: Store relative path only (not absolute URL)
+        // This makes images work in all environments:
+        // - Development (localhost)
+        // - Production (any domain)
+        // - After server restarts or URL changes
+        const url = `/uploads/${folder}/${fileName}`;
 
-        const relativePath = `/uploads/${folder}/${fileName}`;
-        const url = `${backendUrl}${relativePath}`;
-
-        console.log('🖼️ Image URL generated:', url);
+        console.log('🖼️ Image path generated:', url);
+        console.log('📁 File saved to:', destPath);
 
         return {
             url,

@@ -14,7 +14,7 @@ import {
     Award,
     Star
 } from 'lucide-react';
-import { productAPI } from '../services/api';
+import { productAPI, getImageUrl } from '../services/api';
 import { useConfig } from '../context/ConfigContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -44,6 +44,11 @@ const ProductDetail = () => {
     useEffect(() => {
         fetchProduct();
     }, [slug]);
+
+    // Reset to first image when variant changes
+    useEffect(() => {
+        setSelectedImage(0);
+    }, [selectedVariant]);
 
     const fetchProduct = async () => {
         setLoading(true);
@@ -158,9 +163,13 @@ const ProductDetail = () => {
         ? Math.round((1 - getCurrentPrice() / product.compareAtPrice) * 100)
         : 0;
 
-    const images = product.images?.length > 0
-        ? product.images
-        : [{ url: 'https://placehold.co/600x600/e2e8f0/475569?text=No+Image', alt: 'No image' }];
+    // Show variant-specific images if variant is selected and has images, otherwise show product images
+    const images = (selectedVariant?.images?.length > 0
+        ? selectedVariant.images
+        : product.images?.length > 0
+            ? product.images
+            : [{ url: 'https://placehold.co/600x600/e2e8f0/475569?text=No+Image', alt: 'No image' }]
+    );
 
     return (
         <div className="bg-white overflow-hidden w-full">
@@ -201,7 +210,7 @@ const ProductDetail = () => {
                             onTouchEnd={onTouchEnd}
                         >
                             <img
-                                src={images[selectedImage]?.url}
+                                src={getImageUrl(images[selectedImage]?.url)}
                                 alt={images[selectedImage]?.alt || product.name}
                                 className="w-full h-auto max-h-[50vh] sm:max-h-[60vh] lg:max-h-[70vh] object-contain mx-auto transform group-hover:scale-105 transition-transform duration-500"
                             />
@@ -223,8 +232,8 @@ const ProductDetail = () => {
                                                 setSelectedImage(idx);
                                             }}
                                             className={`transition-all duration-300 rounded-full ${selectedImage === idx
-                                                    ? 'w-6 h-2 bg-white'
-                                                    : 'w-2 h-2 bg-white/50 hover:bg-white/75'
+                                                ? 'w-6 h-2 bg-white'
+                                                : 'w-2 h-2 bg-white/50 hover:bg-white/75'
                                                 }`}
                                             aria-label={`Go to image ${idx + 1}`}
                                         />
@@ -280,7 +289,7 @@ const ProductDetail = () => {
                                             }`}
                                     >
                                         <img
-                                            src={img.url}
+                                            src={getImageUrl(img.url)}
                                             alt={img.alt}
                                             className="w-full h-full object-contain bg-white"
                                         />

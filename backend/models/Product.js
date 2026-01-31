@@ -58,7 +58,11 @@ const variantSchema = new mongoose.Schema({
     isAvailable: {
         type: Boolean,
         default: true
-    }
+    },
+    images: [{
+        url: String,
+        alt: String
+    }]
 }, { _id: true });
 
 const productSchema = new mongoose.Schema({

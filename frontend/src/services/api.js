@@ -261,6 +261,40 @@ const deduplicatedGet = (url, config = {}) => {
     return promise;
 };
 
+// ===========================================
+// IMAGE URL HELPER
+// ===========================================
+
+/**
+ * Convert relative image URLs to absolute URLs
+ * CRITICAL FIX for persistent broken images issue
+ * 
+ * @param {string} url - Image URL (can be relative or absolute)
+ * @returns {string} - Absolute URL ready to use in img src
+ */
+export const getImageUrl = (url) => {
+    if (!url) return '';
+
+    // If already absolute URL (external or full URL), return as-is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+    }
+
+    // If relative path (starts with /), prepend backend base URL
+    if (url.startsWith('/')) {
+        // Get backend URL from environment or construct from API URL
+        const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
+        // Remove /api suffix if present (we need base backend URL, not API URL)
+        const backendUrl = apiBaseUrl.replace(/\/api\/?$/, '');
+
+        return `${backendUrl}${url}`;
+    }
+
+    // Fallback: return as-is
+    return url;
+};
+
 // Auth API
 export const authAPI = {
     register: (data) => api.post('/auth/register', data),

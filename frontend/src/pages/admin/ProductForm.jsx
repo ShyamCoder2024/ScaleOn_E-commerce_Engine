@@ -234,7 +234,8 @@ const ProductForm = () => {
                     price: v.price || null,
                     inventory: v.inventory || 0,
                     options: v.options || {},
-                    isAvailable: true  // Explicitly set to true so variants show as in-stock
+                    isAvailable: true,  // Explicitly set to true so variants show as in-stock
+                    images: v.images || []  // Include variant-specific images
                 })) : []
             };
 
@@ -592,6 +593,25 @@ const ProductForm = () => {
                                                         </div>
                                                     ))}
                                                 </div>
+
+                                                {/* Variant Images */}
+                                                <div className="mt-4">
+                                                    <label className="text-xs font-semibold text-slate-500 uppercase mb-2 block">
+                                                        Variant Images (Optional)
+                                                    </label>
+                                                    <p className="text-xs text-slate-400 mb-3">
+                                                        Upload images specific to this variant. If not set, product images will be shown.
+                                                    </p>
+                                                    <ImageUpload
+                                                        images={variant.images || []}
+                                                        onImagesChange={(newImages) => {
+                                                            const v = [...formData.variants];
+                                                            v[index].images = newImages;
+                                                            setFormData(prev => ({ ...prev, variants: v }));
+                                                        }}
+                                                        maxImages={5}
+                                                    />
+                                                </div>
                                             </div>
                                         ))}
 
@@ -599,7 +619,7 @@ const ProductForm = () => {
                                             type="button"
                                             onClick={() => setFormData(prev => ({
                                                 ...prev,
-                                                variants: [...prev.variants, { name: '', sku: '', options: {} }]
+                                                variants: [...prev.variants, { name: '', sku: '', options: {}, images: [] }]
                                             }))}
                                             className="w-full py-4 border-2 border-dashed border-slate-300 rounded-xl text-slate-600 font-semibold hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center gap-2"
                                         >
