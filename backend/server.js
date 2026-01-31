@@ -21,6 +21,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import inventoryRoutes from './routes/inventoryRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import supportRoutes from './routes/supportRoutes.js';
 
 // Load environment variables from root directory
 dotenv.config({ path: '../.env' });
@@ -152,6 +153,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/support', supportRoutes);
 
 // ===========================================
 // Error Handling

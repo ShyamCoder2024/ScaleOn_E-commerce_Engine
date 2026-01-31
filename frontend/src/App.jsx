@@ -51,12 +51,14 @@ const TermsConditions = lazy(() => import('./pages/policies/TermsConditions'))
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminRoute from './components/AdminRoute'
 import ScrollToTop from './components/ScrollToTop'
+import LiveChat from './components/LiveChat'
 
 function App() {
     return (
         <ErrorBoundary>
             <OfflineIndicator />
             <ScrollToTop />
+            <LiveChat />
             <Toaster position="top-center" toastOptions={{
                 duration: 3000,
                 style: {
