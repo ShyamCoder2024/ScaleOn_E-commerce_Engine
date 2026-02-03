@@ -123,7 +123,10 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 // Static Files
 // ===========================================
 
-app.use('/uploads', express.static('uploads'));
+// CRITICAL: Use UPLOAD_DIR env variable for Render Disk support
+// Render Disk mount path should be set in UPLOAD_DIR (e.g., /var/data/uploads)
+const uploadDir = process.env.UPLOAD_DIR || 'uploads';
+app.use('/uploads', express.static(uploadDir));
 
 // ===========================================
 // Health Check Endpoint
