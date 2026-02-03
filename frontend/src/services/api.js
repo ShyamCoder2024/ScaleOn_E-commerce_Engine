@@ -275,18 +275,32 @@ const deduplicatedGet = (url, config = {}) => {
 export const getImageUrl = (url) => {
     if (!url) return '';
 
-    // If already absolute URL (external or full URL), return as-is
+    // If already absolute URL (external or full URL like Cloudinary), return as-is
     if (url.startsWith('http://') || url.startsWith('https://')) {
         return url;
     }
 
     // If relative path (starts with /), prepend backend base URL
     if (url.startsWith('/')) {
-        // Get backend URL from environment or construct from API URL
-        const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+        // CRITICAL: Use dedicated backend URL for images
+        // VITE_BACKEND_URL should be the full backend domain (e.g., https://your-backend.onrender.com)
+        // VITE_API_URL is for API calls (may be relative like /api in production with proxy)
+        const backendUrl = import.meta.env.VITE_BACKEND_URL
+            || import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '')
+            || '';
 
-        // Remove /api suffix if present (we need base backend URL, not API URL)
-        const backendUrl = apiBaseUrl.replace(/\/api\/?$/, '');
+        // If we still have no backend URL (both env vars missing or relative), 
+        // try to construct from current origin in development
+        if (!backendUrl || backendUrl === '/api' || !backendUrl.startsWith('http')) {
+            // In development, images are served from the backend on port 5001
+            if (import.meta.env.DEV) {
+                return `http://localhost:5001${url}`;
+            }
+            // In production without proper config, return as-is (may still fail)
+            // This will at least not break if images are actually on same domain
+            console.warn('[getImageUrl] Missing VITE_BACKEND_URL - images may not load correctly');
+            return url;
+        }
 
         return `${backendUrl}${url}`;
     }
@@ -294,6 +308,7 @@ export const getImageUrl = (url) => {
     // Fallback: return as-is
     return url;
 };
+
 
 // Auth API
 export const authAPI = {

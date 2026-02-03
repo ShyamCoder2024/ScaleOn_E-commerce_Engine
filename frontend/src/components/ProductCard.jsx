@@ -144,15 +144,21 @@ const ProductCard = memo(({ product, viewMode = 'grid' }) => {
     // Fallback placeholder for broken images
     const placeholderImage = `https://placehold.co/400x400/e2e8f0/475569?text=${encodeURIComponent(product.name?.slice(0, 10) || 'Product')}`;
 
-    // Fix: Proper stock check - respect trackInventory setting and variant inventory
+    // Fix: Proper stock check - prefer backend-computed inStock, fallback to local logic
     const checkInStock = () => {
+        // PRIORITY 1: Use backend-computed inStock if available (most reliable)
+        if (typeof product.inStock === 'boolean') {
+            return product.inStock;
+        }
+
+        // FALLBACK: Compute locally (for backwards compatibility)
         // If inventory feature is disabled globally, always show in stock
         if (!isFeatureEnabled('inventory')) return true;
         // If product doesn't track inventory, always show in stock
         if (product.trackInventory === false) return true;
         // If product has variants, check if any variant has stock
         if (product.hasVariants && product.variants?.length > 0) {
-            return product.variants.some(v => v.isAvailable && v.inventory > 0);
+            return product.variants.some(v => v.isAvailable !== false && v.inventory > 0);
         }
         // Check main inventory
         return product.inventory > 0;

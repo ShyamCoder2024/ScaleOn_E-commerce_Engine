@@ -77,7 +77,7 @@ class ProductService {
         const skip = (page - 1) * limit;
 
         // Minimal fields for list view - reduces payload by ~40%
-        const listFields = 'name slug price compareAtPrice primaryImage images categories status isFeatured inventory trackInventory hasVariants variants.inventory variants.isAvailable';
+        const listFields = 'name slug price compareAtPrice primaryImage images categories status isFeatured inventory trackInventory hasVariants variants.inventory variants.isAvailable hasPriceDrop';
 
         const [products, total] = await Promise.all([
             Product.find(filter)
@@ -90,8 +90,15 @@ class ProductService {
             Product.countDocuments(filter)
         ]);
 
+        // CRITICAL FIX: Compute inStock for lean objects (virtuals are not included with .lean())
+        // This matches the logic in Product model's inStock virtual
+        const productsWithStock = products.map(product => ({
+            ...product,
+            inStock: this.computeInStock(product)
+        }));
+
         return {
-            products,
+            products: productsWithStock,
             pagination: {
                 page,
                 limit,
@@ -100,6 +107,24 @@ class ProductService {
             }
         };
     }
+
+    /**
+     * Helper: Compute inStock status for lean product objects
+     * This replicates the logic from the Mongoose virtual
+     */
+    computeInStock(product) {
+        // If inventory tracking is disabled, always in stock
+        if (product.trackInventory === false) return true;
+
+        // If product has variants with valid data, check variant inventory
+        if (product.hasVariants && product.variants?.length > 0) {
+            return product.variants.some(v => v.isAvailable !== false && v.inventory > 0);
+        }
+
+        // Check main product inventory
+        return product.inventory > 0;
+    }
+
 
     /**
      * Get active products for storefront
